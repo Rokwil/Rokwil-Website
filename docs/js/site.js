@@ -90,17 +90,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Parallax effect for hero section
-    const hero = document.querySelector('.hero');
-    if (hero) {
-        window.addEventListener('scroll', () => {
-            const scrolled = window.pageYOffset;
-            const rate = scrolled * 0.5;
-            if (scrolled < window.innerHeight) {
-                hero.style.transform = `translateY(${rate}px)`;
-            }
-        });
-    }
+    // Parallax effect removed to prevent overlap issues
 
     // Add floating particles to hero (optional enhancement)
     function createParticles() {

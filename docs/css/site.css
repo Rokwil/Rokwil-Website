@@ -1534,7 +1534,7 @@ body.dark-mode .csr-card {
 .testimonials-grid,
 .news-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     gap: var(--spacing-lg);
     margin-top: var(--spacing-lg);
 }
@@ -1542,6 +1542,7 @@ body.dark-mode .csr-card {
 @media (min-width: 1200px) {
     .testimonials-grid {
         grid-template-columns: repeat(3, 1fr);
+        gap: var(--spacing-xl);
     }
 }
 
@@ -1576,6 +1577,8 @@ body.dark-mode .csr-card {
     padding: var(--spacing-xl);
     border-left: 4px solid var(--secondary-color);
     background: var(--bg-primary);
+    min-width: 0;
+    width: 100%;
 }
 
 .testimonial-rating {
@@ -1595,7 +1598,10 @@ body.dark-mode .csr-card {
     flex-grow: 1;
     font-weight: 400;
     position: relative;
-    max-width: 100%;
+    word-wrap: normal;
+    word-break: normal;
+    white-space: normal;
+    overflow-wrap: normal;
 }
 
 .testimonial-author {

@@ -1503,6 +1503,10 @@ body.dark-mode .tenant-list li strong {
 }
 
 @media (max-width: 600px) {
+    .container {
+        padding: 0 var(--spacing-sm);
+    }
+
     .hero-title {
         font-size: 2rem;
     }
@@ -1529,6 +1533,179 @@ body.dark-mode .tenant-list li strong {
     .toggle-icon .sun,
     .toggle-icon .moon {
         font-size: 12px;
+    }
+
+    /* Reduce spacing on mobile */
+    section {
+        padding: var(--spacing-md) 0;
+    }
+
+    .section-header {
+        margin-bottom: var(--spacing-md);
+    }
+
+    .section-title {
+        font-size: 1.75rem;
+        margin-bottom: var(--spacing-xs);
+    }
+
+    .section-subtitle {
+        font-size: 1rem;
+    }
+
+    /* Better text wrapping */
+    p {
+        line-height: 1.7 !important;
+        word-wrap: break-word;
+        hyphens: auto;
+        max-width: 100%;
+    }
+
+    /* Fix inline font sizes on mobile */
+    p[style*="font-size: 1.15rem"] {
+        font-size: 1rem !important;
+        line-height: 1.7 !important;
+    }
+
+    h2[style*="font-size: 2.8rem"] {
+        font-size: 1.75rem !important;
+    }
+
+    h3[style*="font-size: 1.4rem"] {
+        font-size: 1.2rem !important;
+    }
+
+    /* About text section mobile */
+    .about-text p[style*="font-size: 1.15rem"] {
+        font-size: 1rem !important;
+        line-height: 1.7 !important;
+        margin-bottom: var(--spacing-md) !important;
+    }
+
+    /* Timeline adjustments for mobile */
+    .timeline-item {
+        flex-direction: column !important;
+        gap: var(--spacing-sm) !important;
+        margin-bottom: var(--spacing-md) !important;
+    }
+
+    .timeline-card {
+        padding: var(--spacing-md) !important;
+        margin-left: 0 !important;
+        border-left: 3px solid var(--secondary-color) !important;
+        flex: 1 1 100% !important;
+    }
+
+    /* Hide timeline vertical line on mobile */
+    div[style*="position: absolute"][style*="left: 30px"] {
+        display: none !important;
+    }
+
+    /* Timeline container adjustments */
+    div[style*="max-width: 900px"][style*="position: relative"] {
+        margin: var(--spacing-md) auto !important;
+        padding: 0 var(--spacing-sm) !important;
+    }
+
+    /* Reduce large section margins on mobile */
+    div[style*="margin-top: 100px"] {
+        margin-top: var(--spacing-lg) !important;
+        margin-bottom: var(--spacing-lg) !important;
+    }
+
+    /* About content section mobile */
+    .about-content {
+        padding: var(--spacing-md) 0 !important;
+    }
+
+    /* Timeline number circles */
+    .timeline-item > div[style*="width: 60px"] {
+        width: 50px !important;
+        height: 50px !important;
+        font-size: 1.2rem !important;
+        align-self: flex-start !important;
+    }
+
+    /* Leadership card mobile */
+    .leadership-card {
+        padding: var(--spacing-md) !important;
+    }
+
+    .leadership-card p[style*="font-size: 1.1rem"] {
+        font-size: 1rem !important;
+        line-height: 1.7 !important;
+    }
+
+    /* Mission box mobile */
+    div[style*="margin-top: 2rem"][style*="padding: 2rem"] {
+        margin-top: var(--spacing-md) !important;
+        padding: var(--spacing-md) !important;
+    }
+
+    div[style*="font-size: 1.5rem"][style*="Our Mission"] {
+        font-size: 1.25rem !important;
+    }
+
+    p[style*="font-size: 1.1rem"][style*="font-style: italic"] {
+        font-size: 1rem !important;
+        line-height: 1.7 !important;
+    }
+
+    /* About grid mobile spacing */
+    .about-grid {
+        gap: var(--spacing-md);
+    }
+
+    .about-text p {
+        font-size: 1rem;
+        line-height: 1.7;
+    }
+
+    /* Project cards mobile */
+    .project-card {
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-md);
+    }
+
+    .project-details {
+        padding: var(--spacing-md);
+    }
+
+    /* Contact form mobile */
+    .contact-grid {
+        gap: var(--spacing-md);
+    }
+
+    .contact-form-container,
+    .contact-info {
+        padding: var(--spacing-md);
+    }
+
+    /* Stats banner mobile */
+    .stats-banner {
+        padding: var(--spacing-md) var(--spacing-sm);
+        gap: var(--spacing-sm);
+    }
+
+    /* Feature cards mobile */
+    .feature-card {
+        padding: var(--spacing-md);
+    }
+
+    /* Testimonials mobile */
+    .testimonials-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+    }
+
+    .testimonial-card {
+        padding: var(--spacing-md);
+    }
+
+    /* News grid mobile */
+    .news-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
     }
 }
 

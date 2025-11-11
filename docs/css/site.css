@@ -1589,7 +1589,7 @@ body.dark-mode .csr-card {
 .testimonial-rating {
     color: #fbbf24;
     font-size: 0.9rem;
-    margin-bottom: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
     letter-spacing: 2px;
     line-height: 1;
     font-weight: 400;

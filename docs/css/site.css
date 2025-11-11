@@ -1534,9 +1534,15 @@ body.dark-mode .csr-card {
 .testimonials-grid,
 .news-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: var(--spacing-lg);
     margin-top: var(--spacing-lg);
+}
+
+@media (min-width: 1200px) {
+    .testimonials-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
 }
 
 .testimonial-card,
@@ -1582,8 +1588,8 @@ body.dark-mode .csr-card {
 }
 
 .testimonial-quote {
-    font-size: 1.1rem;
-    line-height: 1.8;
+    font-size: 1rem;
+    line-height: 1.7;
     color: var(--text-primary);
     margin-bottom: var(--spacing-xl);
     flex-grow: 1;
@@ -1591,6 +1597,7 @@ body.dark-mode .csr-card {
     position: relative;
     padding-left: var(--spacing-md);
     border-left: 2px solid var(--border-color);
+    max-width: 100%;
 }
 
 .testimonial-author {

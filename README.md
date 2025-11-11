@@ -84,14 +84,16 @@ This project has been set up for deployment to GitHub Pages. The static HTML ver
 
 ### Setup Instructions
 
-1. **Enable GitHub Pages:**
+1. **Enable GitHub Pages (IMPORTANT - Do this first!):**
    - Go to your repository on GitHub
    - Click on **Settings** → **Pages**
-   - Under **Source**, select **GitHub Actions**
+   - Under **Source**, select **GitHub Actions** (NOT "Deploy from a branch")
+   - Click **Save**
+   - **Note:** The workflow includes automatic enablement, but manually enabling ensures it works correctly
 
 2. **Automatic Deployment:**
    - The GitHub Actions workflow (`.github/workflows/deploy.yml`) will automatically deploy the site when you push to the `main` branch
-   - No manual steps required after initial setup
+   - The first deployment may take a few minutes to set up
 
 3. **Access Your Site:**
    - After deployment, your site will be available at: `https://[your-username].github.io/[repository-name]/`

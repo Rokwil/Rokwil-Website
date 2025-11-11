@@ -67,6 +67,7 @@ h1, h2, h3, h4, h5, h6 {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 1rem;
 }
 
 .nav-logo a {
@@ -150,6 +151,42 @@ h1, h2, h3, h4, h5, h6 {
     background-position: center;
     background-repeat: no-repeat;
     overflow: hidden;
+}
+
+.hero video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    transform: translate(-50%, -50%);
+    z-index: 0;
+    object-fit: cover;
+    opacity: 1;
+}
+
+@media (max-width: 768px) {
+    .hero video {
+        display: none; /* Hide video on mobile for better performance */
+    }
+    
+    .hero {
+        background-image: url('https://images.unsplash.com/photo-1504307651254-35680f356dfd?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
+        background-size: cover;
+        background-position: center;
+    }
+}
+
+/* Video Section Styles */
+video {
+    border-radius: 20px;
+}
+
+video:focus {
+    outline: 3px solid var(--secondary-color);
+    outline-offset: 3px;
 }
 
 .hero::before {
@@ -1383,11 +1420,74 @@ h1, h2, h3, h4, h5, h6 {
     }
 }
 
+/* Timeline Styles */
+.timeline-item {
+    transition: all 0.3s ease;
+}
+
+.timeline-item:hover {
+    transform: translateX(10px);
+}
+
+.timeline-item:hover .timeline-card {
+    box-shadow: var(--shadow-xl);
+}
+
+/* Recognition Cards Hover */
+.recognition-card {
+    transition: all 0.3s ease;
+}
+
+.recognition-card:hover {
+    transform: translateY(-10px);
+    box-shadow: var(--shadow-xl);
+}
+
+/* Enhanced About Page Image Overlay */
+.about-image {
+    transition: all 0.3s ease;
+}
+
+.about-image:hover {
+    transform: translateY(-5px);
+}
+
+.about-image:hover img {
+    transform: scale(1.05);
+}
+
+.about-image-overlay {
+    transition: all 0.3s ease;
+}
+
+.about-image:hover .about-image-overlay {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-xl);
+    background: rgba(255, 255, 255, 0.98);
+}
+
+/* Stats Banner Animation */
+.stats-banner-item {
+    transition: all 0.3s ease;
+}
+
+.stats-banner-item:hover {
+    transform: scale(1.05);
+}
+
 /* Enhanced Responsive for new sections */
 @media (max-width: 968px) {
     .testimonials-grid,
     .news-grid {
         grid-template-columns: 1fr;
+    }
+
+    .timeline-item {
+        flex-direction: column;
+    }
+
+    .timeline-line {
+        display: none;
     }
 }
 
@@ -1412,6 +1512,11 @@ h1, h2, h3, h4, h5, h6 {
 
     .hamburger {
         display: flex;
+    }
+    
+    .dark-mode-toggle {
+        order: -1;
+        margin-right: 0;
     }
 
     .hero-title {
@@ -1438,6 +1543,279 @@ h1, h2, h3, h4, h5, h6 {
 
     .page-hero-content h1 {
         font-size: 2.5rem;
+    }
+}
+
+/* Dark Mode Toggle Button - Fun & Animated! */
+.dark-mode-toggle {
+    position: relative;
+    width: 60px;
+    height: 30px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    padding: 0;
+    margin-right: 1rem;
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    z-index: 1001;
+}
+
+.dark-mode-toggle:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode-toggle:active {
+    transform: scale(0.95);
+}
+
+.toggle-icon {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8px;
+}
+
+.toggle-icon .sun,
+.toggle-icon .moon {
+    font-size: 18px;
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+}
+
+.toggle-icon .sun {
+    left: 8px;
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+}
+
+.toggle-icon .moon {
+    right: 8px;
+    opacity: 0;
+    transform: rotate(-90deg) scale(0);
+}
+
+/* Dark mode active state */
+body.dark-mode .dark-mode-toggle {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+body.dark-mode .toggle-icon .sun {
+    opacity: 0;
+    transform: rotate(90deg) scale(0);
+}
+
+body.dark-mode .toggle-icon .moon {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+}
+
+/* Dark Mode Styles */
+body.dark-mode {
+    background-color: #0f172a;
+    color: #e2e8f0;
+}
+
+body.dark-mode .navbar {
+    background: rgba(15, 23, 42, 0.95);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .nav-link {
+    color: #e2e8f0;
+}
+
+body.dark-mode .nav-link:hover {
+    color: #60a5fa;
+}
+
+body.dark-mode .logo-text {
+    color: #e2e8f0;
+}
+
+body.dark-mode .logo-subtitle {
+    color: #94a3b8;
+}
+
+body.dark-mode .hero-overlay {
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(30, 41, 59, 0.85) 100%);
+}
+
+body.dark-mode .hero-title,
+body.dark-mode .hero-subtitle {
+    color: #e2e8f0;
+}
+
+body.dark-mode .feature-card,
+body.dark-mode .value-card,
+body.dark-mode .project-card,
+body.dark-mode .showcase-item,
+body.dark-mode .timeline-card,
+body.dark-mode .leadership-card,
+body.dark-mode .recognition-card {
+    background: #1e293b;
+    color: #e2e8f0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .feature-card:hover,
+body.dark-mode .value-card:hover,
+body.dark-mode .project-card:hover {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    transform: translateY(-5px);
+}
+
+body.dark-mode .section-title {
+    color: #e2e8f0;
+}
+
+body.dark-mode .section-subtitle {
+    color: #94a3b8;
+}
+
+body.dark-mode h2,
+body.dark-mode h3,
+body.dark-mode h4 {
+    color: #e2e8f0;
+}
+
+body.dark-mode p {
+    color: #cbd5e1;
+}
+
+body.dark-mode .text-gray {
+    color: #94a3b8;
+}
+
+body.dark-mode .page-hero {
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.9) 100%);
+}
+
+body.dark-mode .page-hero-content h1,
+body.dark-mode .page-hero-content p {
+    color: #e2e8f0;
+}
+
+body.dark-mode .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #ffffff;
+}
+
+body.dark-mode .btn-primary:hover {
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+body.dark-mode .btn-secondary {
+    background: transparent;
+    border: 2px solid #60a5fa;
+    color: #60a5fa;
+}
+
+body.dark-mode .btn-secondary:hover {
+    background: #60a5fa;
+    color: #0f172a;
+}
+
+body.dark-mode .footer {
+    background: #0f172a;
+    color: #cbd5e1;
+}
+
+body.dark-mode .footer h3,
+body.dark-mode .footer h4 {
+    color: #e2e8f0;
+}
+
+body.dark-mode .footer a {
+    color: #94a3b8;
+}
+
+body.dark-mode .footer a:hover {
+    color: #60a5fa;
+}
+
+body.dark-mode .stats-banner-item {
+    background: rgba(30, 41, 59, 0.8);
+    color: #e2e8f0;
+}
+
+body.dark-mode .about-image-overlay {
+    background: rgba(30, 41, 59, 0.95);
+    color: #e2e8f0;
+}
+
+body.dark-mode .form-group input,
+body.dark-mode .form-group textarea {
+    background: #1e293b;
+    border-color: #334155;
+    color: #e2e8f0;
+}
+
+body.dark-mode .form-group input:focus,
+body.dark-mode .form-group textarea:focus {
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+}
+
+body.dark-mode .form-group input::placeholder,
+body.dark-mode .form-group textarea::placeholder {
+    color: #64748b;
+}
+
+body.dark-mode .cta-section {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+}
+
+body.dark-mode .csr-card {
+    background: rgba(30, 41, 59, 0.3);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .project-image {
+    opacity: 0.8;
+}
+
+body.dark-mode .project-badge {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+body.dark-mode .meta-item {
+    color: #94a3b8;
+}
+
+body.dark-mode .feature-tag {
+    background: #334155;
+    color: #e2e8f0;
+}
+
+body.dark-mode .tenant-list li {
+    color: #cbd5e1;
+}
+
+@media (max-width: 768px) {
+    .dark-mode-toggle {
+        margin-right: 0.5rem;
+        width: 50px;
+        height: 26px;
+    }
+    
+    .toggle-icon .sun,
+    .toggle-icon .moon {
+        font-size: 16px;
+        width: 20px;
+        height: 20px;
     }
 }
 

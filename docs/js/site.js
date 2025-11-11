@@ -230,5 +230,82 @@ document.addEventListener('DOMContentLoaded', function() {
     if (statsSection) {
         statsObserver.observe(statsSection);
     }
+
+    // Dark Mode Toggle - Fun & Interactive!
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    
+    // Check for saved theme preference or default to system preference
+    const currentTheme = localStorage.getItem('theme') || (prefersDark.matches ? 'dark' : 'light');
+    
+    // Apply theme on page load
+    if (currentTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+    }
+    
+    // Toggle dark mode
+    if (darkModeToggle) {
+        darkModeToggle.addEventListener('click', function() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            
+            // Save preference
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            
+            // Add a fun bounce animation
+            this.style.transform = 'scale(0.9)';
+            setTimeout(() => {
+                this.style.transform = '';
+            }, 150);
+            
+            // Optional: Add confetti or particles on toggle (for extra fun!)
+            if (isDark) {
+                createToggleEffect(this, '🌙');
+            } else {
+                createToggleEffect(this, '☀️');
+            }
+        });
+    }
+    
+    // Listen for system theme changes
+    prefersDark.addEventListener('change', (e) => {
+        if (!localStorage.getItem('theme')) {
+            if (e.matches) {
+                document.body.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+        }
+    });
+    
+    // Fun toggle effect function
+    function createToggleEffect(element, emoji) {
+        const effect = document.createElement('div');
+        effect.textContent = emoji;
+        effect.style.position = 'fixed';
+        effect.style.fontSize = '2rem';
+        effect.style.pointerEvents = 'none';
+        effect.style.zIndex = '9999';
+        effect.style.transition = 'all 0.6s ease-out';
+        
+        const rect = element.getBoundingClientRect();
+        effect.style.left = rect.left + rect.width / 2 + 'px';
+        effect.style.top = rect.top + rect.height / 2 + 'px';
+        effect.style.transform = 'translate(-50%, -50%) scale(0)';
+        effect.style.opacity = '1';
+        
+        document.body.appendChild(effect);
+        
+        // Animate
+        requestAnimationFrame(() => {
+            effect.style.transform = 'translate(-50%, -50%) scale(1.5) translateY(-50px)';
+            effect.style.opacity = '0';
+        });
+        
+        // Remove after animation
+        setTimeout(() => {
+            effect.remove();
+        }, 600);
+    }
 });
 

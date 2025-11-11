@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Learn about Rokwil Property Development, led by Roderick Robert Stainton. Established 2021, transforming KwaZulu-Natal through innovative property developments." />
+    <meta name="description" content="Learn about Rokwil Property Development, led by Roderick Robert Stainton. Established 2015, transforming KwaZulu-Natal through innovative property developments." />
     <title>About Us - Rokwil Property Development</title>
     <link rel="stylesheet" href="css/site.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
@@ -26,6 +26,12 @@
                 <li><a href="projects.html" class="nav-link">Projects</a></li>
                 <li><a href="contact.html" class="nav-link">Contact</a></li>
             </ul>
+            <button class="dark-mode-toggle" id="darkModeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+                <span class="toggle-icon">
+                    <span class="sun">☀️</span>
+                    <span class="moon">🌙</span>
+                </span>
+            </button>
             <div class="hamburger">
                 <span></span>
                 <span></span>
@@ -35,27 +41,108 @@
     </nav>
 
     <main role="main">
-        <section class="page-hero">
-            <div class="page-hero-content">
-                <h1>About Rokwil</h1>
-                <p>Pioneering property development in KwaZulu-Natal</p>
+        <section class="page-hero" style="background-image: url('images/rokwil-construction.jpg'), url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80'); background-size: cover; background-position: center; position: relative;">
+            <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, rgba(30, 58, 95, 0.85) 0%, rgba(45, 45, 45, 0.85) 100%);"></div>
+            <div class="page-hero-content" style="position: relative; z-index: 2;">
+                <h1 style="font-size: 4rem; margin-bottom: 1.5rem; text-shadow: 2px 2px 12px rgba(0,0,0,0.7);">About Rokwil</h1>
+                <p style="font-size: 1.5rem; opacity: 0.95;">Pioneering property development in KwaZulu-Natal</p>
             </div>
         </section>
 
         <section class="about-content">
             <div class="container">
+                <!-- Quick Stats Banner -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; margin-bottom: 80px; padding: 3rem; background: var(--gradient-2); border-radius: 20px; color: var(--text-light); box-shadow: var(--shadow-lg);">
+                    <div class="stats-banner-item reveal" style="text-align: center; cursor: default;">
+                        <div style="font-size: 3.5rem; font-weight: 800; font-family: 'Playfair Display', serif; margin-bottom: 0.5rem; text-shadow: 2px 2px 8px rgba(0,0,0,0.3);">2015</div>
+                        <div style="font-size: 1rem; opacity: 0.9; text-transform: uppercase; letter-spacing: 1px;">Established</div>
+                    </div>
+                    <div class="stats-banner-item reveal" style="text-align: center; cursor: default;">
+                        <div style="font-size: 3.5rem; font-weight: 800; font-family: 'Playfair Display', serif; margin-bottom: 0.5rem; text-shadow: 2px 2px 8px rgba(0,0,0,0.3);">±152</div>
+                        <div style="font-size: 1rem; opacity: 0.9; text-transform: uppercase; letter-spacing: 1px;">Hectares Developed</div>
+                    </div>
+                    <div class="stats-banner-item reveal" style="text-align: center; cursor: default;">
+                        <div style="font-size: 3.5rem; font-weight: 800; font-family: 'Playfair Display', serif; margin-bottom: 0.5rem; text-shadow: 2px 2px 8px rgba(0,0,0,0.3);">450+</div>
+                        <div style="font-size: 1rem; opacity: 0.9; text-transform: uppercase; letter-spacing: 1px;">Staff Members</div>
+                    </div>
+                    <div class="stats-banner-item reveal" style="text-align: center; cursor: default;">
+                        <div style="font-size: 3.5rem; font-weight: 800; font-family: 'Playfair Display', serif; margin-bottom: 0.5rem; text-shadow: 2px 2px 8px rgba(0,0,0,0.3);">N3</div>
+                        <div style="font-size: 1rem; opacity: 0.9; text-transform: uppercase; letter-spacing: 1px;">Strategic Corridor</div>
+                    </div>
+                </div>
+
                 <div class="about-grid">
                     <div class="about-text reveal">
-                        <h2>Our Story</h2>
-                        <p>Rokwil Property Development, established in 2021 under the leadership of <strong>Roderick Robert Stainton</strong>, has rapidly become a transformative force in KwaZulu-Natal's property landscape. Our head office is located in a landmark A-grade building at <strong>9 Old Main Road, Kloof</strong>, at the top of Fields Hill, constructed in 2017 and tenanted by blue-chip brands.</p>
-                        <p>We focus on large-format industrial and logistics projects along the Durban–Pietermaritzburg N3 corridor, with <strong>Keystone Park</strong> at Hammarsdale as our flagship development. This ±152-hectare serviced logistics precinct has reached maturity with major blue-chip occupiers including Mr Price Group (100,000 m² under roof), Ackermans (97,000 m² with expansion plans), Pepkor (110,000–125,000 m²), plus manufacturing facilities for Dromex (~800 employees), Kerry Ingredients, Nu Dawn Eggs, and Malda Pack.</p>
-                        <p>Our developments are recognised by industry bodies including the Hammarsdale Cato Ridge Development Association and municipal planning authorities as catalytic projects for Outer-West KZN. We also developed Judges Court, a premium corporate office space in the Upper Highway area that sets new standards for commercial development.</p>
-                        <div style="margin-top: 2rem; padding: 1.5rem; background: var(--bg-light); border-radius: 15px; border-left: 4px solid var(--secondary-color);">
-                            <p style="margin: 0; color: var(--text-gray); font-style: italic;"><strong style="color: var(--primary-color);">Our Mission:</strong> To create world-class property developments that drive economic growth, create employment opportunities, and enhance the quality of life in KwaZulu-Natal and beyond.</p>
+                        <div style="display: inline-block; padding: 0.5rem 1.5rem; background: var(--secondary-color); color: var(--text-light); border-radius: 25px; font-size: 0.85rem; font-weight: 600; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 1px;">Our Story</div>
+                        <h2 style="font-size: 2.8rem; margin-bottom: 1.5rem; color: var(--primary-color);">Building the Future of KZN</h2>
+                        <p style="font-size: 1.15rem; line-height: 1.9; margin-bottom: 1.5rem; color: var(--text-gray);">Rokwil is an integrated property development and civils operation with over <strong style="color: var(--primary-color);">450 staff</strong>, based in Durban, KwaZulu-Natal. Established in 2015 under the leadership of <strong style="color: var(--primary-color);">Rod Stainton</strong>, a chartered accountant with over 20 years' experience in property development, consulting, management, civil engineering, and earthworks. Our vision is to act as a catalyst for economic change in the areas in which we operate.</p>
+                        <p style="font-size: 1.15rem; line-height: 1.9; margin-bottom: 1.5rem; color: var(--text-gray);">Our head office is located in a landmark A-grade building at <strong style="color: var(--primary-color);">9 Old Main Road, Kloof</strong>, at the top of Fields Hill, shared with Liberty Group. We operate across several divisions: <strong style="color: var(--primary-color);">Property Development</strong>, <strong style="color: var(--primary-color);">Civil Engineering & Bulk Earthworks</strong>, <strong style="color: var(--primary-color);">Group Services</strong>, and <strong style="color: var(--primary-color);">Corporate Social Responsibility</strong>.</p>
+                        <p style="font-size: 1.15rem; line-height: 1.9; margin-bottom: 1.5rem; color: var(--text-gray);">We focus on large-format industrial and logistics projects along the Durban–Pietermaritzburg N3 corridor, with <strong style="color: var(--primary-color);">Keystone Park</strong> at Hammarsdale as our flagship development. This 152-hectare serviced logistics precinct yields over 1 million m² of platform area and has reached maturity with major blue-chip occupiers including Mr Price Group (100,000 m² under roof), Ackermans (94,000 m²), Pepkor (122,000 m²), plus manufacturing facilities for Dromex, Kerry Ingredients, Nu Dawn Eggs, Malda Pack, and many others.</p>
+                        <p style="font-size: 1.15rem; line-height: 1.9; margin-bottom: 2rem; color: var(--text-gray);">Our developments are recognised by industry bodies including the Hammarsdale Cato Ridge Development Association and municipal planning authorities as catalytic projects for Outer-West KZN. We collaborate closely with local community leadership structures to support grassroots development and have strong relationships with regional and provincial government entities.</p>
+                        
+                        <div style="margin-top: 2rem; padding: 2rem; background: linear-gradient(135deg, var(--bg-light) 0%, rgba(30, 58, 95, 0.05) 100%); border-radius: 20px; border: 2px solid var(--secondary-color); position: relative; overflow: hidden;">
+                            <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: var(--secondary-color); opacity: 0.1; border-radius: 50%;"></div>
+                            <div style="position: relative; z-index: 1;">
+                                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                                    <div style="width: 50px; height: 50px; background: var(--gradient-2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text-light); font-size: 1.5rem;">🎯</div>
+                                    <h3 style="color: var(--primary-color); margin: 0; font-size: 1.5rem;">Our Mission</h3>
+                                </div>
+                                <p style="margin: 0; color: var(--text-gray); font-size: 1.1rem; line-height: 1.8; font-style: italic;">To create world-class property developments that drive economic growth, create employment opportunities, and enhance the quality of life in KwaZulu-Natal and beyond.</p>
+                            </div>
                         </div>
                     </div>
-                    <div class="about-image">
-                        <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80" alt="Modern industrial development" style="width: 100%; height: 400px; object-fit: cover; border-radius: 20px; box-shadow: var(--shadow-lg);">
+                    <div class="about-image reveal" style="position: relative;">
+                        <div style="position: relative; width: 100%; height: 100%; min-height: 500px; border-radius: 20px; overflow: hidden;">
+                            <img src="images/rokwil-construction.jpg" alt="Rokwil construction site - Keystone Park development" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;" onerror="this.src='https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80'">
+                            <div class="about-image-overlay" style="position: absolute; bottom: 20px; left: 20px; right: 20px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); padding: 1.5rem; border-radius: 15px; box-shadow: var(--shadow-lg); transition: all 0.3s ease;">
+                                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+                                    <i class="bi bi-building" style="font-size: 1.5rem; color: var(--secondary-color);"></i>
+                                    <h4 style="margin: 0; color: var(--primary-color); font-size: 1.2rem;">Head Office</h4>
+                                </div>
+                                <p style="margin: 0; color: var(--text-gray); font-size: 0.95rem; line-height: 1.6;">9 Old Main Road, Kloof<br>Landmark A-Grade Building<br>Fields Hill, KZN</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timeline Section -->
+                <div style="margin-top: 100px; margin-bottom: 80px;">
+                    <div class="section-header">
+                        <h2 class="section-title">Our Journey</h2>
+                        <p class="section-subtitle">Key milestones in our growth</p>
+                    </div>
+                    <div style="max-width: 900px; margin: 3rem auto; position: relative;">
+                        <div style="position: absolute; left: 30px; top: 0; bottom: 0; width: 3px; background: var(--gradient-2); border-radius: 2px;"></div>
+                        <div style="position: relative;">
+                            <div class="timeline-item reveal" style="display: flex; gap: 2rem; margin-bottom: 3rem; position: relative;">
+                                <div style="width: 60px; height: 60px; background: var(--gradient-2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text-light); font-size: 1.5rem; font-weight: 700; flex-shrink: 0; box-shadow: var(--shadow-md); z-index: 2; transition: all 0.3s ease;">1</div>
+                                <div class="timeline-card" style="flex: 1; background: var(--text-light); padding: 2rem; border-radius: 15px; box-shadow: var(--shadow-md); transition: all 0.3s ease; border-left: 4px solid var(--secondary-color);">
+                                    <h3 style="color: var(--primary-color); margin-bottom: 0.5rem; font-size: 1.4rem;">2015 - Foundation</h3>
+                                    <p style="color: var(--text-gray); margin: 0; line-height: 1.8;">Rokwil Property Development established under the leadership of Roderick Robert Stainton, focusing on large-format industrial and logistics projects along the N3 corridor.</p>
+                                </div>
+                            </div>
+                            <div class="timeline-item reveal" style="display: flex; gap: 2rem; margin-bottom: 3rem; position: relative;">
+                                <div style="width: 60px; height: 60px; background: var(--gradient-2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text-light); font-size: 1.5rem; font-weight: 700; flex-shrink: 0; box-shadow: var(--shadow-md); z-index: 2; transition: all 0.3s ease;">2</div>
+                                <div class="timeline-card" style="flex: 1; background: var(--text-light); padding: 2rem; border-radius: 15px; box-shadow: var(--shadow-md); transition: all 0.3s ease; border-left: 4px solid var(--secondary-color);">
+                                    <h3 style="color: var(--primary-color); margin-bottom: 0.5rem; font-size: 1.4rem;">2020 - Keystone Park Maturity</h3>
+                                    <p style="color: var(--text-gray); margin: 0; line-height: 1.8;">Keystone Park reached maturity with large platforms sold and build-to-suit projects underway, attracting major blue-chip occupiers including Mr Price, Ackermans, and Pepkor.</p>
+                                </div>
+                            </div>
+                            <div class="timeline-item reveal" style="display: flex; gap: 2rem; margin-bottom: 3rem; position: relative;">
+                                <div style="width: 60px; height: 60px; background: var(--gradient-2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text-light); font-size: 1.5rem; font-weight: 700; flex-shrink: 0; box-shadow: var(--shadow-md); z-index: 2; transition: all 0.3s ease;">3</div>
+                                <div class="timeline-card" style="flex: 1; background: var(--text-light); padding: 2rem; border-radius: 15px; box-shadow: var(--shadow-md); transition: all 0.3s ease; border-left: 4px solid var(--secondary-color);">
+                                    <h3 style="color: var(--primary-color); margin-bottom: 0.5rem; font-size: 1.4rem;">2023 - Industry Recognition</h3>
+                                    <p style="color: var(--text-gray); margin: 0; line-height: 1.8;">Pepkor's distribution centre at Keystone Park received recognition in specialist awards for innovative ground-improvement works. Growthpoint Properties acquired logistics assets, validating investment appeal.</p>
+                                </div>
+                            </div>
+                            <div class="timeline-item reveal" style="display: flex; gap: 2rem; position: relative;">
+                                <div style="width: 60px; height: 60px; background: var(--gradient-2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text-light); font-size: 1.5rem; font-weight: 700; flex-shrink: 0; box-shadow: var(--shadow-md); z-index: 2; transition: all 0.3s ease;">4</div>
+                                <div class="timeline-card" style="flex: 1; background: var(--text-light); padding: 2rem; border-radius: 15px; box-shadow: var(--shadow-md); transition: all 0.3s ease; border-left: 4px solid var(--secondary-color);">
+                                    <h3 style="color: var(--primary-color); margin-bottom: 0.5rem; font-size: 1.4rem;">2024 - Continued Growth</h3>
+                                    <p style="color: var(--text-gray); margin: 0; line-height: 1.8;">Keystone Park continues to expand with 7 platforms remaining, ranging from 13,000 m² to 54,335 m². Ongoing development of manufacturing facilities and continued recognition as a catalytic project for Outer-West KZN.</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -86,15 +173,114 @@
                 </div>
 
                 <!-- Leadership Section -->
-                <div class="values-section" style="margin-top: 80px;">
-                    <h2 class="section-title">Leadership</h2>
-                    <div style="max-width: 800px; margin: 3rem auto; background: var(--text-light); padding: 3rem; border-radius: 20px; box-shadow: var(--shadow-lg);">
-                        <div style="text-align: center; margin-bottom: 2rem;">
-                            <div style="width: 120px; height: 120px; margin: 0 auto 1.5rem; border-radius: 50%; background: var(--gradient-2); display: flex; align-items: center; justify-content: center; color: var(--text-light); font-size: 3rem; font-weight: 700;">RS</div>
-                            <h3 style="color: var(--primary-color); margin-bottom: 0.5rem;">Roderick Robert Stainton</h3>
-                            <p style="color: var(--secondary-color); font-weight: 600; margin-bottom: 1rem;">Director & Founder</p>
+                <div class="values-section" style="margin-top: 100px;">
+                    <div class="section-header">
+                        <h2 class="section-title">Leadership Team</h2>
+                        <p class="section-subtitle">Experienced professionals driving transformation</p>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-top: 3rem;">
+                        <div class="leadership-card reveal" style="background: var(--text-light); padding: 2.5rem; border-radius: 20px; box-shadow: var(--shadow-md); text-align: center; transition: all 0.3s ease; border-top: 4px solid var(--secondary-color);">
+                            <div style="width: 120px; height: 120px; margin: 0 auto 1.5rem; border-radius: 50%; background: var(--gradient-2); display: flex; align-items: center; justify-content: center; color: var(--text-light); font-size: 3rem; font-weight: 700; box-shadow: var(--shadow-md); border: 4px solid var(--text-light);">RS</div>
+                            <h3 style="color: var(--primary-color); margin-bottom: 0.5rem; font-size: 1.5rem;">Rod Stainton</h3>
+                            <p style="color: var(--secondary-color); font-weight: 600; margin-bottom: 1rem; font-size: 1rem;">Director & Founder</p>
+                            <p style="color: var(--text-gray); margin: 0; line-height: 1.7; font-size: 0.95rem;">Chartered accountant with over 20 years' experience in property development, consulting, management, civil engineering, and earthworks.</p>
                         </div>
-                        <p style="color: var(--text-gray); line-height: 1.8; text-align: center; font-size: 1.05rem;">With a vision to transform KwaZulu-Natal's property landscape, Roderick Robert Stainton established Rokwil Property Development in 2021. Under his leadership, the company has delivered landmark developments along the N3 corridor, including Keystone Park—a ±152-hectare logistics precinct that reached maturity in 2020 and is recognised by the Hammarsdale Cato Ridge Development Association as a catalytic project for Outer-West KZN, linking Durban port to the interior.</p>
+                        <div class="leadership-card reveal" style="background: var(--text-light); padding: 2.5rem; border-radius: 20px; box-shadow: var(--shadow-md); text-align: center; transition: all 0.3s ease; border-top: 4px solid var(--secondary-color);">
+                            <div style="width: 120px; height: 120px; margin: 0 auto 1.5rem; border-radius: 50%; background: var(--gradient-2); display: flex; align-items: center; justify-content: center; color: var(--text-light); font-size: 3rem; font-weight: 700; box-shadow: var(--shadow-md); border: 4px solid var(--text-light);">SJ</div>
+                            <h3 style="color: var(--primary-color); margin-bottom: 0.5rem; font-size: 1.5rem;">Scott Johnson</h3>
+                            <p style="color: var(--secondary-color); font-weight: 600; margin-bottom: 1rem; font-size: 1rem;">Development Adviser</p>
+                            <p style="color: var(--text-gray); margin: 0; line-height: 1.7; font-size: 0.95rem;">20+ years' industry experience, including Heathrow's World Business Centre III and Bank of England HQ refurbishment.</p>
+                        </div>
+                        <div class="leadership-card reveal" style="background: var(--text-light); padding: 2.5rem; border-radius: 20px; box-shadow: var(--shadow-md); text-align: center; transition: all 0.3s ease; border-top: 4px solid var(--secondary-color);">
+                            <div style="width: 120px; height: 120px; margin: 0 auto 1.5rem; border-radius: 50%; background: var(--gradient-2); display: flex; align-items: center; justify-content: center; color: var(--text-light); font-size: 3rem; font-weight: 700; box-shadow: var(--shadow-md); border: 4px solid var(--text-light);">AH</div>
+                            <h3 style="color: var(--primary-color); margin-bottom: 0.5rem; font-size: 1.5rem;">Alistair Hobden</h3>
+                            <p style="color: var(--secondary-color); font-weight: 600; margin-bottom: 1rem; font-size: 1rem;">Development Manager (BSc QS)</p>
+                            <p style="color: var(--text-gray); margin: 0; line-height: 1.7; font-size: 0.95rem;">Worked on Keystone Park, The Palace at Lost City, Coco Beach Resort, Sugar Beach Resort (Mauritius), and Fairmont Zimbali Hotel.</p>
+                        </div>
+                        <div class="leadership-card reveal" style="background: var(--text-light); padding: 2.5rem; border-radius: 20px; box-shadow: var(--shadow-md); text-align: center; transition: all 0.3s ease; border-top: 4px solid var(--secondary-color);">
+                            <div style="width: 120px; height: 120px; margin: 0 auto 1.5rem; border-radius: 50%; background: var(--gradient-2); display: flex; align-items: center; justify-content: center; color: var(--text-light); font-size: 3rem; font-weight: 700; box-shadow: var(--shadow-md); border: 4px solid var(--text-light);">JB</div>
+                            <h3 style="color: var(--primary-color); margin-bottom: 0.5rem; font-size: 1.5rem;">Jeanine Brown</h3>
+                            <p style="color: var(--secondary-color); font-weight: 600; margin-bottom: 1rem; font-size: 1rem;">Marketing & Sales Manager (BCom Hons)</p>
+                            <p style="color: var(--text-gray); margin: 0; line-height: 1.7; font-size: 0.95rem;">Former corporate banker, manages client relations and lease/sales negotiations.</p>
+                        </div>
+                        <div class="leadership-card reveal" style="background: var(--text-light); padding: 2.5rem; border-radius: 20px; box-shadow: var(--shadow-md); text-align: center; transition: all 0.3s ease; border-top: 4px solid var(--secondary-color);">
+                            <div style="width: 120px; height: 120px; margin: 0 auto 1.5rem; border-radius: 50%; background: var(--gradient-2); display: flex; align-items: center; justify-content: center; color: var(--text-light); font-size: 3rem; font-weight: 700; box-shadow: var(--shadow-md); border: 4px solid var(--text-light);">BK</div>
+                            <h3 style="color: var(--primary-color); margin-bottom: 0.5rem; font-size: 1.5rem;">Bernadette Khumalo</h3>
+                            <p style="color: var(--secondary-color); font-weight: 600; margin-bottom: 1rem; font-size: 1rem;">Director, Civils (BCom + UCT Property Dev)</p>
+                            <p style="color: var(--text-gray); margin: 0; line-height: 1.7; font-size: 0.95rem;">First female SAPOA KZN chair; served on UNISA Council; Businesswoman of the Year 2018.</p>
+                        </div>
+                        <div class="leadership-card reveal" style="background: var(--text-light); padding: 2.5rem; border-radius: 20px; box-shadow: var(--shadow-md); text-align: center; transition: all 0.3s ease; border-top: 4px solid var(--secondary-color);">
+                            <div style="width: 120px; height: 120px; margin: 0 auto 1.5rem; border-radius: 50%; background: var(--gradient-2); display: flex; align-items: center; justify-content: center; color: var(--text-light); font-size: 3rem; font-weight: 700; box-shadow: var(--shadow-md); border: 4px solid var(--text-light);">AK</div>
+                            <h3 style="color: var(--primary-color); margin-bottom: 0.5rem; font-size: 1.5rem;">Anthony King</h3>
+                            <p style="color: var(--secondary-color); font-weight: 600; margin-bottom: 1rem; font-size: 1rem;">Civil Engineer (PrCM)</p>
+                            <p style="color: var(--text-gray); margin: 0; line-height: 1.7; font-size: 0.95rem;">20+ years experience, over 400 staff under management.</p>
+                        </div>
+                        <div class="leadership-card reveal" style="background: var(--text-light); padding: 2.5rem; border-radius: 20px; box-shadow: var(--shadow-md); text-align: center; transition: all 0.3s ease; border-top: 4px solid var(--secondary-color);">
+                            <div style="width: 120px; height: 120px; margin: 0 auto 1.5rem; border-radius: 50%; background: var(--gradient-2); display: flex; align-items: center; justify-content: center; color: var(--text-light); font-size: 3rem; font-weight: 700; box-shadow: var(--shadow-md); border: 4px solid var(--text-light);">OH</div>
+                            <h3 style="color: var(--primary-color); margin-bottom: 0.5rem; font-size: 1.5rem;">Oliver Humphries</h3>
+                            <p style="color: var(--secondary-color); font-weight: 600; margin-bottom: 1rem; font-size: 1rem;">Group CFO (CA SA)</p>
+                            <p style="color: var(--text-gray); margin: 0; line-height: 1.7; font-size: 0.95rem;">Provides finance support to development and civils arms.</p>
+                        </div>
+                        <div class="leadership-card reveal" style="background: var(--text-light); padding: 2.5rem; border-radius: 20px; box-shadow: var(--shadow-md); text-align: center; transition: all 0.3s ease; border-top: 4px solid var(--secondary-color);">
+                            <div style="width: 120px; height: 120px; margin: 0 auto 1.5rem; border-radius: 50%; background: var(--gradient-2); display: flex; align-items: center; justify-content: center; color: var(--text-light); font-size: 3rem; font-weight: 700; box-shadow: var(--shadow-md); border: 4px solid var(--text-light);">SB</div>
+                            <h3 style="color: var(--primary-color); margin-bottom: 0.5rem; font-size: 1.5rem;">Sue Bartlett</h3>
+                            <p style="color: var(--secondary-color); font-weight: 600; margin-bottom: 1rem; font-size: 1rem;">Legal Manager (LLB)</p>
+                            <p style="color: var(--text-gray); margin: 0; line-height: 1.7; font-size: 0.95rem;">Involved in Gateway Royal Palm Hotel and Zimbali Fairmont Hotel projects.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CSR Section -->
+                <div style="margin-top: 100px; padding: 80px 0; background: var(--gradient-2); border-radius: 30px; color: var(--text-light);">
+                    <div class="container">
+                        <div class="section-header" style="color: var(--text-light);">
+                            <h2 class="section-title" style="color: var(--text-light);">Corporate Social Responsibility</h2>
+                            <p class="section-subtitle" style="color: rgba(255, 255, 255, 0.9);">Making a positive impact in our communities</p>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-top: 3rem;">
+                            <div class="csr-card reveal" style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); padding: 2.5rem; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.2);">
+                                <div style="font-size: 3rem; margin-bottom: 1rem;">👥</div>
+                                <h4 style="color: var(--text-light); margin-bottom: 1rem; font-size: 1.3rem;">Hammarsdale Steering Committee</h4>
+                                <p style="color: rgba(255, 255, 255, 0.9); margin: 0; line-height: 1.7;">Created the Hammarsdale Steering Committee and placed 500+ locals in jobs within a year, supporting grassroots development in the community.</p>
+                            </div>
+                            <div class="csr-card reveal" style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); padding: 2.5rem; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.2);">
+                                <div style="font-size: 3rem; margin-bottom: 1rem;">❤️</div>
+                                <h4 style="color: var(--text-light); margin-bottom: 1rem; font-size: 1.3rem;">Do More Love Campaign</h4>
+                                <p style="color: rgba(255, 255, 255, 0.9); margin: 0; line-height: 1.7;">Supported the "Do More Love" campaign, demonstrating our commitment to community welfare and social responsibility.</p>
+                            </div>
+                            <div class="csr-card reveal" style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); padding: 2.5rem; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.2);">
+                                <div style="font-size: 3rem; margin-bottom: 1rem;">🛡️</div>
+                                <h4 style="color: var(--text-light); margin-bottom: 1rem; font-size: 1.3rem;">Victims of Crime Centre</h4>
+                                <p style="color: rgba(255, 255, 255, 0.9); margin: 0; line-height: 1.7;">Founded the Victims of Crime Centre for rape and abuse support in Hammarsdale, providing critical support services to the community.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recognition Section -->
+                <div style="margin-top: 100px; padding: 80px 0; background: var(--bg-light); border-radius: 30px;">
+                    <div class="container">
+                        <div class="section-header">
+                            <h2 class="section-title">Recognition & Partnerships</h2>
+                            <p class="section-subtitle">Trusted by industry leaders and recognised by authorities</p>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-top: 3rem;">
+                            <div class="recognition-card reveal" style="background: var(--text-light); padding: 2.5rem; border-radius: 20px; text-align: center; box-shadow: var(--shadow-md); transition: all 0.3s ease; border-top: 4px solid var(--secondary-color);">
+                                <div style="width: 80px; height: 80px; margin: 0 auto 1.5rem; background: var(--gradient-2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text-light); font-size: 2rem; box-shadow: var(--shadow-md);">🏆</div>
+                                <h4 style="color: var(--primary-color); margin-bottom: 1rem; font-size: 1.3rem;">HCRDA Recognition</h4>
+                                <p style="color: var(--text-gray); margin: 0; line-height: 1.7;">Recognised by the Hammarsdale Cato Ridge Development Association as a catalytic project for Outer-West KZN.</p>
+                            </div>
+                            <div class="recognition-card reveal" style="background: var(--text-light); padding: 2.5rem; border-radius: 20px; text-align: center; box-shadow: var(--shadow-md); transition: all 0.3s ease; border-top: 4px solid var(--secondary-color);">
+                                <div style="width: 80px; height: 80px; margin: 0 auto 1.5rem; background: var(--gradient-2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text-light); font-size: 2rem; box-shadow: var(--shadow-md);">🤝</div>
+                                <h4 style="color: var(--primary-color); margin-bottom: 1rem; font-size: 1.3rem;">Blue-Chip Tenants</h4>
+                                <p style="color: var(--text-gray); margin: 0; line-height: 1.7;">Trusted by major brands including Mr Price, Ackermans, Pepkor, and leading manufacturing companies.</p>
+                            </div>
+                            <div class="recognition-card reveal" style="background: var(--text-light); padding: 2.5rem; border-radius: 20px; text-align: center; box-shadow: var(--shadow-md); transition: all 0.3s ease; border-top: 4px solid var(--secondary-color);">
+                                <div style="width: 80px; height: 80px; margin: 0 auto 1.5rem; background: var(--gradient-2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text-light); font-size: 2rem; box-shadow: var(--shadow-md);">💼</div>
+                                <h4 style="color: var(--primary-color); margin-bottom: 1rem; font-size: 1.3rem;">Investment Validation</h4>
+                                <p style="color: var(--text-gray); margin: 0; line-height: 1.7;">Third-party investment from Growthpoint Properties demonstrates strong confidence in our developments.</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -27,6 +27,12 @@
                 <li><a href="projects.html" class="nav-link">Projects</a></li>
                 <li><a href="contact.html" class="nav-link">Contact</a></li>
             </ul>
+            <button class="dark-mode-toggle" id="darkModeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+                <span class="toggle-icon">
+                    <span class="sun">☀️</span>
+                    <span class="moon">🌙</span>
+                </span>
+            </button>
             <div class="hamburger">
                 <span></span>
                 <span></span>
@@ -36,8 +42,13 @@
     </nav>
 
     <main role="main">
-        <!-- Hero section - Replace with actual Keystone Park image when available -->
-        <section class="hero" style="background-image: url('https://images.unsplash.com/photo-1504307651254-35680f356dfd?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80'); background-size: cover; background-position: center;">
+        <!-- Hero section with video background -->
+        <section class="hero" style="position: relative; overflow: hidden;">
+            <video autoplay muted loop playsinline style="position: absolute; top: 50%; left: 50%; min-width: 100%; min-height: 100%; width: auto; height: auto; transform: translate(-50%, -50%); z-index: 0; object-fit: cover;">
+                <source src="videos/Rokwil.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: url('images/rokwil-construction.jpg'), url('https://images.unsplash.com/photo-1504307651254-35680f356dfd?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80'); background-size: cover; background-position: center; z-index: -1;"></div>
             <div class="hero-overlay"></div>
             <div class="hero-content">
                 <h1 class="hero-title">Industrial Platforms & Mega DCs on the N3 in KZN</h1>
@@ -52,13 +63,29 @@
             </div>
         </section>
 
+        <!-- Video Showcase Section -->
+        <section style="padding: 100px 0; background: var(--text-light);">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">Experience Rokwil</h2>
+                    <p class="section-subtitle">See our developments in action</p>
+                </div>
+                <div style="max-width: 1200px; margin: 3rem auto; position: relative; border-radius: 20px; overflow: hidden; box-shadow: var(--shadow-xl);">
+                    <video controls style="width: 100%; height: auto; display: block; background: var(--primary-color);" poster="images/rokwil-construction.jpg">
+                        <source src="videos/Rokwil.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+            </div>
+        </section>
+
         <section class="features">
             <div class="container">
                 <div class="features-grid">
                     <div class="feature-card">
                         <div class="feature-icon">🏗️</div>
                         <h3>Industrial Development</h3>
-                        <p>State-of-the-art logistics and warehousing facilities designed for modern business needs. Our ±152-hectare Keystone Park development hosts mega DCs including Mr Price (100,000 m² under roof), Ackermans (97,000 m² with expansion plans), Pepkor (110,000–125,000 m²), plus manufacturing facilities for Dromex, Kerry Ingredients, and more.</p>
+                        <p>State-of-the-art logistics and warehousing facilities designed for modern business needs. Our 152-hectare Keystone Park development yields over 1 million m² of platform area and hosts mega DCs including Mr Price (100,000 m² under roof), Ackermans (94,000 m²), Pepkor (122,000 m²), plus manufacturing facilities for Dromex, Kerry Ingredients, Nu Dawn Eggs, Malda Pack, and many others.</p>
                     </div>
                     <div class="feature-card">
                         <div class="feature-icon">🏢</div>
@@ -68,7 +95,7 @@
                     <div class="feature-card">
                         <div class="feature-icon">🌱</div>
                         <h3>Community Impact</h3>
-                        <p>Committed to creating developments that generate employment opportunities. Keystone Park alone is expected to create 6,500 permanent jobs, contributing significantly to regional economic growth.</p>
+                        <p>Committed to creating developments that generate employment opportunities. With over 450 staff and strong community engagement, we've created the Hammarsdale Steering Committee, placed 500+ locals in jobs, and founded the Victims of Crime Centre for support services in Hammarsdale.</p>
                     </div>
                 </div>
             </div>

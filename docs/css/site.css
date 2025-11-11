@@ -1595,8 +1595,6 @@ body.dark-mode .csr-card {
     flex-grow: 1;
     font-weight: 400;
     position: relative;
-    padding-left: var(--spacing-md);
-    border-left: 2px solid var(--border-color);
     max-width: 100%;
 }
 
@@ -1757,7 +1755,6 @@ body.dark-mode .testimonial-rating {
 
 body.dark-mode .testimonial-quote {
     color: var(--text-primary);
-    border-left-color: var(--border-color);
 }
 
 body.dark-mode .testimonial-info h4 {

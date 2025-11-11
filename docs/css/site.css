@@ -160,11 +160,21 @@ h1, h2, h3, h4, h5, h6 {
 video {
     border-radius: 0;
     display: block;
+    width: 100%;
+    height: auto;
+    background: #1a1a1a;
 }
 
 video:focus {
     outline: 3px solid var(--secondary-color);
     outline-offset: 3px;
+}
+
+/* Ensure poster image displays properly */
+video[poster] {
+    object-fit: cover;
+    background-size: cover;
+    background-position: center;
 }
 
 .hero::before {

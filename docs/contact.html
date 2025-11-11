@@ -122,6 +122,7 @@
                             <div class="info-content">
                                 <h3>Email</h3>
                                 <p><a href="mailto:rod@rokwil.com" style="color: var(--secondary-color); text-decoration: none;">rod@rokwil.com</a></p>
+                                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.5rem; line-height: 1.5;"><i class="bi bi-info-circle me-1"></i>Tip: Add this email to your contacts to prevent messages from going to spam</p>
                             </div>
                         </div>
 
@@ -220,16 +221,27 @@
             emailInput.value = 'rod@rokwil.com';
             form.appendChild(emailInput);
             
-            // Submit form to Static Forms
+            // Submit form to Static Forms with timeout
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+            
             fetch(form.action, {
                 method: 'POST',
-                body: new FormData(form)
+                body: new FormData(form),
+                signal: controller.signal
             })
-            .then(response => response.json())
+            .then(response => {
+                clearTimeout(timeoutId);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
-                if (data.success) {
+                // Static Forms returns { success: true } on success
+                if (data.success === true || data.success === 'true') {
                     // Success
-                    formMessage.textContent = 'Thank you for your message! We will get back to you soon.';
+                    formMessage.innerHTML = 'Thank you for your message! We will get back to you soon.<br><small style="opacity: 0.8;">If you don\'t receive a reply within 24 hours, please check your spam folder or email us directly at rod@rokwil.com</small>';
                     formMessage.className = 'form-message success';
                     form.reset();
                     
@@ -237,30 +249,41 @@
                     submitButton.disabled = false;
                     submitButton.innerHTML = originalButtonText;
                     
-                    // Clear message after 5 seconds
+                    // Clear message after 8 seconds (longer to read the spam note)
                     setTimeout(() => {
                         formMessage.textContent = '';
                         formMessage.className = 'form-message';
-                    }, 5000);
+                    }, 8000);
                 } else {
-                    throw new Error(data.message || 'Failed to send message');
+                    throw new Error(data.message || data.error || 'Failed to send message');
                 }
             })
             .catch(error => {
+                clearTimeout(timeoutId);
                 // Error
-                formMessage.textContent = 'Sorry, there was an error sending your message. Please try again or email us directly at rod@rokwil.com';
+                console.error('Form submission error:', error);
+                
+                let errorMessage = 'Sorry, there was an error sending your message. ';
+                if (error.name === 'AbortError') {
+                    errorMessage += 'The request timed out. ';
+                }
+                errorMessage += 'Please try again or email us directly at rod@rokwil.com';
+                
+                formMessage.textContent = errorMessage;
                 formMessage.className = 'form-message error';
                 
                 // Reset button
                 submitButton.disabled = false;
                 submitButton.innerHTML = originalButtonText;
-                
-                console.error('Static Forms Error:', error);
             })
             .finally(() => {
-                // Remove hidden inputs
-                form.removeChild(accessKeyInput);
-                form.removeChild(emailInput);
+                // Remove hidden inputs if they exist
+                if (form.contains(accessKeyInput)) {
+                    form.removeChild(accessKeyInput);
+                }
+                if (form.contains(emailInput)) {
+                    form.removeChild(emailInput);
+                }
             });
         });
     </script>

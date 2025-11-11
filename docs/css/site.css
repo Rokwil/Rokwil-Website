@@ -103,7 +103,7 @@ img {
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
     padding: 0 var(--spacing-md);
 }
@@ -1534,8 +1534,8 @@ body.dark-mode .csr-card {
 .testimonials-grid,
 .news-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    gap: var(--spacing-lg);
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: var(--spacing-xl);
     margin-top: var(--spacing-lg);
 }
 
@@ -1543,6 +1543,10 @@ body.dark-mode .csr-card {
     .testimonials-grid {
         grid-template-columns: repeat(3, 1fr);
         gap: var(--spacing-xl);
+    }
+    
+    .testimonial-card {
+        min-width: 380px;
     }
 }
 
@@ -1574,11 +1578,12 @@ body.dark-mode .csr-card {
     display: flex;
     flex-direction: column;
     position: relative;
-    padding: var(--spacing-xl);
+    padding: var(--spacing-lg) var(--spacing-md);
     border-left: 4px solid var(--secondary-color);
     background: var(--bg-primary);
     min-width: 0;
     width: 100%;
+    box-sizing: border-box;
 }
 
 .testimonial-rating {
@@ -1591,7 +1596,7 @@ body.dark-mode .csr-card {
 }
 
 .testimonial-quote {
-    font-size: 1rem;
+    font-size: 1.05rem;
     line-height: 1.7;
     color: var(--text-primary);
     margin-bottom: var(--spacing-xl);
@@ -1602,6 +1607,10 @@ body.dark-mode .csr-card {
     word-break: normal;
     white-space: normal;
     overflow-wrap: normal;
+    hyphens: none;
+    text-align: left;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .testimonial-author {

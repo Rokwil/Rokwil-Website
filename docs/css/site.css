@@ -1113,9 +1113,21 @@ body.dark-mode .showcase-item,
 body.dark-mode .timeline-card,
 body.dark-mode .leadership-card,
 body.dark-mode .recognition-card {
-    background: var(--bg-secondary);
+    background: var(--bg-secondary) !important;
     border-color: var(--border-color);
     color: var(--text-primary);
+}
+
+body.dark-mode .timeline-card h3,
+body.dark-mode .leadership-card h3,
+body.dark-mode .recognition-card h3 {
+    color: var(--text-primary);
+}
+
+body.dark-mode .timeline-card p,
+body.dark-mode .leadership-card p,
+body.dark-mode .recognition-card p {
+    color: var(--text-secondary);
 }
 
 body.dark-mode .feature-card:hover,

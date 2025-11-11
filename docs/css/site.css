@@ -1149,6 +1149,20 @@ body.dark-mode p {
     color: var(--text-secondary);
 }
 
+body.dark-mode strong {
+    color: var(--text-primary);
+}
+
+body.dark-mode .about-text h2,
+body.dark-mode .about-text h3,
+body.dark-mode .about-text h4 {
+    color: var(--text-primary);
+}
+
+body.dark-mode .about-text p {
+    color: var(--text-secondary);
+}
+
 body.dark-mode .page-hero {
     background: linear-gradient(135deg, var(--secondary-color) 0%, var(--primary-color) 100%);
 }

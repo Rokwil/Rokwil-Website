@@ -153,35 +153,12 @@ h1, h2, h3, h4, h5, h6 {
     overflow: hidden;
 }
 
-.hero video {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    min-width: 100%;
-    min-height: 100%;
-    width: auto;
-    height: auto;
-    transform: translate(-50%, -50%);
-    z-index: 0;
-    object-fit: cover;
-    opacity: 1;
-}
 
-@media (max-width: 768px) {
-    .hero video {
-        display: none; /* Hide video on mobile for better performance */
-    }
-    
-    .hero {
-        background-image: url('https://images.unsplash.com/photo-1504307651254-35680f356dfd?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
-        background-size: cover;
-        background-position: center;
-    }
-}
 
 /* Video Section Styles */
 video {
-    border-radius: 20px;
+    border-radius: 0;
+    display: block;
 }
 
 video:focus {

@@ -68,7 +68,11 @@
 
                 <!-- Keystone Park -->
                 <div class="project-card featured">
-                    <div class="project-image" style="background-image: url('images/Keystone.jpg'), url('images/Keystone 2.webp'), url('images/Keystone 3.jpg'), url('images/Keystone 4.webp'), url('https://images.unsplash.com/photo-1504307651254-35680f356dfd?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80'); background-size: cover; background-position: center;">
+                    <div class="project-image keystone-slideshow" style="position: relative; overflow: hidden;">
+                        <div class="keystone-slide active" style="background-image: url('images/Keystone.jpg');"></div>
+                        <div class="keystone-slide" style="background-image: url('images/Keystone 2.webp');"></div>
+                        <div class="keystone-slide" style="background-image: url('images/Keystone 3.jpg');"></div>
+                        <div class="keystone-slide" style="background-image: url('images/Keystone 4.webp');"></div>
                         <div class="project-badge"><i class="bi bi-star-fill me-1"></i>Featured</div>
                     </div>
                     <div class="project-details">
@@ -390,6 +394,29 @@
     </footer>
 
     <script src="js/site.js"></script>
+    <script>
+        // Keystone Park Image Slideshow
+        (function() {
+            const slides = document.querySelectorAll('.keystone-slide');
+            if (slides.length === 0) return;
+            
+            let currentSlide = 0;
+            
+            function nextSlide() {
+                // Remove active class from current slide
+                slides[currentSlide].classList.remove('active');
+                
+                // Move to next slide
+                currentSlide = (currentSlide + 1) % slides.length;
+                
+                // Add active class to new slide
+                slides[currentSlide].classList.add('active');
+            }
+            
+            // Change slide every 4 seconds
+            setInterval(nextSlide, 4000);
+        })();
+    </script>
 </body>
 </html>
 

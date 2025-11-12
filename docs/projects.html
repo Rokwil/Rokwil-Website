@@ -69,10 +69,16 @@
                 <!-- Keystone Park -->
                 <div class="project-card featured">
                     <div class="project-image keystone-slideshow" style="position: relative; overflow: hidden;">
-                        <div class="keystone-slide active" style="background-image: url('images/keystone - meeting.webp');"></div>
+                        <div class="keystone-slide active" style="background-image: url('images/Keystone 1.webp');"></div>
                         <div class="keystone-slide" style="background-image: url('images/Keystone 2.webp');"></div>
                         <div class="keystone-slide" style="background-image: url('images/Keystone 3.webp');"></div>
                         <div class="keystone-slide" style="background-image: url('images/Keystone 4.webp');"></div>
+                        <div class="keystone-slide" style="background-image: url('images/Keystone 5.webp');"></div>
+                        <div class="keystone-slide" style="background-image: url('images/Keystone 6.webp');"></div>
+                        <div class="keystone-slide" style="background-image: url('images/Keystone 7.webp');"></div>
+                        <div class="keystone-slide" style="background-image: url('images/Keystone 8.webp');"></div>
+                        <div class="keystone-slide" style="background-image: url('images/Keystone 9.webp');"></div>
+                        <div class="keystone-slide" style="background-image: url('images/Keystone 10.webp');"></div>
                         <div class="project-badge"><i class="bi bi-star-fill me-1"></i>Featured</div>
                     </div>
                     <div class="project-details">
@@ -395,31 +401,80 @@
 
     <script src="js/site.js"></script>
     <script>
-        // Keystone Park Image Slideshow
+        // Keystone Park Image Slideshow - Robust version
         (function() {
+            'use strict';
+            
             const slides = document.querySelectorAll('.keystone-slide');
             if (slides.length === 0) return;
             
-            // Ensure first slide is visible on load
-            if (slides[0]) {
-                slides[0].classList.add('active');
+            let currentSlide = 0;
+            let slideInterval = null;
+            let isTransitioning = false;
+            
+            // Initialize: Ensure first slide is visible
+            function initializeSlideshow() {
+                // Remove active from all slides first
+                slides.forEach(slide => slide.classList.remove('active'));
+                
+                // Set first slide as active
+                if (slides[0]) {
+                    slides[0].classList.add('active');
+                    currentSlide = 0;
+                }
             }
             
-            let currentSlide = 0;
-            
+            // Transition to next slide
             function nextSlide() {
+                // Prevent overlapping transitions
+                if (isTransitioning) return;
+                isTransitioning = true;
+                
                 // Remove active class from current slide
-                slides[currentSlide].classList.remove('active');
+                if (slides[currentSlide]) {
+                    slides[currentSlide].classList.remove('active');
+                }
                 
                 // Move to next slide
                 currentSlide = (currentSlide + 1) % slides.length;
                 
                 // Add active class to new slide
-                slides[currentSlide].classList.add('active');
+                if (slides[currentSlide]) {
+                    slides[currentSlide].classList.add('active');
+                }
+                
+                // Reset transition lock after animation completes
+                setTimeout(() => {
+                    isTransitioning = false;
+                }, 1600); // Slightly longer than CSS transition (1.5s)
             }
             
-            // Change slide every 4 seconds
-            setInterval(nextSlide, 4000);
+            // Start slideshow
+            function startSlideshow() {
+                initializeSlideshow();
+                
+                // Clear any existing interval
+                if (slideInterval) {
+                    clearInterval(slideInterval);
+                }
+                
+                // Change slide every 4 seconds
+                slideInterval = setInterval(nextSlide, 4000);
+            }
+            
+            // Initialize when DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', startSlideshow);
+            } else {
+                startSlideshow();
+            }
+            
+            // Cleanup on page unload
+            window.addEventListener('beforeunload', function() {
+                if (slideInterval) {
+                    clearInterval(slideInterval);
+                }
+            });
         })();
     </script>
 </body>

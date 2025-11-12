@@ -841,9 +841,8 @@ section {
 }
 
 .project-card {
-    display: grid;
-    grid-template-columns: 1fr 1.5fr;
-    gap: var(--spacing-lg);
+    display: flex;
+    flex-direction: column;
     margin-bottom: var(--spacing-xl);
     background: var(--bg-primary);
     border: 1px solid var(--border-color);
@@ -865,10 +864,18 @@ section {
 }
 
 .project-image {
-    min-height: 400px;
+    width: 100%;
+    min-height: 500px;
     background-size: cover;
     background-position: center;
     position: relative;
+}
+
+.project-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
 }
 
 .project-badge {

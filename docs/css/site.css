@@ -1483,8 +1483,7 @@ body.dark-mode .tenant-list li strong {
     }
 
     .about-grid,
-    .contact-grid,
-    .project-card {
+    .contact-grid {
         grid-template-columns: 1fr;
     }
 

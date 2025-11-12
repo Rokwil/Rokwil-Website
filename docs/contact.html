@@ -27,6 +27,32 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- WIP Disclaimer Modal -->
+    <div class="wip-disclaimer-overlay" id="wipDisclaimer">
+        <div class="wip-disclaimer-modal">
+            <div class="wip-disclaimer-header">
+                <div class="wip-disclaimer-icon">🚧</div>
+                <h2>Website Under Construction</h2>
+            </div>
+            <div class="wip-disclaimer-content">
+                <p><strong>This website is currently a work in progress.</strong></p>
+                <p>Please be aware that:</p>
+                <ul>
+                    <li>Some information may be incorrect or incomplete</li>
+                    <li>Certain statements and details may be placeholders or examples</li>
+                    <li>Content is subject to change as development continues</li>
+                    <li>Features and functionality may not be fully operational</li>
+                </ul>
+                <p>We appreciate your understanding as we continue to improve and finalize the website.</p>
+            </div>
+            <div class="wip-disclaimer-actions">
+                <button class="wip-disclaimer-btn wip-disclaimer-btn-accept" id="acceptDisclaimer">
+                    I Understand, Continue
+                </button>
+            </div>
+        </div>
+    </div>
+
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo">
@@ -180,6 +206,64 @@
     </footer>
 
     <script src="js/site.js"></script>
+    <script>
+        // WIP Disclaimer Modal
+        (function() {
+            'use strict';
+            
+            const disclaimerKey = 'rokwil_wip_disclaimer_accepted';
+            const disclaimerOverlay = document.getElementById('wipDisclaimer');
+            const acceptButton = document.getElementById('acceptDisclaimer');
+            
+            function hasAcceptedDisclaimer() {
+                return localStorage.getItem(disclaimerKey) === 'true';
+            }
+            
+            function showDisclaimer() {
+                if (disclaimerOverlay) {
+                    setTimeout(() => {
+                        disclaimerOverlay.classList.add('show');
+                    }, 100);
+                }
+            }
+            
+            function hideDisclaimer() {
+                if (disclaimerOverlay) {
+                    disclaimerOverlay.classList.remove('show');
+                    setTimeout(() => {
+                        if (disclaimerOverlay.parentNode) {
+                            disclaimerOverlay.style.display = 'none';
+                        }
+                    }, 300);
+                }
+            }
+            
+            function acceptDisclaimer() {
+                localStorage.setItem(disclaimerKey, 'true');
+                hideDisclaimer();
+            }
+            
+            function initDisclaimer() {
+                if (!hasAcceptedDisclaimer()) {
+                    showDisclaimer();
+                } else {
+                    if (disclaimerOverlay) {
+                        disclaimerOverlay.style.display = 'none';
+                    }
+                }
+                
+                if (acceptButton) {
+                    acceptButton.addEventListener('click', acceptDisclaimer);
+                }
+            }
+            
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initDisclaimer);
+            } else {
+                initDisclaimer();
+            }
+        })();
+    </script>
     <script>
         /*
          * STATIC FORMS SETUP (FREE - 500 emails/month):

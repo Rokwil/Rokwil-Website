@@ -2152,3 +2152,134 @@ body.dark-mode .news-link {
 body.dark-mode .stats {
     background: linear-gradient(135deg, var(--secondary-color) 0%, var(--primary-color) 100%);
 }
+
+/* ============================================
+   WIP DISCLAIMER MODAL
+   ============================================ */
+
+.wip-disclaimer-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-md);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.wip-disclaimer-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.wip-disclaimer-modal {
+    background: var(--bg-primary);
+    border-radius: 16px;
+    padding: var(--spacing-lg);
+    max-width: 600px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    border: 2px solid var(--secondary-color);
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+    position: relative;
+}
+
+.wip-disclaimer-overlay.show .wip-disclaimer-modal {
+    transform: scale(1);
+}
+
+.wip-disclaimer-header {
+    text-align: center;
+    margin-bottom: var(--spacing-md);
+}
+
+.wip-disclaimer-header h2 {
+    font-size: 2rem;
+    color: var(--secondary-color);
+    margin-bottom: var(--spacing-sm);
+    font-family: var(--font-heading);
+}
+
+.wip-disclaimer-icon {
+    font-size: 3rem;
+    margin-bottom: var(--spacing-sm);
+}
+
+.wip-disclaimer-content {
+    margin-bottom: var(--spacing-md);
+}
+
+.wip-disclaimer-content p {
+    line-height: 1.8;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-sm);
+    font-size: 1.05rem;
+}
+
+.wip-disclaimer-content ul {
+    list-style: none;
+    padding-left: 0;
+    margin: var(--spacing-sm) 0;
+}
+
+.wip-disclaimer-content li {
+    padding: var(--spacing-xs) 0;
+    padding-left: 1.5rem;
+    position: relative;
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+.wip-disclaimer-content li:before {
+    content: "⚠️";
+    position: absolute;
+    left: 0;
+}
+
+.wip-disclaimer-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    justify-content: center;
+    margin-top: var(--spacing-md);
+}
+
+.wip-disclaimer-btn {
+    padding: 0.875rem 2rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    font-family: var(--font-primary);
+}
+
+.wip-disclaimer-btn-accept {
+    background: var(--secondary-color);
+    color: var(--text-light);
+}
+
+.wip-disclaimer-btn-accept:hover {
+    background: var(--accent-color);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+body.dark-mode .wip-disclaimer-modal {
+    background: var(--bg-primary);
+    border-color: var(--secondary-color);
+}
+
+body.dark-mode .wip-disclaimer-content p,
+body.dark-mode .wip-disclaimer-content li {
+    color: var(--text-primary);
+}

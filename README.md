@@ -1,107 +1,63 @@
 # Rokwil Property Development Website
 
-A modern, responsive website for Rokwil Property Development built with ASP.NET Core MVC.
+A modern, responsive static website for Rokwil Property Development, deployed on GitHub Pages.
 
 ## Features
 
 - 🎨 Modern, sleek design with property development themes
 - 📱 Fully responsive (mobile, tablet, desktop)
 - ⚡ Smooth animations and transitions
+- 🌙 Dark mode support
 - 🏗️ Showcase of major projects (Keystone Park, Judges Court)
-- 📧 Contact form
-- 🎯 SEO-friendly structure
-
-## Getting Started
-
-### Prerequisites
-
-- .NET 8.0 SDK or later
-- A code editor (Visual Studio, VS Code, Rider, etc.)
-
-### Running the Application
-
-1. Open a terminal in the project directory
-2. Run the following command:
-
-```bash
-dotnet run
-```
-
-3. Open your browser and navigate to:
-   - HTTPS: `https://localhost:5001`
-   - HTTP: `http://localhost:5000`
-
-### Building the Application
-
-```bash
-dotnet build
-```
+- 📧 Contact form with Static Forms integration
+- 🎯 SEO-friendly structure with Open Graph and Twitter Card meta tags
+- 📹 Video showcase section
 
 ## Project Structure
 
 ```
-RokwilWebsite/
-├── Controllers/
-│   └── HomeController.cs
-├── Views/
-│   ├── Home/
-│   │   ├── Index.cshtml
-│   │   ├── About.cshtml
-│   │   ├── Projects.cshtml
-│   │   └── Contact.cshtml
-│   └── Shared/
-│       └── _Layout.cshtml
-├── wwwroot/
+Rokwil-Website/
+├── docs/
+│   ├── index.html          # Home page
+│   ├── about.html          # About page
+│   ├── projects.html       # Projects page
+│   ├── contact.html        # Contact page
 │   ├── css/
-│   │   └── site.css
-│   └── js/
-│       └── site.js
-├── Program.cs
-└── RokwilWebsite.csproj
+│   │   └── site.css        # Main stylesheet
+│   ├── js/
+│   │   └── site.js         # JavaScript functionality
+│   ├── images/
+│   │   └── image.webp      # Images
+│   └── videos/
+│       └── Rokwil.mp4      # Video content
+├── LICENSE
+└── README.md
 ```
 
 ## Technologies Used
 
-- ASP.NET Core 8.0 MVC
 - HTML5 & CSS3
-- JavaScript (Vanilla)
+- Vanilla JavaScript
 - Google Fonts (Inter & Playfair Display)
+- Bootstrap Icons
+- Static Forms (for contact form submissions)
 
 ## Pages
 
-- **Home**: Hero section, features, project showcase, and statistics
-- **About**: Company story and values
-- **Projects**: Detailed information about Keystone Park and Judges Court
-- **Contact**: Contact form and company information
+- **Home** (`index.html`): Hero section, video showcase, features, project showcase, testimonials, news section, and statistics
+- **About** (`about.html`): Company story and values
+- **Projects** (`projects.html`): Detailed information about Keystone Park and Judges Court
+- **Contact** (`contact.html`): Contact form with Static Forms integration and company information
 
 ## Customization
 
-The website uses CSS custom properties (variables) defined in `wwwroot/css/site.css` for easy theming. You can modify colors, fonts, and other design elements by updating the `:root` variables.
+The website uses CSS custom properties (variables) defined in `docs/css/site.css` for easy theming. You can modify colors, fonts, and other design elements by updating the `:root` variables.
 
-## GitHub Pages Deployment
+## Local Development
 
-This project has been set up for deployment to GitHub Pages. The static HTML version is located in the `docs/` folder.
+To test the website locally:
 
-### Setup Instructions
-
-1. **Enable GitHub Pages (IMPORTANT - Do this first!):**
-   - Go to your repository on GitHub
-   - Click on **Settings** → **Pages**
-   - Under **Source**, select **GitHub Actions** (NOT "Deploy from a branch")
-   - Click **Save**
-   - **Note:** The workflow includes automatic enablement, but manually enabling ensures it works correctly
-
-2. **Automatic Deployment:**
-   - The GitHub Actions workflow (`.github/workflows/deploy.yml`) will automatically deploy the site when you push to the `main` branch
-   - The first deployment may take a few minutes to set up
-
-3. **Access Your Site:**
-   - After deployment, your site will be available at: `https://[your-username].github.io/[repository-name]/`
-   - Deployment typically takes 1-2 minutes after pushing
-
-### Local Testing
-
-To test the static site locally before deploying:
+### Option 1: Simple HTTP Server (Python)
 
 ```bash
 # Navigate to docs folder
@@ -110,11 +66,49 @@ cd docs
 # Python 3
 python -m http.server 8000
 
-# Node.js
-npx serve docs
+# Then open http://localhost:8000 in your browser
 ```
 
-Then open `http://localhost:8000` in your browser.
+### Option 2: Node.js Serve
+
+```bash
+# From project root
+npx serve docs
+
+# Or navigate to docs folder first
+cd docs
+npx serve
+```
+
+### Option 3: VS Code Live Server
+
+If using Visual Studio Code, install the "Live Server" extension and right-click on any HTML file to open with Live Server.
+
+## GitHub Pages Deployment
+
+This website is deployed to GitHub Pages from the `docs/` folder.
+
+### Setup Instructions
+
+1. **Enable GitHub Pages:**
+   - Go to your repository on GitHub
+   - Click on **Settings** → **Pages**
+   - Under **Source**, select **Deploy from a branch**
+   - Select the `main` branch and `/docs` folder
+   - Click **Save**
+
+2. **Access Your Site:**
+   - After enabling, your site will be available at: `https://[your-username].github.io/[repository-name]/`
+   - It may take a few minutes for the site to be available initially
+
+### Contact Form Setup
+
+The contact form uses Static Forms (free service, 500 emails/month). The access key is already configured in `contact.html`. To update it:
+
+1. Go to https://www.staticforms.xyz/
+2. Enter your email address
+3. Get your access key
+4. Update the `accessKey` value in `docs/contact.html` (line 214)
 
 ## License
 

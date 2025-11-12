@@ -400,6 +400,11 @@
             const slides = document.querySelectorAll('.keystone-slide');
             if (slides.length === 0) return;
             
+            // Ensure first slide is visible on load
+            if (slides[0]) {
+                slides[0].classList.add('active');
+            }
+            
             let currentSlide = 0;
             
             function nextSlide() {

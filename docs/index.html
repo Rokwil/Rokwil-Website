@@ -321,18 +321,27 @@
         </div>
     </footer>
 
-    <!-- Cookie Consent Banner -->
-    <div class="cookie-consent-banner" id="cookieConsentBanner">
-        <div class="cookie-consent-content">
-            <p>
-                <i class="bi bi-info-circle me-2"></i>
-                We use cookies and local storage to enhance your experience, remember your preferences, and process contact form submissions. By continuing to use this site, you consent to our use of cookies. 
-                <a href="contact.html">Learn more</a>
-            </p>
-        </div>
-        <div class="cookie-consent-actions">
-            <button class="cookie-consent-btn cookie-consent-btn-decline" id="declineCookies">Decline</button>
-            <button class="cookie-consent-btn cookie-consent-btn-accept" id="acceptCookies">Accept</button>
+    <!-- Cookie Consent Modal -->
+    <div class="cookie-consent-overlay" id="cookieConsentOverlay">
+        <div class="cookie-consent-modal">
+            <div class="cookie-consent-header">
+                <div class="cookie-consent-icon"><i class="bi bi-shield-check"></i></div>
+                <h2>Cookie Consent</h2>
+            </div>
+            <div class="cookie-consent-content">
+                <p><strong>We use cookies and local storage to enhance your experience.</strong></p>
+                <p>This website uses:</p>
+                <ul>
+                    <li>Local storage to remember your theme preference (light/dark mode)</li>
+                    <li>Local storage to remember your WIP disclaimer acceptance</li>
+                    <li>Third-party services (Static Forms) to process contact form submissions</li>
+                </ul>
+                <p>By continuing to use this site, you consent to our use of cookies and local storage. <a href="contact.html">Learn more</a></p>
+            </div>
+            <div class="cookie-consent-actions">
+                <button class="cookie-consent-btn cookie-consent-btn-decline" id="declineCookies">Decline</button>
+                <button class="cookie-consent-btn cookie-consent-btn-accept" id="acceptCookies">Accept</button>
+            </div>
         </div>
     </div>
 
@@ -411,7 +420,7 @@
             'use strict';
             
             const consentKey = 'rokwil_cookie_consent';
-            const banner = document.getElementById('cookieConsentBanner');
+            const overlay = document.getElementById('cookieConsentOverlay');
             const acceptBtn = document.getElementById('acceptCookies');
             const declineBtn = document.getElementById('declineCookies');
             
@@ -419,20 +428,20 @@
                 return localStorage.getItem(consentKey) !== null;
             }
             
-            function showBanner() {
-                if (banner) {
+            function showModal() {
+                if (overlay) {
                     setTimeout(() => {
-                        banner.classList.add('show');
-                    }, 1000); // Show after 1 second delay
+                        overlay.classList.add('show');
+                    }, 100); // Show after brief delay
                 }
             }
             
-            function hideBanner() {
-                if (banner) {
-                    banner.classList.remove('show');
+            function hideModal() {
+                if (overlay) {
+                    overlay.classList.remove('show');
                     setTimeout(() => {
-                        if (banner.parentNode) {
-                            banner.style.display = 'none';
+                        if (overlay.parentNode) {
+                            overlay.style.display = 'none';
                         }
                     }, 300);
                 }
@@ -440,22 +449,22 @@
             
             function acceptCookies() {
                 localStorage.setItem(consentKey, 'accepted');
-                hideBanner();
+                hideModal();
             }
             
             function declineCookies() {
                 localStorage.setItem(consentKey, 'declined');
                 // Clear non-essential localStorage items
                 localStorage.removeItem('theme');
-                hideBanner();
+                hideModal();
             }
             
             function initConsent() {
                 if (!hasConsented()) {
-                    showBanner();
+                    showModal();
                 } else {
-                    if (banner) {
-                        banner.style.display = 'none';
+                    if (overlay) {
+                        overlay.style.display = 'none';
                     }
                 }
                 

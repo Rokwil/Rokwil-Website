@@ -2389,42 +2389,105 @@ body.dark-mode .wip-disclaimer-content li {
 }
 
 /* ============================================
-   COOKIE CONSENT BANNER
+   COOKIE CONSENT MODAL
    ============================================ */
 
-.cookie-consent-banner {
+.cookie-consent-overlay {
     position: fixed;
-    bottom: 0;
+    top: 0;
     left: 0;
-    right: 0;
-    background: var(--bg-primary);
-    border-top: 2px solid var(--border-color);
-    padding: var(--spacing-md) var(--spacing-lg);
-    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-    transform: translateY(100%);
-    transition: transform var(--transition-base);
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: var(--spacing-md);
-    flex-wrap: wrap;
+    justify-content: center;
+    z-index: 10000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--transition-base), visibility var(--transition-base);
+    padding: var(--spacing-md);
 }
 
-.cookie-consent-banner.show {
-    transform: translateY(0);
+.cookie-consent-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.cookie-consent-modal {
+    background: var(--bg-primary);
+    border-radius: 16px;
+    padding: var(--spacing-lg);
+    max-width: 600px;
+    width: 100%;
+    box-shadow: var(--shadow-xl);
+    border: 1px solid var(--border-color);
+    transform: scale(0.9);
+    transition: transform var(--transition-base);
+}
+
+.cookie-consent-overlay.show .cookie-consent-modal {
+    transform: scale(1);
+}
+
+.cookie-consent-header {
+    text-align: center;
+    margin-bottom: var(--spacing-md);
+}
+
+.cookie-consent-header h2 {
+    font-size: 2rem;
+    color: var(--secondary-color);
+    margin-bottom: var(--spacing-sm);
+    font-family: var(--font-heading);
+}
+
+.cookie-consent-icon {
+    font-size: 3rem;
+    margin-bottom: var(--spacing-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--secondary-color);
+}
+
+.cookie-consent-icon i {
+    display: inline-block;
 }
 
 .cookie-consent-content {
-    flex: 1;
-    min-width: 250px;
+    margin-bottom: var(--spacing-md);
 }
 
 .cookie-consent-content p {
-    margin: 0;
-    color: var(--text-secondary);
-    font-size: 0.95rem;
+    line-height: 1.8;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-sm);
+    font-size: 1.05rem;
+}
+
+.cookie-consent-content ul {
+    list-style: none;
+    padding-left: 0;
+    margin: var(--spacing-sm) 0;
+}
+
+.cookie-consent-content li {
+    padding: var(--spacing-xs) 0;
+    padding-left: 1.5rem;
+    position: relative;
+    color: var(--text-primary);
     line-height: 1.6;
+}
+
+.cookie-consent-content li:before {
+    font-family: "bootstrap-icons";
+    content: "\F4A5"; /* bi-info-circle Unicode */
+    position: absolute;
+    left: 0;
+    font-size: 1rem;
+    color: var(--secondary-color);
 }
 
 .cookie-consent-content a {
@@ -2439,18 +2502,18 @@ body.dark-mode .wip-disclaimer-content li {
 .cookie-consent-actions {
     display: flex;
     gap: var(--spacing-sm);
-    flex-shrink: 0;
+    justify-content: center;
+    margin-top: var(--spacing-md);
 }
 
 .cookie-consent-btn {
-    padding: 0.75rem 1.5rem;
+    padding: 0.875rem 2rem;
     border: none;
-    border-radius: 6px;
-    font-size: 0.95rem;
+    border-radius: 8px;
+    font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
     transition: all var(--transition-fast);
-    white-space: nowrap;
 }
 
 .cookie-consent-btn-accept {
@@ -2477,14 +2540,15 @@ body.dark-mode .wip-disclaimer-content li {
 }
 
 @media (max-width: 768px) {
-    .cookie-consent-banner {
-        flex-direction: column;
-        align-items: stretch;
+    .cookie-consent-modal {
         padding: var(--spacing-md);
     }
     
+    .cookie-consent-header h2 {
+        font-size: 1.5rem;
+    }
+    
     .cookie-consent-actions {
-        width: 100%;
         flex-direction: column;
     }
     
@@ -2493,15 +2557,12 @@ body.dark-mode .wip-disclaimer-content li {
     }
 }
 
-body.dark-mode .cookie-consent-banner {
-    background: var(--bg-secondary);
-    border-top-color: var(--border-color);
+body.dark-mode .cookie-consent-modal {
+    background: var(--bg-primary);
+    border-color: var(--secondary-color);
 }
 
-body.dark-mode .cookie-consent-content p {
-    color: var(--text-secondary);
-}
-
-body.dark-mode .cookie-consent-btn-decline {
-    border-color: var(--border-color);
+body.dark-mode .cookie-consent-content p,
+body.dark-mode .cookie-consent-content li {
+    color: var(--text-primary);
 }

@@ -873,6 +873,16 @@ section {
     position: relative;
 }
 
+/* Ensure single images show fully without being cut off - allow flexible height */
+.project-image:not(.project-slideshow) {
+    /* Increase min-height to accommodate taller images and add padding */
+    min-height: 600px;
+    height: auto;
+    padding: 2rem 0;
+    /* Ensure background shows complete image without cropping */
+    background-size: contain;
+}
+
 /* For images that should fill the space */
 .project-image.fill-image {
     background-size: cover;

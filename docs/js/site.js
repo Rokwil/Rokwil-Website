@@ -225,8 +225,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const darkModeToggle = document.getElementById('darkModeToggle');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
     
-    // Check for saved theme preference or default to system preference
-    const currentTheme = localStorage.getItem('theme') || (prefersDark.matches ? 'dark' : 'light');
+    // Check for saved theme preference or default to light mode
+    const currentTheme = localStorage.getItem('theme') || 'light';
     
     // Apply theme on page load
     if (currentTheme === 'dark') {

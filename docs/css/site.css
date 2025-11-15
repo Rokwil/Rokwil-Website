@@ -296,12 +296,22 @@ body.dark-mode .navbar {
     border-radius: 50%;
     background: var(--bg-primary);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    color: var(--text-primary);
+    z-index: 1;
+}
+
+.toggle-icon .sun i,
+.toggle-icon .moon i {
+    display: block;
+    line-height: 1;
 }
 
 .toggle-icon .sun {
     left: 3px;
     opacity: 1;
     transform: scale(1) rotate(0deg);
+    color: var(--text-primary);
+    background: var(--bg-primary);
 }
 
 .toggle-icon .moon {
@@ -323,11 +333,18 @@ body.dark-mode .dark-mode-toggle:hover {
 body.dark-mode .toggle-icon .sun {
     opacity: 0;
     transform: scale(0) rotate(90deg);
+    color: var(--text-primary);
 }
 
 body.dark-mode .toggle-icon .moon {
     opacity: 1;
     transform: scale(1) rotate(0deg);
+    color: #ffffff;
+    background: var(--bg-primary);
+}
+
+body.dark-mode .toggle-icon .moon i {
+    color: #ffffff;
 }
 
 /* ============================================

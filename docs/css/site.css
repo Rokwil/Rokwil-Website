@@ -866,9 +866,17 @@ section {
 .project-image {
     width: 100%;
     min-height: 500px;
-    background-size: cover;
+    background-size: contain;
     background-position: center;
+    background-repeat: no-repeat;
+    background-color: var(--bg-secondary);
     position: relative;
+}
+
+/* For images that should fill the space */
+.project-image.fill-image {
+    background-size: cover;
+    background-color: transparent;
 }
 
 .project-image img {

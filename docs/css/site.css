@@ -1031,6 +1031,67 @@ section {
     font-weight: 600;
 }
 
+/* Project Section Headings */
+.project-section-heading {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.3rem;
+    color: var(--text-primary);
+}
+
+.project-section-heading i {
+    color: var(--secondary-color);
+}
+
+/* Project Info Box */
+.project-info-box {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    border-left: 3px solid var(--secondary-color);
+}
+
+.project-info-box p:first-child {
+    margin: 0 0 1rem 0;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.project-info-box p:first-child i {
+    color: var(--secondary-color);
+}
+
+/* Button with icon inline flex */
+.btn-icon-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Project progress paragraph spacing */
+.project-progress {
+    margin-top: 1.5rem;
+}
+
+/* Footer link styling */
+.footer-link {
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+.footer-link:hover {
+    color: var(--secondary-color);
+    text-decoration: underline;
+}
+
 /* ============================================
    CONTACT PAGE
    ============================================ */

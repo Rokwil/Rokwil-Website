@@ -82,8 +82,8 @@
     </nav>
 
     <main>
-        <section class="page-hero" style="background-image: url('images/Projects/Keystone/The Boys.jpg') !important; background-size: cover !important; background-position: center !important; position: relative;">
-            <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, rgba(30, 58, 95, 0.85) 0%, rgba(45, 45, 45, 0.85) 100%); z-index: 1;"></div>
+        <section class="page-hero" style="background-image: url('images/Projects/Keystone/The Boys.jpg'); background-size: cover; background-position: center; position: relative;">
+            <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, rgba(30, 58, 95, 0.85) 0%, rgba(45, 45, 45, 0.85) 100%);"></div>
             <div class="page-hero-content" style="position: relative; z-index: 2;">
                 <h1>Our Projects</h1>
                 <p>Landmark developments shaping KwaZulu-Natal</p>
@@ -568,8 +568,9 @@
         (function() {
             'use strict';
             
-            const SLIDE_INTERVAL = 3000; // 3 seconds per slide
-            const TRANSITION_DURATION = 1500; // Match CSS transition duration
+            const SLIDE_INTERVAL = 4000; // 4 seconds per slide (viewing time)
+            const TRANSITION_DURATION = 1200; // Transition animation duration
+            const INITIAL_DELAY = 2000; // Show first slide for 2 seconds before starting
             
             /**
              * Initialize slideshow for a single project
@@ -654,8 +655,11 @@
                         clearInterval(slideInterval);
                     }
                     
-                    // Start auto-rotation
-                    slideInterval = setInterval(nextSlide, SLIDE_INTERVAL);
+                    // Start auto-rotation after initial delay, then continue at regular interval
+                    setTimeout(() => {
+                        nextSlide(); // First transition
+                        slideInterval = setInterval(nextSlide, SLIDE_INTERVAL);
+                    }, INITIAL_DELAY);
                 }
                 
                 /**

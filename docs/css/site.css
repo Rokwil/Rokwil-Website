@@ -941,7 +941,7 @@ section {
     background-position: center;
     background-repeat: no-repeat;
     opacity: 0;
-    transition: opacity 1.5s ease-in-out;
+    transition: opacity 1.2s ease-in-out;
     z-index: 0;
     /* Image quality improvements for photos */
     image-rendering: -webkit-optimize-contrast;

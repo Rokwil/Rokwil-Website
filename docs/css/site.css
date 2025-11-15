@@ -2264,9 +2264,12 @@ body.dark-mode .stats {
 }
 
 .wip-disclaimer-content li:before {
-    content: "⚠️";
+    font-family: "bootstrap-icons";
+    content: "\F33E"; /* bi-exclamation-triangle Unicode */
     position: absolute;
     left: 0;
+    font-size: 1rem;
+    color: var(--secondary-color);
 }
 
 .wip-disclaimer-actions {

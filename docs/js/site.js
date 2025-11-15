@@ -248,11 +248,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.style.transform = '';
             }, 150);
             
-            // Optional: Add confetti or particles on toggle (for extra fun!)
+            // Optional: Add icon effect on toggle (for extra fun!)
             if (isDark) {
-                createToggleEffect(this, '🌙');
+                createToggleEffect(this, 'bi-moon');
             } else {
-                createToggleEffect(this, '☀️');
+                createToggleEffect(this, 'bi-sun');
             }
         });
     }
@@ -269,14 +269,17 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Fun toggle effect function
-    function createToggleEffect(element, emoji) {
+    function createToggleEffect(element, iconClass) {
         const effect = document.createElement('div');
-        effect.textContent = emoji;
+        const icon = document.createElement('i');
+        icon.className = 'bi ' + iconClass;
+        effect.appendChild(icon);
         effect.style.position = 'fixed';
         effect.style.fontSize = '2rem';
         effect.style.pointerEvents = 'none';
         effect.style.zIndex = '9999';
         effect.style.transition = 'all 0.6s ease-out';
+        effect.style.color = 'var(--secondary-color)';
         
         const rect = element.getBoundingClientRect();
         effect.style.left = rect.left + rect.width / 2 + 'px';

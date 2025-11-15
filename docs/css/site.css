@@ -957,13 +957,7 @@ section {
 
 .project-slide.active {
     opacity: 1 !important;
-    z-index: 1;
-}
-
-/* First slide should be visible by default */
-.project-slide:first-child {
-    opacity: 1;
-    z-index: 1;
+    z-index: 2;
 }
 
 .project-badge {

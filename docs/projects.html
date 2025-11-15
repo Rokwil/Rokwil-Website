@@ -590,14 +590,22 @@
                  * Initialize slideshow state - show first slide
                  */
                 function initializeSlideshow() {
-                    slides.forEach((slide) => {
+                    slides.forEach((slide, index) => {
                         slide.classList.remove('active');
                         slide.setAttribute('aria-hidden', 'true');
+                        // Force opacity to 0 for all slides except the first
+                        if (index === 0) {
+                            slide.classList.add('active');
+                            slide.setAttribute('aria-hidden', 'false');
+                        } else {
+                            slide.style.opacity = '0';
+                            slide.style.zIndex = '0';
+                        }
                     });
                     
                     if (slides[0]) {
-                        slides[0].classList.add('active');
-                        slides[0].setAttribute('aria-hidden', 'false');
+                        slides[0].style.opacity = '1';
+                        slides[0].style.zIndex = '2';
                         currentSlide = 0;
                     }
                 }
@@ -613,6 +621,9 @@
                     if (slides[currentSlide]) {
                         slides[currentSlide].classList.remove('active');
                         slides[currentSlide].setAttribute('aria-hidden', 'true');
+                        // Force remove active state
+                        slides[currentSlide].style.opacity = '0';
+                        slides[currentSlide].style.zIndex = '0';
                     }
                     
                     // Move to next slide (loop back to start)
@@ -622,6 +633,9 @@
                     if (slides[currentSlide]) {
                         slides[currentSlide].classList.add('active');
                         slides[currentSlide].setAttribute('aria-hidden', 'false');
+                        // Force show active state
+                        slides[currentSlide].style.opacity = '1';
+                        slides[currentSlide].style.zIndex = '2';
                     }
                     
                     // Reset transition flag after animation completes

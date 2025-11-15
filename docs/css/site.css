@@ -878,8 +878,8 @@ section {
     display: block;
 }
 
-/* Keystone Park Slideshow */
-.keystone-slideshow {
+/* Project Slideshow (Generic for all projects with multiple images) */
+.project-slideshow {
     position: relative;
     width: 100%;
     height: 500px;
@@ -887,7 +887,7 @@ section {
     overflow: hidden;
 }
 
-.keystone-slide {
+.project-slide {
     position: absolute;
     top: 0;
     left: 0;
@@ -912,8 +912,14 @@ section {
     -moz-osx-font-smoothing: grayscale;
 }
 
-.keystone-slide.active {
+.project-slide.active {
     opacity: 1 !important;
+    z-index: 1;
+}
+
+/* First slide should be visible by default */
+.project-slide:first-child {
+    opacity: 1;
     z-index: 1;
 }
 

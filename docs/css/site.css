@@ -2398,7 +2398,7 @@ body.dark-mode .wip-disclaimer-content li {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.85);
     backdrop-filter: blur(4px);
     display: flex;
     align-items: center;
@@ -2408,6 +2408,7 @@ body.dark-mode .wip-disclaimer-content li {
     visibility: hidden;
     transition: opacity var(--transition-base), visibility var(--transition-base);
     padding: var(--spacing-md);
+    pointer-events: auto;
 }
 
 .cookie-consent-overlay.show {

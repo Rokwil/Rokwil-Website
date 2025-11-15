@@ -221,26 +221,12 @@ document.addEventListener('DOMContentLoaded', function() {
         statsObserver.observe(statsSection);
     }
 
-    // Cookie Consent Helper Functions
-    function hasCookieConsent() {
-        const consent = localStorage.getItem('rokwil_cookie_consent');
-        return consent === 'accepted';
-    }
-    
-    function canStoreData() {
-        return hasCookieConsent();
-    }
-    
     // Dark Mode Toggle - Fun & Interactive!
     const darkModeToggle = document.getElementById('darkModeToggle');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
     
     // Check for saved theme preference or default to light mode
-    // Only read from localStorage if consent is given
-    let currentTheme = 'light';
-    if (hasCookieConsent()) {
-        currentTheme = localStorage.getItem('theme') || 'light';
-    }
+    const currentTheme = localStorage.getItem('theme') || 'light';
     
     // Apply theme on page load
     if (currentTheme === 'dark') {
@@ -253,10 +239,8 @@ document.addEventListener('DOMContentLoaded', function() {
             document.body.classList.toggle('dark-mode');
             const isDark = document.body.classList.contains('dark-mode');
             
-            // Save preference only if consent is given
-            if (canStoreData()) {
-                localStorage.setItem('theme', isDark ? 'dark' : 'light');
-            }
+            // Always save preference
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
             
             // Add a fun bounce animation
             this.style.transform = 'scale(0.9)';

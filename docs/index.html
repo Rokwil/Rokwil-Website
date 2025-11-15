@@ -339,7 +339,7 @@
                 <p>By continuing to use this site, you consent to our use of cookies and local storage. <a href="contact.html">Learn more</a></p>
             </div>
             <div class="cookie-consent-actions">
-                <button class="cookie-consent-btn cookie-consent-btn-decline" id="declineCookies">Decline</button>
+                <button class="cookie-consent-btn cookie-consent-btn-decline" id="declineCookies">Leave Website</button>
                 <button class="cookie-consent-btn cookie-consent-btn-accept" id="acceptCookies">Accept</button>
             </div>
         </div>
@@ -383,18 +383,9 @@
                 }
             }
             
-            // Check if cookies are accepted before storing
-            function hasCookieConsent() {
-                const consent = localStorage.getItem('rokwil_cookie_consent');
-                return consent === 'accepted';
-            }
-            
-            // Accept disclaimer
+            // Accept disclaimer - always store
             function acceptDisclaimer() {
-                // Only store if cookie consent is given
-                if (hasCookieConsent()) {
-                    localStorage.setItem(disclaimerKey, 'true');
-                }
+                localStorage.setItem(disclaimerKey, 'true');
                 hideDisclaimer();
             }
             
@@ -462,17 +453,23 @@
             }
             
             function declineCookies() {
-                localStorage.setItem(consentKey, 'declined');
-                // Clear ALL stored data when cookies are declined
-                localStorage.removeItem('theme');
-                localStorage.removeItem('rokwil_wip_disclaimer_accepted');
-                // Keep only the consent decline itself
-                hideModal();
+                // Redirect to Google if user declines
+                window.location.href = 'https://www.google.com';
             }
             
             function initConsent() {
+                // Always show modal if not accepted - mandatory consent
                 if (!hasConsented()) {
                     showModal();
+                    // Prevent closing modal by clicking outside
+                    if (overlay) {
+                        overlay.addEventListener('click', function(e) {
+                            if (e.target === overlay) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                            }
+                        });
+                    }
                 } else {
                     if (overlay) {
                         overlay.style.display = 'none';

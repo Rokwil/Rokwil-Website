@@ -250,7 +250,17 @@
             const disclaimerOverlay = document.getElementById('wipDisclaimer');
             const acceptButton = document.getElementById('acceptDisclaimer');
             
+            // Check if cookies are accepted
+            function hasCookieConsent() {
+                const consent = localStorage.getItem('rokwil_cookie_consent');
+                return consent === 'accepted';
+            }
+            
+            // Check if user has already accepted (only if cookies are accepted)
             function hasAcceptedDisclaimer() {
+                if (!hasCookieConsent()) {
+                    return false; // Don't check if cookies declined
+                }
                 return localStorage.getItem(disclaimerKey) === 'true';
             }
             
@@ -273,8 +283,17 @@
                 }
             }
             
+            // Check if cookies are accepted before storing
+            function hasCookieConsentForDisclaimer() {
+                const consent = localStorage.getItem('rokwil_cookie_consent');
+                return consent === 'accepted';
+            }
+            
             function acceptDisclaimer() {
-                localStorage.setItem(disclaimerKey, 'true');
+                // Only store if cookie consent is given
+                if (hasCookieConsentForDisclaimer()) {
+                    localStorage.setItem(disclaimerKey, 'true');
+                }
                 hideDisclaimer();
             }
             
@@ -445,7 +464,10 @@
             
             function declineCookies() {
                 localStorage.setItem(consentKey, 'declined');
+                // Clear ALL stored data when cookies are declined
                 localStorage.removeItem('theme');
+                localStorage.removeItem('rokwil_wip_disclaimer_accepted');
+                // Keep only the consent decline itself
                 hideModal();
             }
             

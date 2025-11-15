@@ -383,9 +383,18 @@
                 }
             }
             
+            // Check if cookies are accepted before storing
+            function hasCookieConsent() {
+                const consent = localStorage.getItem('rokwil_cookie_consent');
+                return consent === 'accepted';
+            }
+            
             // Accept disclaimer
             function acceptDisclaimer() {
-                localStorage.setItem(disclaimerKey, 'true');
+                // Only store if cookie consent is given
+                if (hasCookieConsent()) {
+                    localStorage.setItem(disclaimerKey, 'true');
+                }
                 hideDisclaimer();
             }
             
@@ -454,8 +463,10 @@
             
             function declineCookies() {
                 localStorage.setItem(consentKey, 'declined');
-                // Clear non-essential localStorage items
+                // Clear ALL stored data when cookies are declined
                 localStorage.removeItem('theme');
+                localStorage.removeItem('rokwil_wip_disclaimer_accepted');
+                // Keep only the consent decline itself
                 hideModal();
             }
             

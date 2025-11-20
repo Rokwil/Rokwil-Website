@@ -300,5 +300,109 @@ document.addEventListener('DOMContentLoaded', function() {
             effect.remove();
         }, 600);
     }
+
+    // Load and apply admin content changes
+    (function() {
+        'use strict';
+        
+        const ADMIN_CONTENT_KEY = 'rokwil_admin_content';
+        
+        function getContent() {
+            const stored = localStorage.getItem(ADMIN_CONTENT_KEY);
+            if (stored) {
+                try {
+                    return JSON.parse(stored);
+                } catch (e) {
+                    return null;
+                }
+            }
+            return null;
+        }
+        
+        function applyContentChanges() {
+            const content = getContent();
+            if (!content) return;
+            
+            // Apply to home page
+            if (window.location.pathname.includes('index.html') || window.location.pathname.endsWith('/')) {
+                // Hero title
+                const heroTitle = document.querySelector('.hero-title');
+                if (heroTitle && content.homePage && content.homePage.heroTitle) {
+                    heroTitle.textContent = content.homePage.heroTitle;
+                }
+                
+                // Hero subtitle
+                const heroSubtitle = document.querySelector('.hero-subtitle');
+                if (heroSubtitle && content.homePage && content.homePage.heroSubtitle) {
+                    heroSubtitle.textContent = content.homePage.heroSubtitle;
+                }
+            }
+            
+            // Apply email and phone throughout the site
+            if (content.footer || content.contact) {
+                const email = (content.footer && content.footer.email) || (content.contact && content.contact.email);
+                const phone = (content.footer && content.footer.phone) || (content.contact && content.contact.phone);
+                
+                if (email) {
+                    const emailElements = document.querySelectorAll('a[href^="mailto:"]');
+                    emailElements.forEach(el => {
+                        el.setAttribute('href', `mailto:${email}`);
+                        // Only update text if it contains an email pattern
+                        if (el.textContent.includes('@')) {
+                            el.textContent = email;
+                        }
+                    });
+                }
+                
+                if (phone) {
+                    const phoneElements = document.querySelectorAll('a[href^="tel:"]');
+                    phoneElements.forEach(el => {
+                        el.setAttribute('href', `tel:${phone.replace(/\s/g, '')}`);
+                        // Only update text if it contains digits
+                        if (el.textContent.match(/\d/)) {
+                            el.textContent = phone;
+                        }
+                    });
+                }
+            }
+            
+            // Apply icons
+            if (content.icons) {
+                if (content.icons.emailIcon) {
+                    const emailIcons = document.querySelectorAll('.bi-envelope-fill, .bi-envelope, [class*="envelope"]');
+                    emailIcons.forEach(icon => {
+                        if (icon.classList.contains('bi')) {
+                            icon.className = `bi ${content.icons.emailIcon}`;
+                        }
+                    });
+                }
+                
+                if (content.icons.phoneIcon) {
+                    const phoneIcons = document.querySelectorAll('.bi-telephone-fill, .bi-telephone, [class*="telephone"]');
+                    phoneIcons.forEach(icon => {
+                        if (icon.classList.contains('bi')) {
+                            icon.className = `bi ${content.icons.phoneIcon}`;
+                        }
+                    });
+                }
+                
+                if (content.icons.locationIcon) {
+                    const locationIcons = document.querySelectorAll('.bi-geo-alt-fill, .bi-geo-alt, [class*="geo"]');
+                    locationIcons.forEach(icon => {
+                        if (icon.classList.contains('bi')) {
+                            icon.className = `bi ${content.icons.locationIcon}`;
+                        }
+                    });
+                }
+            }
+        }
+        
+        // Apply changes when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', applyContentChanges);
+        } else {
+            applyContentChanges();
+        }
+    })();
 });
 

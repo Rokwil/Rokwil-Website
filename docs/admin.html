@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Admin Panel - Rokwil Property Development" />
+    <title>Admin Panel - Rokwil Property Development</title>
+    <link rel="stylesheet" href="css/site.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        .admin-container {
+            min-height: 100vh;
+            background: var(--bg-secondary);
+            padding: var(--spacing-md);
+        }
+        .admin-header {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: var(--spacing-md);
+        }
+        .admin-header h1 {
+            margin: 0;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+        .admin-header-actions {
+            display: flex;
+            gap: var(--spacing-sm);
+            align-items: center;
+        }
+        .admin-section {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+        }
+        .admin-section h2 {
+            margin-bottom: var(--spacing-md);
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            font-size: 1.5rem;
+        }
+        .form-group {
+            margin-bottom: var(--spacing-md);
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: var(--spacing-xs);
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.875rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-family: var(--font-primary);
+            font-size: 1rem;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: all var(--transition-base);
+        }
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        .form-group small {
+            display: block;
+            margin-top: var(--spacing-xs);
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+        .btn-group {
+            display: flex;
+            gap: var(--spacing-sm);
+            flex-wrap: wrap;
+        }
+        .btn-save {
+            background: var(--secondary-color);
+            color: var(--text-light);
+            border: none;
+            padding: 0.875rem 2rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-base);
+        }
+        .btn-save:hover {
+            background: var(--accent-color);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        .btn-logout {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            padding: 0.875rem 2rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-base);
+        }
+        .btn-logout:hover {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-color: var(--text-secondary);
+        }
+        .btn-view-site {
+            background: var(--accent-color);
+            color: var(--text-light);
+            border: none;
+            padding: 0.875rem 2rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-view-site:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        .message {
+            padding: var(--spacing-sm);
+            border-radius: 6px;
+            margin-bottom: var(--spacing-md);
+            display: none;
+        }
+        .message.show {
+            display: block;
+        }
+        .message.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        .message.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+        .icon-preview {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            margin-top: var(--spacing-xs);
+        }
+        .icon-preview i {
+            font-size: 1.5rem;
+            color: var(--secondary-color);
+        }
+        .custom-content-item {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-md);
+        }
+        .custom-content-item h3 {
+            margin-bottom: var(--spacing-sm);
+            color: var(--text-primary);
+        }
+        .btn-remove {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all var(--transition-base);
+        }
+        .btn-remove:hover {
+            background: #b91c1c;
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-md);
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1>
+                <i class="bi bi-gear-fill"></i>
+                Admin Panel
+            </h1>
+            <div class="admin-header-actions">
+                <a href="index.html" target="_blank" class="btn-view-site">
+                    <i class="bi bi-box-arrow-up-right"></i>View Site
+                </a>
+                <button class="btn-logout" onclick="logout()">
+                    <i class="bi bi-box-arrow-right"></i>Logout
+                </button>
+            </div>
+        </div>
+
+        <div id="message" class="message"></div>
+
+        <!-- Home Page Content -->
+        <div class="admin-section">
+            <h2><i class="bi bi-house-fill"></i>Home Page Content</h2>
+            <form id="homePageForm">
+                <div class="form-group">
+                    <label for="heroTitle">Hero Title</label>
+                    <input type="text" id="heroTitle" name="heroTitle" placeholder="Enter hero title">
+                    <small>The main heading on the home page</small>
+                </div>
+                <div class="form-group">
+                    <label for="heroSubtitle">Hero Subtitle</label>
+                    <textarea id="heroSubtitle" name="heroSubtitle" placeholder="Enter hero subtitle"></textarea>
+                    <small>The subtitle text below the hero title</small>
+                </div>
+                <div class="btn-group">
+                    <button type="submit" class="btn-save">
+                        <i class="bi bi-save"></i>Save Home Page
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Contact Information -->
+        <div class="admin-section">
+            <h2><i class="bi bi-envelope-fill"></i>Contact Information</h2>
+            <form id="contactForm">
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" placeholder="Enter email address">
+                        <small>This will update email throughout the site</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" name="phone" placeholder="Enter phone number">
+                        <small>Format: 083 693 226</small>
+                    </div>
+                </div>
+                <div class="btn-group">
+                    <button type="submit" class="btn-save">
+                        <i class="bi bi-save"></i>Save Contact Info
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Icons -->
+        <div class="admin-section">
+            <h2><i class="bi bi-palette-fill"></i>Icons</h2>
+            <form id="iconsForm">
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="emailIcon">Email Icon</label>
+                        <input type="text" id="emailIcon" name="emailIcon" placeholder="bi-envelope-fill">
+                        <small>Bootstrap Icons class name (e.g., bi-envelope-fill)</small>
+                        <div class="icon-preview">
+                            Preview: <i id="emailIconPreview" class="bi bi-envelope-fill"></i>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="phoneIcon">Phone Icon</label>
+                        <input type="text" id="phoneIcon" name="phoneIcon" placeholder="bi-telephone-fill">
+                        <small>Bootstrap Icons class name (e.g., bi-telephone-fill)</small>
+                        <div class="icon-preview">
+                            Preview: <i id="phoneIconPreview" class="bi bi-telephone-fill"></i>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="locationIcon">Location Icon</label>
+                        <input type="text" id="locationIcon" name="locationIcon" placeholder="bi-geo-alt-fill">
+                        <small>Bootstrap Icons class name (e.g., bi-geo-alt-fill)</small>
+                        <div class="icon-preview">
+                            Preview: <i id="locationIconPreview" class="bi bi-geo-alt-fill"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="btn-group">
+                    <button type="submit" class="btn-save">
+                        <i class="bi bi-save"></i>Save Icons
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Add Custom Content -->
+        <div class="admin-section">
+            <h2><i class="bi bi-plus-circle-fill"></i>Add Custom Content</h2>
+            <form id="customContentForm">
+                <div class="form-group">
+                    <label for="customTitle">Title</label>
+                    <input type="text" id="customTitle" name="customTitle" placeholder="Enter title">
+                </div>
+                <div class="form-group">
+                    <label for="customContent">Content</label>
+                    <textarea id="customContent" name="customContent" placeholder="Enter content"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="customPage">Page</label>
+                    <select id="customPage" name="customPage">
+                        <option value="home">Home</option>
+                        <option value="about">About</option>
+                        <option value="projects">Projects</option>
+                        <option value="contact">Contact</option>
+                    </select>
+                </div>
+                <div class="btn-group">
+                    <button type="submit" class="btn-save">
+                        <i class="bi bi-plus-circle"></i>Add Content
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Custom Content List -->
+        <div class="admin-section" id="customContentList">
+            <h2><i class="bi bi-list-ul"></i>Custom Content</h2>
+            <div id="customContentItems"></div>
+        </div>
+    </div>
+
+    <script src="js/admin.js"></script>
+    <script>
+        // Check authentication on page load
+        if (!checkAuth()) {
+            // Redirect will happen in checkAuth
+        }
+
+        // Load current content
+        const content = getContent();
+        
+        // Populate forms
+        if (content.homePage) {
+            document.getElementById('heroTitle').value = content.homePage.heroTitle || '';
+            document.getElementById('heroSubtitle').value = content.homePage.heroSubtitle || '';
+        }
+        
+        if (content.footer) {
+            document.getElementById('email').value = content.footer.email || '';
+            document.getElementById('phone').value = content.footer.phone || '';
+        }
+        
+        if (content.icons) {
+            document.getElementById('emailIcon').value = content.icons.emailIcon || 'bi-envelope-fill';
+            document.getElementById('phoneIcon').value = content.icons.phoneIcon || 'bi-telephone-fill';
+            document.getElementById('locationIcon').value = content.icons.locationIcon || 'bi-geo-alt-fill';
+            updateIconPreviews();
+        }
+
+        // Update icon previews
+        function updateIconPreviews() {
+            const emailIcon = document.getElementById('emailIcon').value || 'bi-envelope-fill';
+            const phoneIcon = document.getElementById('phoneIcon').value || 'bi-telephone-fill';
+            const locationIcon = document.getElementById('locationIcon').value || 'bi-geo-alt-fill';
+            
+            document.getElementById('emailIconPreview').className = `bi ${emailIcon}`;
+            document.getElementById('phoneIconPreview').className = `bi ${phoneIcon}`;
+            document.getElementById('locationIconPreview').className = `bi ${locationIcon}`;
+        }
+
+        // Icon input listeners
+        document.getElementById('emailIcon').addEventListener('input', updateIconPreviews);
+        document.getElementById('phoneIcon').addEventListener('input', updateIconPreviews);
+        document.getElementById('locationIcon').addEventListener('input', updateIconPreviews);
+
+        // Show message
+        function showMessage(text, type = 'success') {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = text;
+            messageEl.className = `message ${type} show`;
+            setTimeout(() => {
+                messageEl.classList.remove('show');
+            }, 5000);
+        }
+
+        // Home page form
+        document.getElementById('homePageForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const content = getContent();
+            content.homePage = {
+                heroTitle: document.getElementById('heroTitle').value,
+                heroSubtitle: document.getElementById('heroSubtitle').value
+            };
+            if (saveContent(content)) {
+                showMessage('Home page content saved successfully!');
+            } else {
+                showMessage('Error saving content', 'error');
+            }
+        });
+
+        // Contact form
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const content = getContent();
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            
+            content.footer = content.footer || {};
+            content.contact = content.contact || {};
+            content.homePage = content.homePage || {};
+            
+            content.footer.email = email;
+            content.footer.phone = phone;
+            content.contact.email = email;
+            content.contact.phone = phone;
+            content.homePage.email = email;
+            content.homePage.phone = phone;
+            
+            if (saveContent(content)) {
+                showMessage('Contact information saved successfully!');
+            } else {
+                showMessage('Error saving content', 'error');
+            }
+        });
+
+        // Icons form
+        document.getElementById('iconsForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const content = getContent();
+            content.icons = {
+                emailIcon: document.getElementById('emailIcon').value || 'bi-envelope-fill',
+                phoneIcon: document.getElementById('phoneIcon').value || 'bi-telephone-fill',
+                locationIcon: document.getElementById('locationIcon').value || 'bi-geo-alt-fill'
+            };
+            if (saveContent(content)) {
+                showMessage('Icons saved successfully!');
+                updateIconPreviews();
+            } else {
+                showMessage('Error saving content', 'error');
+            }
+        });
+
+        // Custom content form
+        document.getElementById('customContentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const content = getContent();
+            if (!content.customContent) {
+                content.customContent = [];
+            }
+            
+            content.customContent.push({
+                id: Date.now().toString(),
+                title: document.getElementById('customTitle').value,
+                text: document.getElementById('customContent').value,
+                page: document.getElementById('customPage').value
+            });
+            
+            if (saveContent(content)) {
+                showMessage('Custom content added successfully!');
+                document.getElementById('customContentForm').reset();
+                loadCustomContent();
+            } else {
+                showMessage('Error saving content', 'error');
+            }
+        });
+
+        // Load and display custom content
+        function loadCustomContent() {
+            const content = getContent();
+            const container = document.getElementById('customContentItems');
+            container.innerHTML = '';
+            
+            if (!content.customContent || content.customContent.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-secondary);">No custom content added yet.</p>';
+                return;
+            }
+            
+            content.customContent.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'custom-content-item';
+                div.innerHTML = `
+                    <h3>${item.title}</h3>
+                    <p style="color: var(--text-secondary);">${item.text}</p>
+                    <p style="color: var(--text-secondary); font-size: 0.875rem;">Page: ${item.page}</p>
+                    <button class="btn-remove" onclick="removeCustomContent('${item.id}')">
+                        <i class="bi bi-trash"></i> Remove
+                    </button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // Remove custom content
+        function removeCustomContent(id) {
+            if (!confirm('Are you sure you want to remove this content?')) {
+                return;
+            }
+            
+            const content = getContent();
+            if (content.customContent) {
+                content.customContent = content.customContent.filter(item => item.id !== id);
+                if (saveContent(content)) {
+                    showMessage('Content removed successfully!');
+                    loadCustomContent();
+                } else {
+                    showMessage('Error removing content', 'error');
+                }
+            }
+        }
+
+        // Load custom content on page load
+        loadCustomContent();
+    </script>
+</body>
+</html>
+

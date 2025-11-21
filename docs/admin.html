@@ -11,34 +11,90 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        .admin-container {
+        body {
+            padding-top: 0;
+        }
+        .admin-wrapper {
             min-height: 100vh;
             background: var(--bg-secondary);
-            padding: var(--spacing-md);
+            padding-top: 80px;
         }
-        .admin-header {
+        .admin-navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
             background: var(--bg-primary);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: var(--spacing-lg);
-            margin-bottom: var(--spacing-lg);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 1000;
+            padding: var(--spacing-sm) 0;
+            box-shadow: var(--shadow-sm);
+        }
+        .admin-navbar-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-md);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
             gap: var(--spacing-md);
         }
-        .admin-header h1 {
+        .admin-navbar h1 {
             margin: 0;
+            font-size: 1.5rem;
             color: var(--text-primary);
             display: flex;
             align-items: center;
             gap: var(--spacing-sm);
         }
-        .admin-header-actions {
+        .admin-navbar-actions {
             display: flex;
             gap: var(--spacing-sm);
             align-items: center;
+        }
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--spacing-lg) var(--spacing-md);
+        }
+        .admin-tabs {
+            display: flex;
+            gap: var(--spacing-xs);
+            margin-bottom: var(--spacing-lg);
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: var(--spacing-xs);
+            flex-wrap: wrap;
+        }
+        .admin-tab {
+            padding: var(--spacing-sm) var(--spacing-md);
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            font-family: var(--font-primary);
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+        .admin-tab:hover {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+        .admin-tab.active {
+            background: var(--secondary-color);
+            color: var(--text-light);
+        }
+        .admin-tab-content {
+            display: none;
+        }
+        .admin-tab-content.active {
+            display: block;
         }
         .admin-section {
             background: var(--bg-primary);
@@ -55,6 +111,14 @@
             gap: var(--spacing-sm);
             font-size: 1.5rem;
         }
+        .admin-section h3 {
+            margin-top: var(--spacing-lg);
+            margin-bottom: var(--spacing-md);
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            padding-bottom: var(--spacing-xs);
+            border-bottom: 2px solid var(--border-color);
+        }
         .form-group {
             margin-bottom: var(--spacing-md);
         }
@@ -63,6 +127,7 @@
             margin-bottom: var(--spacing-xs);
             font-weight: 500;
             color: var(--text-primary);
+            font-size: 0.9rem;
         }
         .form-group input,
         .form-group textarea,
@@ -76,6 +141,16 @@
             background: var(--bg-primary);
             color: var(--text-primary);
             transition: all var(--transition-base);
+        }
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: var(--text-secondary);
+            opacity: 1;
+        }
+        body.dark-mode .form-group input::placeholder,
+        body.dark-mode .form-group textarea::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+            opacity: 1;
         }
         .form-group input:focus,
         .form-group textarea:focus,
@@ -94,10 +169,21 @@
             color: var(--text-secondary);
             font-size: 0.875rem;
         }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-md);
+        }
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-md);
+        }
         .btn-group {
             display: flex;
             gap: var(--spacing-sm);
             flex-wrap: wrap;
+            margin-top: var(--spacing-md);
         }
         .btn-save {
             background: var(--secondary-color);
@@ -109,6 +195,9 @@
             font-weight: 600;
             cursor: pointer;
             transition: all var(--transition-base);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
         }
         .btn-save:hover {
             background: var(--accent-color);
@@ -119,12 +208,15 @@
             background: transparent;
             color: var(--text-secondary);
             border: 1px solid var(--border-color);
-            padding: 0.875rem 2rem;
+            padding: 0.875rem 1.5rem;
             border-radius: 6px;
-            font-size: 1rem;
-            font-weight: 600;
+            font-size: 0.95rem;
+            font-weight: 500;
             cursor: pointer;
             transition: all var(--transition-base);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
         }
         .btn-logout:hover {
             background: var(--bg-secondary);
@@ -135,10 +227,10 @@
             background: var(--accent-color);
             color: var(--text-light);
             border: none;
-            padding: 0.875rem 2rem;
+            padding: 0.875rem 1.5rem;
             border-radius: 6px;
-            font-size: 1rem;
-            font-weight: 600;
+            font-size: 0.95rem;
+            font-weight: 500;
             cursor: pointer;
             transition: all var(--transition-base);
             text-decoration: none;
@@ -170,6 +262,41 @@
             color: #991b1b;
             border: 1px solid #fecaca;
         }
+        .editable-item {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-md);
+        }
+        .editable-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-sm);
+        }
+        .editable-item-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+        .image-preview {
+            max-width: 100%;
+            max-height: 150px;
+            width: auto;
+            height: auto;
+            border-radius: 4px;
+            margin-top: 0.5rem;
+            border: 1px solid var(--border-color);
+            display: block;
+        }
+        .video-preview {
+            max-width: 100%;
+            max-height: 150px;
+            border-radius: 6px;
+            margin-top: var(--spacing-sm);
+            border: 1px solid var(--border-color);
+        }
         .icon-preview {
             display: inline-flex;
             align-items: center;
@@ -182,17 +309,6 @@
         .icon-preview i {
             font-size: 1.5rem;
             color: var(--secondary-color);
-        }
-        .custom-content-item {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: var(--spacing-md);
-            margin-bottom: var(--spacing-md);
-        }
-        .custom-content-item h3 {
-            margin-bottom: var(--spacing-sm);
-            color: var(--text-primary);
         }
         .btn-remove {
             background: #dc2626;
@@ -207,334 +323,1442 @@
         .btn-remove:hover {
             background: #b91c1c;
         }
-        .grid-2 {
+        .btn-remove-small {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 32px;
+        }
+        .btn-remove-small:hover {
+            background: #b91c1c;
+        }
+        .btn-add-small {
+            background: var(--secondary-color);
+            color: var(--text-light);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-add-small:hover {
+            background: var(--accent-color);
+        }
+        .meta-item-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            background: var(--bg-secondary);
+            border-radius: 6px;
+        }
+        .meta-item-row .icon-picker-btn {
+            flex-shrink: 0;
+        }
+        .meta-item-row .meta-value-input {
+            flex: 1;
+            padding: 0.4rem 0.5rem !important;
+            line-height: 1.3;
+            height: auto !important;
+            min-height: auto !important;
+        }
+        .meta-items-list {
+            margin-bottom: 0.5rem;
+        }
+        .btn-add {
+            background: var(--secondary-color);
+            color: var(--text-light);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: var(--spacing-md);
+        }
+        .btn-add:hover {
+            background: var(--accent-color);
+        }
+        .collapsible {
+            cursor: pointer;
+            user-select: none;
+        }
+        .collapsible-section {
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .collapsible-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: var(--bg-secondary);
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+        .collapsible-header:hover {
+            background: var(--bg-tertiary);
+        }
+        .collapsible-header h3 {
+            margin: 0;
+            flex: 1;
+        }
+        .collapsible-header i {
+            transition: transform 0.3s ease;
+            color: var(--text-secondary);
+        }
+        .collapsible-section:has(.collapsible-content.expanded) .collapsible-header i {
+            transform: rotate(180deg);
+        }
+        .collapsible-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            padding: 0 1rem;
+        }
+        .collapsible-content.expanded {
+            max-height: 10000px;
+            padding: 1rem;
+        }
+        .file-upload-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+        .file-upload-input {
+            display: none;
+        }
+        .file-upload-label {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            padding: 0.875rem;
+            border: 2px dashed var(--border-color);
+            border-radius: 6px;
+            background: var(--bg-secondary);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            text-align: center;
+            justify-content: center;
+        }
+        .file-upload-label:hover {
+            border-color: var(--secondary-color);
+            background: var(--bg-primary);
+        }
+        .file-upload-label i {
+            font-size: 1.5rem;
+            color: var(--secondary-color);
+        }
+        .file-upload-info {
+            margin-top: var(--spacing-xs);
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+        .icon-picker-btn {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-left: var(--spacing-xs);
+            transition: all var(--transition-base);
+            color: var(--text-primary);
+        }
+        .icon-picker-btn:hover {
+            background: var(--secondary-color);
+            color: var(--text-light);
+            border-color: var(--secondary-color);
+        }
+        body.dark-mode .icon-picker-btn {
+            color: #ffffff;
+        }
+        body.dark-mode .icon-picker-btn:hover {
+            color: #ffffff;
+        }
+        .icon-picker-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-md);
+        }
+        .icon-picker-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+        }
+        .icon-picker-container {
+            position: relative;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            width: 100%;
+            max-width: 800px;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-xl);
+            z-index: 1;
+        }
+        .icon-picker-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-md);
+            border-bottom: 1px solid var(--border-color);
+        }
+        .icon-picker-header h3 {
+            margin: 0;
+            color: var(--text-primary);
+        }
+        .icon-picker-close {
+            background: transparent;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0.25rem;
+            transition: color var(--transition-base);
+        }
+        .icon-picker-close:hover {
+            color: var(--text-primary);
+        }
+        .icon-picker-search {
+            position: relative;
+            padding: var(--spacing-md);
+            border-bottom: 1px solid var(--border-color);
+        }
+        .icon-picker-search input {
+            width: 100%;
+            padding: 0.75rem 2.5rem 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+        .icon-picker-search i {
+            position: absolute;
+            right: calc(var(--spacing-md) + 1rem);
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+        .icon-picker-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: var(--spacing-md);
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: var(--spacing-sm);
+            padding: var(--spacing-md);
+            overflow-y: auto;
+            max-height: calc(80vh - 200px);
+        }
+        .icon-picker-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-md);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            background: var(--bg-primary);
+        }
+        .icon-picker-item:hover {
+            background: var(--bg-secondary);
+            border-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+        .icon-picker-item.selected {
+            background: var(--secondary-color);
+            border-color: var(--secondary-color);
+            color: var(--text-light);
+        }
+        .icon-picker-item i {
+            font-size: 1.5rem;
+            margin-bottom: var(--spacing-xs);
+        }
+        .icon-picker-item span {
+            font-size: 0.75rem;
+            text-align: center;
+            word-break: break-word;
+            color: inherit;
+        }
+        .btn-load-current {
+            background: var(--accent-color);
+            color: var(--text-light);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-left: var(--spacing-sm);
+        }
+        .btn-load-current:hover {
+            background: var(--secondary-color);
+        }
+        
+        .btn-select-file {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            padding: 0.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-base);
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            min-width: 40px;
+        }
+        .btn-select-file:hover {
+            background: var(--secondary-color);
+            color: var(--text-light);
+            border-color: var(--secondary-color);
+        }
+        body.dark-mode .btn-select-file {
+            color: #ffffff;
+        }
+        body.dark-mode .btn-select-file:hover {
+            color: #ffffff;
+        }
+        .file-selector-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-md);
+        }
+        .file-selector-modal.show {
+            display: flex;
+        }
+        .file-selector-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+        }
+        .file-selector-container {
+            position: relative;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            width: 100%;
+            max-width: 600px;
+            max-height: 70vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-xl);
+            z-index: 1;
+        }
+        .file-selector-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .file-selector-header h3 {
+            margin: 0;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        .file-selector-close {
+            background: transparent;
+            border: none;
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0.25rem;
+            transition: color var(--transition-base);
+            line-height: 1;
+        }
+        .file-selector-close:hover {
+            color: var(--text-primary);
+        }
+        .file-selector-search {
+            position: relative;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .file-selector-search input {
+            width: 100%;
+            padding: 0.5rem 2rem 0.5rem 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 0.875rem;
+        }
+        .file-selector-search i {
+            position: absolute;
+            right: 1.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+        .file-selector-list {
+            padding: 0.5rem;
+            overflow-y: auto;
+            max-height: calc(70vh - 120px);
+        }
+        .file-selector-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            background: var(--bg-primary);
+            margin-bottom: 0.5rem;
+        }
+        .file-selector-item:hover {
+            background: var(--bg-secondary);
+            border-color: var(--secondary-color);
+        }
+        .file-selector-item.selected {
+            background: var(--secondary-color);
+            border-color: var(--secondary-color);
+            color: var(--text-light);
+        }
+        .file-selector-thumbnail {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+        .file-selector-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .file-selector-name {
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 0.125rem;
+            word-break: break-word;
+            font-size: 0.875rem;
+        }
+        .file-selector-path {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            word-break: break-all;
+            line-height: 1.3;
+        }
+        .file-selector-item.selected .file-selector-name,
+        .file-selector-item.selected .file-selector-path {
+            color: var(--text-light);
+        }
+        body.dark-mode .file-selector-item.selected .file-selector-name,
+        body.dark-mode .file-selector-item.selected .file-selector-path {
+            color: #ffffff;
+        }
+        body.dark-mode .file-selector-header h3,
+        body.dark-mode .file-selector-search input,
+        body.dark-mode .file-selector-name,
+        body.dark-mode .file-selector-close {
+            color: #ffffff;
+        }
+        
+        /* Dark Mode - Ensure all text is white */
+        body.dark-mode .admin-wrapper,
+        body.dark-mode .admin-section,
+        body.dark-mode .admin-navbar,
+        body.dark-mode .admin-tabs {
+            color: #ffffff;
+        }
+        
+        body.dark-mode .admin-navbar h1,
+        body.dark-mode .admin-section h2,
+        body.dark-mode .admin-section h3,
+        body.dark-mode .admin-section h4,
+        body.dark-mode .admin-section h5,
+        body.dark-mode .admin-section h6 {
+            color: #ffffff;
+        }
+        
+        body.dark-mode .form-group label,
+        body.dark-mode .editable-item-title,
+        body.dark-mode .editable-item-header,
+        body.dark-mode .admin-tab {
+            color: #ffffff;
+        }
+        
+        body.dark-mode .form-group input,
+        body.dark-mode .form-group textarea,
+        body.dark-mode .form-group select {
+            color: #ffffff;
+            background: var(--bg-secondary);
+        }
+        
+        body.dark-mode .form-group input::placeholder,
+        body.dark-mode .form-group textarea::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        body.dark-mode .form-group small,
+        body.dark-mode .file-upload-info,
+        body.dark-mode .file-upload-label span {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        body.dark-mode .icon-preview {
+            color: #ffffff;
+        }
+        
+        body.dark-mode .icon-preview i {
+            color: #ffffff;
+        }
+        
+        body.dark-mode .icon-picker-item span {
+            color: #ffffff;
+        }
+        
+        body.dark-mode .message.success {
+            background: rgba(16, 185, 129, 0.2);
+            color: #ffffff;
+            border-color: rgba(16, 185, 129, 0.4);
+        }
+        
+        body.dark-mode .message.error {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ffffff;
+            border-color: rgba(239, 68, 68, 0.4);
+        }
+        
+        body.dark-mode .file-upload-label {
+            color: #ffffff;
+        }
+        
+        body.dark-mode .file-upload-label span {
+            color: #ffffff;
+        }
+        
+        body.dark-mode .icon-picker-header h3,
+        body.dark-mode .icon-picker-search input {
+            color: #ffffff;
+        }
+        
+        body.dark-mode .icon-picker-item {
+            color: #ffffff;
+        }
+        
+        body.dark-mode .icon-picker-item.selected {
+            color: #ffffff;
+        }
+        
+        body.dark-mode .admin-section p,
+        body.dark-mode .admin-section span:not(.btn),
+        body.dark-mode .admin-section div:not(.btn):not(.btn-group) {
+            color: #ffffff;
+        }
+        
+        body.dark-mode .admin-tab:not(.active) {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        body.dark-mode .btn-logout {
+            color: #ffffff;
+        }
+        
+        body.dark-mode .icon-picker-close {
+            color: #ffffff;
+        }
+        
+        body.dark-mode .icon-picker-search i {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        body.dark-mode .btn-collapse {
+            color: #ffffff;
+        }
+        
+        body.dark-mode .btn-collapse i {
+            color: #ffffff;
         }
     </style>
 </head>
 <body>
-    <div class="admin-container">
-        <div class="admin-header">
-            <h1>
-                <i class="bi bi-gear-fill"></i>
-                Admin Panel
-            </h1>
-            <div class="admin-header-actions">
-                <a href="index.html" target="_blank" class="btn-view-site">
-                    <i class="bi bi-box-arrow-up-right"></i>View Site
-                </a>
-                <button class="btn-logout" onclick="logout()">
-                    <i class="bi bi-box-arrow-right"></i>Logout
+    <div class="admin-wrapper">
+        <nav class="admin-navbar">
+            <div class="admin-navbar-content">
+                <h1>
+                    <i class="bi bi-gear-fill"></i>
+                    Admin Panel
+                </h1>
+                <div class="admin-navbar-actions">
+                    <button class="dark-mode-toggle" id="darkModeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+                        <span class="toggle-icon">
+                            <span class="sun"><i class="bi bi-sun"></i></span>
+                            <span class="moon"><i class="bi bi-moon"></i></span>
+                        </span>
+                    </button>
+                    <a href="index.html" target="_blank" class="btn-view-site">
+                        <i class="bi bi-box-arrow-up-right"></i>View Site
+                    </a>
+                    <button class="btn-logout" onclick="logout()">
+                        <i class="bi bi-box-arrow-right"></i>Logout
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <div class="admin-container">
+            <div id="message" class="message"></div>
+
+            <div class="admin-tabs">
+                <button class="admin-tab active" data-tab="home">
+                    <i class="bi bi-house-fill"></i>Home
+                </button>
+                <button class="admin-tab" data-tab="about">
+                    <i class="bi bi-info-circle-fill"></i>About
+                </button>
+                <button class="admin-tab" data-tab="projects">
+                    <i class="bi bi-building-fill"></i>Projects
+                </button>
+                <button class="admin-tab" data-tab="contact">
+                    <i class="bi bi-envelope-fill"></i>Contact
+                </button>
+                <button class="admin-tab" data-tab="global">
+                    <i class="bi bi-globe"></i>Global Settings
                 </button>
             </div>
-        </div>
 
-        <div id="message" class="message"></div>
+            <!-- Home Tab -->
+            <div class="admin-tab-content active" id="tab-home">
+                <div class="admin-section">
+                    <h2><i class="bi bi-house-fill"></i>Home Page</h2>
+                    
+                    <h3>Hero Section <button type="button" class="btn-load-current" onclick="loadCurrentContentFromPage('index')">
+                        <i class="bi bi-download"></i> Load Current
+                    </button></h3>
+                    <form id="homeHeroForm">
+                        <div class="form-group">
+                            <label for="heroTitle">Hero Title</label>
+                            <input type="text" id="heroTitle" name="heroTitle" placeholder="Enter hero title">
+                        </div>
+                        <div class="form-group">
+                            <label for="heroSubtitle">Hero Subtitle</label>
+                            <textarea id="heroSubtitle" name="heroSubtitle" placeholder="Enter hero subtitle"></textarea>
+                        </div>
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label for="heroImage1">Hero Background Image 1</label>
+                                <div style="display: flex; gap: 0.5rem; align-items: flex-start;">
+                                    <input type="text" id="heroImage1" name="heroImage1" placeholder="images/Projects/Keystone/Keystone 2.webp" style="flex: 1; padding: 0.4rem 0.5rem !important; line-height: 1.3; height: auto; min-height: auto;">
+                                    <button type="button" class="btn-select-file" onclick="openFileSelector('heroImage1', 'heroImage1Preview', 'image')" title="Select from existing files">
+                                        <i class="bi bi-folder"></i>
+                                    </button>
+                                </div>
+                                <div class="file-upload-wrapper" style="margin-top: 0.5rem;">
+                                    <input type="file" id="heroImage1Upload" class="file-upload-input" accept="image/*">
+                                    <label for="heroImage1Upload" class="file-upload-label">
+                                        <i class="bi bi-upload"></i>
+                                        <span>Upload Image</span>
+                                    </label>
+                                </div>
+                                <img id="heroImage1Preview" class="image-preview" style="display: none;">
+                                <small>Path to first background image or upload a new one</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="heroImage2">Hero Background Image 2</label>
+                                <div style="display: flex; gap: 0.5rem; align-items: flex-start;">
+                                    <input type="text" id="heroImage2" name="heroImage2" placeholder="images/Projects/Keystone/Pep MAIN.jpg" style="flex: 1; padding: 0.4rem 0.5rem !important; line-height: 1.3; height: auto; min-height: auto;">
+                                    <button type="button" class="btn-select-file" onclick="openFileSelector('heroImage2', 'heroImage2Preview', 'image')" title="Select from existing files">
+                                        <i class="bi bi-folder"></i>
+                                    </button>
+                                </div>
+                                <div class="file-upload-wrapper" style="margin-top: 0.5rem;">
+                                    <input type="file" id="heroImage2Upload" class="file-upload-input" accept="image/*">
+                                    <label for="heroImage2Upload" class="file-upload-label">
+                                        <i class="bi bi-upload"></i>
+                                        <span>Upload Image</span>
+                                    </label>
+                                </div>
+                                <img id="heroImage2Preview" class="image-preview" style="display: none;">
+                                <small>Path to second background image (optional) or upload a new one</small>
+                            </div>
+                        </div>
+                        <div class="btn-group">
+                            <button type="submit" class="btn-save">
+                                <i class="bi bi-save"></i>Save Hero Section
+                            </button>
+                        </div>
+                    </form>
 
-        <!-- Home Page Content -->
-        <div class="admin-section">
-            <h2><i class="bi bi-house-fill"></i>Home Page Content</h2>
-            <form id="homePageForm">
-                <div class="form-group">
-                    <label for="heroTitle">Hero Title</label>
-                    <input type="text" id="heroTitle" name="heroTitle" placeholder="Enter hero title">
-                    <small>The main heading on the home page</small>
-                </div>
-                <div class="form-group">
-                    <label for="heroSubtitle">Hero Subtitle</label>
-                    <textarea id="heroSubtitle" name="heroSubtitle" placeholder="Enter hero subtitle"></textarea>
-                    <small>The subtitle text below the hero title</small>
-                </div>
-                <div class="btn-group">
-                    <button type="submit" class="btn-save">
-                        <i class="bi bi-save"></i>Save Home Page
-                    </button>
-                </div>
-            </form>
-        </div>
+                    <h3>Video Section</h3>
+                    <form id="homeVideoForm">
+                        <div class="form-group">
+                            <label for="videoTitle">Video Section Title</label>
+                            <input type="text" id="videoTitle" name="videoTitle" placeholder="Experience Rokwil">
+                        </div>
+                        <div class="form-group">
+                            <label for="videoSubtitle">Video Section Subtitle</label>
+                            <input type="text" id="videoSubtitle" name="videoSubtitle" placeholder="See our developments in action">
+                        </div>
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label for="videoSrc">Video Source</label>
+                                <div style="display: flex; gap: 0.5rem; align-items: flex-start;">
+                                    <input type="text" id="videoSrc" name="videoSrc" placeholder="videos/Rokwil.mp4" style="flex: 1; padding: 0.4rem 0.5rem !important; line-height: 1.3; height: auto; min-height: auto;">
+                                    <button type="button" class="btn-select-file" onclick="openFileSelector('videoSrc', 'videoSrcPreview', 'video')" title="Select from existing files">
+                                        <i class="bi bi-folder"></i>
+                                    </button>
+                                </div>
+                                <div class="file-upload-wrapper" style="margin-top: 0.5rem;">
+                                    <input type="file" id="videoSrcUpload" class="file-upload-input" accept="video/*">
+                                    <label for="videoSrcUpload" class="file-upload-label">
+                                        <i class="bi bi-upload"></i>
+                                        <span>Upload Video</span>
+                                    </label>
+                                </div>
+                                <video id="videoSrcPreview" class="video-preview" controls style="display: none;"></video>
+                                <small>Path to video file or upload a new one</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="videoPoster">Video Poster Image</label>
+                                <div style="display: flex; gap: 0.5rem; align-items: flex-start;">
+                                    <input type="text" id="videoPoster" name="videoPoster" placeholder="images/Projects/Keystone/Keystone 2.webp" style="flex: 1; padding: 0.4rem 0.5rem !important; line-height: 1.3; height: auto; min-height: auto;">
+                                    <button type="button" class="btn-select-file" onclick="openFileSelector('videoPoster', 'videoPosterPreview', 'image')" title="Select from existing files">
+                                        <i class="bi bi-folder"></i>
+                                    </button>
+                                </div>
+                                <div class="file-upload-wrapper" style="margin-top: 0.5rem;">
+                                    <input type="file" id="videoPosterUpload" class="file-upload-input" accept="image/*">
+                                    <label for="videoPosterUpload" class="file-upload-label">
+                                        <i class="bi bi-upload"></i>
+                                        <span>Upload Image</span>
+                                    </label>
+                                </div>
+                                <img id="videoPosterPreview" class="image-preview" style="display: none;">
+                                <small>Thumbnail image for video or upload a new one</small>
+                            </div>
+                        </div>
+                        <div class="btn-group">
+                            <button type="submit" class="btn-save">
+                                <i class="bi bi-save"></i>Save Video Section
+                            </button>
+                        </div>
+                    </form>
 
-        <!-- Contact Information -->
-        <div class="admin-section">
-            <h2><i class="bi bi-envelope-fill"></i>Contact Information</h2>
-            <form id="contactForm">
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label for="email">Email Address</label>
-                        <input type="email" id="email" name="email" placeholder="Enter email address">
-                        <small>This will update email throughout the site</small>
-                    </div>
-                    <div class="form-group">
-                        <label for="phone">Phone Number</label>
-                        <input type="tel" id="phone" name="phone" placeholder="Enter phone number">
-                        <small>Format: 083 693 226</small>
-                    </div>
-                </div>
-                <div class="btn-group">
-                    <button type="submit" class="btn-save">
-                        <i class="bi bi-save"></i>Save Contact Info
-                    </button>
-                </div>
-            </form>
-        </div>
+                    <h3>Features Section</h3>
+                    <form id="homeFeaturesForm">
+                        <div class="form-group">
+                            <label for="featuresTitle">Features Title</label>
+                            <input type="text" id="featuresTitle" name="featuresTitle" placeholder="What We Do">
+                        </div>
+                        <div class="form-group">
+                            <label for="featuresSubtitle">Features Subtitle</label>
+                            <input type="text" id="featuresSubtitle" name="featuresSubtitle" placeholder="Transforming landscapes through strategic property development">
+                        </div>
+                        <div id="featuresList"></div>
+                        <button type="button" class="btn-add" onclick="addFeature()">
+                            <i class="bi bi-plus-circle"></i>Add Feature
+                        </button>
+                        <div class="btn-group">
+                            <button type="submit" class="btn-save">
+                                <i class="bi bi-save"></i>Save Features
+                            </button>
+                        </div>
+                    </form>
 
-        <!-- Icons -->
-        <div class="admin-section">
-            <h2><i class="bi bi-palette-fill"></i>Icons</h2>
-            <form id="iconsForm">
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label for="emailIcon">Email Icon</label>
-                        <input type="text" id="emailIcon" name="emailIcon" placeholder="bi-envelope-fill">
-                        <small>Bootstrap Icons class name (e.g., bi-envelope-fill)</small>
-                        <div class="icon-preview">
-                            Preview: <i id="emailIconPreview" class="bi bi-envelope-fill"></i>
+                    <h3>Showcase Section</h3>
+                    <form id="homeShowcaseForm">
+                        <div class="form-group">
+                            <label for="showcaseTitle">Showcase Title</label>
+                            <input type="text" id="showcaseTitle" name="showcaseTitle" placeholder="Featured Projects">
+                        </div>
+                        <div class="form-group">
+                            <label for="showcaseSubtitle">Showcase Subtitle</label>
+                            <input type="text" id="showcaseSubtitle" name="showcaseSubtitle" placeholder="Discover our landmark developments">
+                        </div>
+                        <div id="showcaseList"></div>
+                        <button type="button" class="btn-add" onclick="addShowcase()">
+                            <i class="bi bi-plus-circle"></i>Add Showcase Item
+                        </button>
+                        <div class="btn-group">
+                            <button type="submit" class="btn-save">
+                                <i class="bi bi-save"></i>Save Showcase
+                            </button>
+                        </div>
+                    </form>
+
+                    <h3>Testimonials Section</h3>
+                    <form id="homeTestimonialsForm">
+                        <div class="form-group">
+                            <label for="testimonialsTitle">Testimonials Title</label>
+                            <input type="text" id="testimonialsTitle" name="testimonialsTitle" placeholder="What Our Partners Say">
+                        </div>
+                        <div class="form-group">
+                            <label for="testimonialsSubtitle">Testimonials Subtitle</label>
+                            <input type="text" id="testimonialsSubtitle" name="testimonialsSubtitle" placeholder="Trusted by leading businesses across South Africa">
+                        </div>
+                        <div id="testimonialsList"></div>
+                        <button type="button" class="btn-add" onclick="addTestimonial()">
+                            <i class="bi bi-plus-circle"></i>Add Testimonial
+                        </button>
+                        <div class="btn-group">
+                            <button type="submit" class="btn-save">
+                                <i class="bi bi-save"></i>Save Testimonials
+                            </button>
+                        </div>
+                    </form>
+
+                    <h3>News Section</h3>
+                    <form id="homeNewsForm">
+                        <div class="form-group">
+                            <label for="newsTitle">News Title</label>
+                            <input type="text" id="newsTitle" name="newsTitle" placeholder="Latest News & Updates">
+                        </div>
+                        <div class="form-group">
+                            <label for="newsSubtitle">News Subtitle</label>
+                            <input type="text" id="newsSubtitle" name="newsSubtitle" placeholder="Stay informed about our developments and milestones">
+                        </div>
+                        <div id="newsList"></div>
+                        <button type="button" class="btn-add" onclick="addNews()">
+                            <i class="bi bi-plus-circle"></i>Add News Item
+                        </button>
+                        <div class="btn-group">
+                            <button type="submit" class="btn-save">
+                                <i class="bi bi-save"></i>Save News
+                            </button>
+                        </div>
+                    </form>
+
+                    <h3>Stats Section</h3>
+                    <form id="homeStatsForm">
+                        <div id="statsList"></div>
+                        <button type="button" class="btn-add" onclick="addStat()">
+                            <i class="bi bi-plus-circle"></i>Add Stat
+                        </button>
+                        <div class="btn-group">
+                            <button type="submit" class="btn-save">
+                                <i class="bi bi-save"></i>Save Stats
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- About Tab -->
+            <div class="admin-tab-content" id="tab-about">
+                <div class="admin-section">
+                    <h2><i class="bi bi-info-circle-fill"></i>About Page</h2>
+                    
+                    <div class="collapsible-section collapsible">
+                        <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                            <h3>Page Hero <button type="button" class="btn-load-current" onclick="event.stopPropagation(); loadCurrentContentFromPage('about')">
+                                <i class="bi bi-download"></i> Load Current
+                            </button></h3>
+                            <i class="bi bi-chevron-down"></i>
+                        </div>
+                        <div class="collapsible-content expanded">
+                            <form id="aboutHeroForm">
+                        <div class="form-group">
+                            <label for="aboutHeroTitle">Hero Title</label>
+                            <input type="text" id="aboutHeroTitle" name="aboutHeroTitle" placeholder="About Rokwil">
+                        </div>
+                        <div class="form-group">
+                            <label for="aboutHeroSubtitle">Hero Subtitle</label>
+                            <input type="text" id="aboutHeroSubtitle" name="aboutHeroSubtitle" placeholder="Pioneering property development in KwaZulu-Natal">
+                        </div>
+                        <div class="form-group">
+                            <label for="aboutHeroImage">Hero Background Image</label>
+                            <div style="display: flex; gap: 0.5rem; align-items: flex-start;">
+                                <input type="text" id="aboutHeroImage" name="aboutHeroImage" placeholder="images/Projects/Keystone/The Boys.jpg" style="flex: 1; padding: 0.4rem 0.5rem !important; line-height: 1.3; height: auto; min-height: auto;">
+                                <button type="button" class="btn-select-file" onclick="openFileSelector('aboutHeroImage', 'aboutHeroImagePreview', 'image')" title="Select from existing files">
+                                    <i class="bi bi-folder"></i>
+                                </button>
+                            </div>
+                            <div class="file-upload-wrapper" style="margin-top: 0.5rem;">
+                                <input type="file" id="aboutHeroImageUpload" class="file-upload-input" accept="image/*">
+                                <label for="aboutHeroImageUpload" class="file-upload-label">
+                                    <i class="bi bi-upload"></i>
+                                    <span>Upload Image</span>
+                                </label>
+                            </div>
+                            <img id="aboutHeroImagePreview" class="image-preview" style="display: none;">
+                        </div>
+                        <div class="btn-group">
+                            <button type="submit" class="btn-save">
+                                <i class="bi bi-save"></i>Save Hero
+                            </button>
+                        </div>
+                            </form>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label for="phoneIcon">Phone Icon</label>
-                        <input type="text" id="phoneIcon" name="phoneIcon" placeholder="bi-telephone-fill">
-                        <small>Bootstrap Icons class name (e.g., bi-telephone-fill)</small>
-                        <div class="icon-preview">
-                            Preview: <i id="phoneIconPreview" class="bi bi-telephone-fill"></i>
+
+                    <div class="collapsible-section collapsible">
+                        <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                            <h3>Stats Banner <button type="button" class="btn-load-current" onclick="event.stopPropagation(); loadCurrentContentFromPage('about')">
+                                <i class="bi bi-download"></i> Load Current
+                            </button></h3>
+                            <i class="bi bi-chevron-down"></i>
+                        </div>
+                        <div class="collapsible-content">
+                            <form id="aboutStatsForm">
+                        <div id="aboutStatsList"></div>
+                        <button type="button" class="btn-add" onclick="addAboutStat()">
+                            <i class="bi bi-plus-circle"></i>Add Stat
+                        </button>
+                        <div class="btn-group">
+                            <button type="submit" class="btn-save">
+                                <i class="bi bi-save"></i>Save Stats
+                            </button>
+                        </div>
+                            </form>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label for="locationIcon">Location Icon</label>
-                        <input type="text" id="locationIcon" name="locationIcon" placeholder="bi-geo-alt-fill">
-                        <small>Bootstrap Icons class name (e.g., bi-geo-alt-fill)</small>
-                        <div class="icon-preview">
-                            Preview: <i id="locationIconPreview" class="bi bi-geo-alt-fill"></i>
+
+                    <div class="collapsible-section collapsible">
+                        <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                            <h3>About Content</h3>
+                            <i class="bi bi-chevron-down"></i>
+                        </div>
+                        <div class="collapsible-content">
+                            <form id="aboutContentForm">
+                        <div class="form-group">
+                            <label for="aboutStoryBadge">Story Badge Text</label>
+                            <input type="text" id="aboutStoryBadge" name="aboutStoryBadge" placeholder="Our Story">
+                        </div>
+                        <div class="form-group">
+                            <label for="aboutStoryHeading">Story Heading</label>
+                            <input type="text" id="aboutStoryHeading" name="aboutStoryHeading" placeholder="Building the Future of KZN">
+                        </div>
+                        <div class="form-group">
+                            <label for="aboutStory">Story Paragraphs (one per line)</label>
+                            <textarea id="aboutStory" name="aboutStory" rows="8" placeholder="First paragraph...&#10;Second paragraph...&#10;Third paragraph..."></textarea>
+                            <small>Each paragraph on a new line</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="aboutImage">About Image</label>
+                            <div style="display: flex; gap: 0.5rem; align-items: flex-start;">
+                                <input type="text" id="aboutImage" name="aboutImage" placeholder="images/Projects/Keystone/Keystone 2.webp" style="flex: 1; padding: 0.4rem 0.5rem !important; line-height: 1.3; height: auto; min-height: auto;">
+                                <button type="button" class="btn-select-file" onclick="openFileSelector('aboutImage', 'aboutImagePreview', 'image')" title="Select from existing files">
+                                    <i class="bi bi-folder"></i>
+                                </button>
+                            </div>
+                            <div class="file-upload-wrapper" style="margin-top: 0.5rem;">
+                                <input type="file" id="aboutImageUpload" class="file-upload-input" accept="image/*">
+                                <label for="aboutImageUpload" class="file-upload-label">
+                                    <i class="bi bi-upload"></i>
+                                    <span>Upload Image</span>
+                                </label>
+                            </div>
+                            <img id="aboutImagePreview" class="image-preview" style="display: none;">
+                        </div>
+                        <div class="btn-group">
+                            <button type="submit" class="btn-save">
+                                <i class="bi bi-save"></i>Save About Content
+                            </button>
+                        </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="collapsible-section collapsible">
+                        <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                            <h3>Mission Section</h3>
+                            <i class="bi bi-chevron-down"></i>
+                        </div>
+                        <div class="collapsible-content">
+                            <form id="aboutMissionForm">
+                        <div class="form-group">
+                            <label for="missionIcon">Mission Icon Class</label>
+                            <input type="text" id="missionIcon" name="missionIcon" placeholder="bi-bullseye">
+                            <button type="button" class="icon-picker-btn" onclick="createIconPicker('missionIcon', document.getElementById('missionIcon').value)">
+                                <i class="bi bi-palette"></i> Pick Icon
+                            </button>
+                        </div>
+                        <div class="form-group">
+                            <label for="missionTitle">Mission Title</label>
+                            <input type="text" id="missionTitle" name="missionTitle" placeholder="Our Mission">
+                        </div>
+                        <div class="form-group">
+                            <label for="missionText">Mission Text</label>
+                            <textarea id="missionText" name="missionText" rows="3" placeholder="To create world-class property developments..."></textarea>
+                        </div>
+                        <div class="btn-group">
+                            <button type="submit" class="btn-save">
+                                <i class="bi bi-save"></i>Save Mission
+                            </button>
+                        </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="collapsible-section collapsible">
+                        <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                            <h3>Timeline Section</h3>
+                            <i class="bi bi-chevron-down"></i>
+                        </div>
+                        <div class="collapsible-content">
+                            <form id="aboutTimelineHeaderForm">
+                        <div class="form-group">
+                            <label for="timelineTitle">Timeline Title</label>
+                            <input type="text" id="timelineTitle" name="timelineTitle" placeholder="Our Journey">
+                        </div>
+                        <div class="form-group">
+                            <label for="timelineSubtitle">Timeline Subtitle</label>
+                            <input type="text" id="timelineSubtitle" name="timelineSubtitle" placeholder="Key milestones in our growth">
+                        </div>
+                        <div class="btn-group">
+                            <button type="submit" class="btn-save">
+                                <i class="bi bi-save"></i>Save Timeline Header
+                            </button>
+                        </div>
+                    </form>
+                    <div id="timelineList"></div>
+                    <button type="button" class="btn-add" onclick="addTimelineItem()">
+                        <i class="bi bi-plus-circle"></i>Add Timeline Item
+                    </button>
+                            <div class="btn-group">
+                                <button type="button" class="btn-save" onclick="saveTimeline()">
+                                    <i class="bi bi-save"></i>Save Timeline
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="collapsible-section collapsible">
+                        <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                            <h3>Values Section</h3>
+                            <i class="bi bi-chevron-down"></i>
+                        </div>
+                        <div class="collapsible-content">
+                            <form id="aboutValuesForm">
+                        <div class="form-group">
+                            <label for="valuesTitle">Values Title</label>
+                            <input type="text" id="valuesTitle" name="valuesTitle" placeholder="Our Values">
+                        </div>
+                        <div id="valuesList"></div>
+                        <button type="button" class="btn-add" onclick="addValue()">
+                            <i class="bi bi-plus-circle"></i>Add Value
+                        </button>
+                        <div class="btn-group">
+                            <button type="submit" class="btn-save">
+                                <i class="bi bi-save"></i>Save Values
+                            </button>
+                        </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="collapsible-section collapsible">
+                        <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                            <h3>Leadership Section</h3>
+                            <i class="bi bi-chevron-down"></i>
+                        </div>
+                        <div class="collapsible-content">
+                            <form id="aboutLeadershipForm">
+                        <div class="form-group">
+                            <label for="leadershipTitle">Leadership Title</label>
+                            <input type="text" id="leadershipTitle" name="leadershipTitle" placeholder="Leadership">
+                        </div>
+                        <div class="form-group">
+                            <label for="leadershipSubtitle">Leadership Subtitle</label>
+                            <input type="text" id="leadershipSubtitle" name="leadershipSubtitle" placeholder="Visionary leadership driving transformation">
+                        </div>
+                        <div class="form-group">
+                            <label for="leaderInitials">Leader Initials</label>
+                            <input type="text" id="leaderInitials" name="leaderInitials" placeholder="RS">
+                        </div>
+                        <div class="form-group">
+                            <label for="leaderName">Leader Name</label>
+                            <input type="text" id="leaderName" name="leaderName" placeholder="Rod Stainton">
+                        </div>
+                        <div class="form-group">
+                            <label for="leaderTitle">Leader Title</label>
+                            <input type="text" id="leaderTitle" name="leaderTitle" placeholder="Director & Founder">
+                        </div>
+                        <div class="form-group">
+                            <label for="leaderTags">Leader Tags (comma-separated)</label>
+                            <input type="text" id="leaderTags" name="leaderTags" placeholder="Property Development, KZN Focus, Industry Leader">
+                            <small>Comma-separated tags displayed as badges</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="leaderDescription">Leader Description</label>
+                            <textarea id="leaderDescription" name="leaderDescription" rows="4" placeholder="Chartered accountant with over 20 years' experience..."></textarea>
+                        </div>
+                        <div class="btn-group">
+                            <button type="submit" class="btn-save">
+                                <i class="bi bi-save"></i>Save Leadership
+                            </button>
+                        </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="collapsible-section collapsible">
+                        <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                            <h3>CSR Section</h3>
+                            <i class="bi bi-chevron-down"></i>
+                        </div>
+                        <div class="collapsible-content">
+                            <form id="aboutCSRForm">
+                        <div class="form-group">
+                            <label for="csrTitle">CSR Title</label>
+                            <input type="text" id="csrTitle" name="csrTitle" placeholder="Corporate Social Responsibility">
+                        </div>
+                        <div class="form-group">
+                            <label for="csrSubtitle">CSR Subtitle</label>
+                            <input type="text" id="csrSubtitle" name="csrSubtitle" placeholder="Making a positive impact in our communities">
+                        </div>
+                        <div id="csrList"></div>
+                        <button type="button" class="btn-add" onclick="addCSRItem()">
+                            <i class="bi bi-plus-circle"></i>Add CSR Item
+                        </button>
+                        <div class="btn-group">
+                            <button type="submit" class="btn-save">
+                                <i class="bi bi-save"></i>Save CSR
+                            </button>
+                        </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="collapsible-section collapsible">
+                        <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                            <h3>Recognition Section</h3>
+                            <i class="bi bi-chevron-down"></i>
+                        </div>
+                        <div class="collapsible-content">
+                            <form id="aboutRecognitionForm">
+                        <div class="form-group">
+                            <label for="recognitionTitle">Recognition Title</label>
+                            <input type="text" id="recognitionTitle" name="recognitionTitle" placeholder="Recognition & Partnerships">
+                        </div>
+                        <div class="form-group">
+                            <label for="recognitionSubtitle">Recognition Subtitle</label>
+                            <input type="text" id="recognitionSubtitle" name="recognitionSubtitle" placeholder="Trusted by industry leaders and recognised by authorities">
+                        </div>
+                        <div id="recognitionList"></div>
+                        <button type="button" class="btn-add" onclick="addRecognitionItem()">
+                            <i class="bi bi-plus-circle"></i>Add Recognition Item
+                        </button>
+                        <div class="btn-group">
+                            <button type="submit" class="btn-save">
+                                <i class="bi bi-save"></i>Save Recognition
+                            </button>
+                            </div>
+                            </form>
                         </div>
                     </div>
                 </div>
-                <div class="btn-group">
-                    <button type="submit" class="btn-save">
-                        <i class="bi bi-save"></i>Save Icons
-                    </button>
-                </div>
-            </form>
-        </div>
+            </div>
 
-        <!-- Add Custom Content -->
-        <div class="admin-section">
-            <h2><i class="bi bi-plus-circle-fill"></i>Add Custom Content</h2>
-            <form id="customContentForm">
-                <div class="form-group">
-                    <label for="customTitle">Title</label>
-                    <input type="text" id="customTitle" name="customTitle" placeholder="Enter title">
-                </div>
-                <div class="form-group">
-                    <label for="customContent">Content</label>
-                    <textarea id="customContent" name="customContent" placeholder="Enter content"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="customPage">Page</label>
-                    <select id="customPage" name="customPage">
-                        <option value="home">Home</option>
-                        <option value="about">About</option>
-                        <option value="projects">Projects</option>
-                        <option value="contact">Contact</option>
-                    </select>
-                </div>
-                <div class="btn-group">
-                    <button type="submit" class="btn-save">
-                        <i class="bi bi-plus-circle"></i>Add Content
-                    </button>
-                </div>
-            </form>
-        </div>
+            <!-- Projects Tab -->
+            <div class="admin-tab-content" id="tab-projects">
+                <div class="admin-section">
+                    <h2><i class="bi bi-building-fill"></i>Projects Page</h2>
+                    
+                    <h3>Page Hero</h3>
+                    <form id="projectsHeroForm">
+                        <div class="form-group">
+                            <label for="projectsHeroTitle">Hero Title</label>
+                            <input type="text" id="projectsHeroTitle" name="projectsHeroTitle" placeholder="Our Projects">
+                        </div>
+                        <div class="form-group">
+                            <label for="projectsHeroSubtitle">Hero Subtitle</label>
+                            <input type="text" id="projectsHeroSubtitle" name="projectsHeroSubtitle" placeholder="Landmark developments shaping KwaZulu-Natal">
+                        </div>
+                        <div class="form-group">
+                            <label for="projectsHeroImage">Hero Background Image</label>
+                            <div style="display: flex; gap: 0.5rem; align-items: flex-start;">
+                                <input type="text" id="projectsHeroImage" name="projectsHeroImage" placeholder="images/Projects/Keystone/The Boys.jpg" style="flex: 1; padding: 0.4rem 0.5rem !important; line-height: 1.3; height: auto; min-height: auto;">
+                                <button type="button" class="btn-select-file" onclick="openFileSelector('projectsHeroImage', 'projectsHeroImagePreview', 'image')" title="Select from existing files">
+                                    <i class="bi bi-folder"></i>
+                                </button>
+                            </div>
+                            <div class="file-upload-wrapper" style="margin-top: 0.5rem;">
+                                <input type="file" id="projectsHeroImageUpload" class="file-upload-input" accept="image/*">
+                                <label for="projectsHeroImageUpload" class="file-upload-label">
+                                    <i class="bi bi-upload"></i>
+                                    <span>Upload Image</span>
+                                </label>
+                            </div>
+                            <img id="projectsHeroImagePreview" class="image-preview" style="display: none;">
+                        </div>
+                        <div class="btn-group">
+                            <button type="submit" class="btn-save">
+                                <i class="bi bi-save"></i>Save Hero
+                            </button>
+                        </div>
+                    </form>
 
-        <!-- Custom Content List -->
-        <div class="admin-section" id="customContentList">
-            <h2><i class="bi bi-list-ul"></i>Custom Content</h2>
-            <div id="customContentItems"></div>
+                    <h3>Projects <button type="button" class="btn-load-current" onclick="loadCurrentContentFromPage('projects')">
+                        <i class="bi bi-download"></i> Load Current
+                    </button></h3>
+                    <p style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: var(--spacing-md);">
+                        <i class="bi bi-info-circle"></i> Click "Load Current" to extract all projects from the projects page. 
+                        Make sure you've visited <a href="projects.html" target="_blank" style="color: var(--secondary-color);">projects.html</a> first.
+                    </p>
+                    <div id="projectsList"></div>
+                    <button type="button" class="btn-add" onclick="addProject()">
+                        <i class="bi bi-plus-circle"></i>Add Project
+                    </button>
+                    <div class="btn-group">
+                        <button type="button" class="btn-save" onclick="saveProjects()">
+                            <i class="bi bi-save"></i>Save Projects
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Tab -->
+            <div class="admin-tab-content" id="tab-contact">
+                <div class="admin-section">
+                    <h2><i class="bi bi-envelope-fill"></i>Contact Page</h2>
+                    
+                    <h3>Page Hero <button type="button" class="btn-load-current" onclick="loadCurrentContentFromPage('contact')">
+                        <i class="bi bi-download"></i> Load Current
+                    </button></h3>
+                    <form id="contactHeroForm">
+                        <div class="form-group">
+                            <label for="contactHeroTitle">Hero Title</label>
+                            <input type="text" id="contactHeroTitle" name="contactHeroTitle" placeholder="Contact Us">
+                        </div>
+                        <div class="form-group">
+                            <label for="contactHeroSubtitle">Hero Subtitle</label>
+                            <input type="text" id="contactHeroSubtitle" name="contactHeroSubtitle" placeholder="Let's discuss your property development needs">
+                        </div>
+                        <div class="form-group">
+                            <label for="contactHeroImage">Hero Background Image</label>
+                            <div style="display: flex; gap: 0.5rem; align-items: flex-start;">
+                                <input type="text" id="contactHeroImage" name="contactHeroImage" placeholder="images/Projects/Keystone/The Boys.jpg" style="flex: 1; padding: 0.4rem 0.5rem !important; line-height: 1.3; height: auto; min-height: auto;">
+                                <button type="button" class="btn-select-file" onclick="openFileSelector('contactHeroImage', 'contactHeroImagePreview', 'image')" title="Select from existing files">
+                                    <i class="bi bi-folder"></i>
+                                </button>
+                            </div>
+                            <div class="file-upload-wrapper" style="margin-top: 0.5rem;">
+                                <input type="file" id="contactHeroImageUpload" class="file-upload-input" accept="image/*">
+                                <label for="contactHeroImageUpload" class="file-upload-label">
+                                    <i class="bi bi-upload"></i>
+                                    <span>Upload Image</span>
+                                </label>
+                            </div>
+                            <img id="contactHeroImagePreview" class="image-preview" style="display: none;">
+                        </div>
+                        <div class="btn-group">
+                            <button type="submit" class="btn-save">
+                                <i class="bi bi-save"></i>Save Hero
+                            </button>
+                        </div>
+                    </form>
+
+                    <h3>Contact Information</h3>
+                    <form id="contactInfoForm">
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label for="contactEmail">Email Address</label>
+                                <input type="email" id="contactEmail" name="contactEmail" placeholder="rod@rokwil.com">
+                            </div>
+                            <div class="form-group">
+                                <label for="contactPhone">Phone Number</label>
+                                <input type="tel" id="contactPhone" name="contactPhone" placeholder="083 693 226">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="contactAddress">Address</label>
+                            <input type="text" id="contactAddress" name="contactAddress" placeholder="Durban, KwaZulu-Natal, South Africa">
+                        </div>
+                        <div class="form-group">
+                            <label for="contactOfficeHours">Office Hours</label>
+                            <textarea id="contactOfficeHours" name="contactOfficeHours" rows="3" placeholder="Monday - Friday: 8:00 AM - 5:00 PM"></textarea>
+                        </div>
+                        <div class="btn-group">
+                            <button type="submit" class="btn-save">
+                                <i class="bi bi-save"></i>Save Contact Info
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Global Settings Tab -->
+            <div class="admin-tab-content" id="tab-global">
+                <div class="admin-section">
+                    <h2><i class="bi bi-globe"></i>Global Settings</h2>
+                    
+                    <h3>Contact Information (Site-wide)</h3>
+                    <form id="globalContactForm">
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label for="globalEmail">Email Address</label>
+                                <input type="email" id="globalEmail" name="globalEmail" placeholder="rod@rokwil.com">
+                                <small>This will update email throughout the entire site</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="globalPhone">Phone Number</label>
+                                <input type="tel" id="globalPhone" name="globalPhone" placeholder="083 693 226">
+                                <small>This will update phone throughout the entire site</small>
+                            </div>
+                        </div>
+                        <div class="btn-group">
+                            <button type="submit" class="btn-save">
+                                <i class="bi bi-save"></i>Save Global Contact Info
+                            </button>
+                        </div>
+                    </form>
+
+                    <h3>Icons</h3>
+                    <form id="iconsForm">
+                        <div class="grid-3">
+                            <div class="form-group">
+                                <label for="emailIcon">Email Icon</label>
+                                <input type="text" id="emailIcon" name="emailIcon" placeholder="bi-envelope-fill">
+                                <small>Bootstrap Icons class name</small>
+                                <div class="icon-preview">
+                                    Preview: <i id="emailIconPreview" class="bi bi-envelope-fill"></i>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="phoneIcon">Phone Icon</label>
+                                <input type="text" id="phoneIcon" name="phoneIcon" placeholder="bi-telephone-fill">
+                                <small>Bootstrap Icons class name</small>
+                                <div class="icon-preview">
+                                    Preview: <i id="phoneIconPreview" class="bi bi-telephone-fill"></i>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="locationIcon">Location Icon</label>
+                                <input type="text" id="locationIcon" name="locationIcon" placeholder="bi-geo-alt-fill">
+                                <small>Bootstrap Icons class name</small>
+                                <div class="icon-preview">
+                                    Preview: <i id="locationIconPreview" class="bi bi-geo-alt-fill"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="btn-group">
+                            <button type="submit" class="btn-save">
+                                <i class="bi bi-save"></i>Save Icons
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 
     <script src="js/admin.js"></script>
+    <script src="js/site.js"></script>
+    <script src="js/content-extractor.js"></script>
+    <script src="js/icon-picker.js"></script>
     <script>
-        // Check authentication on page load
-        if (!checkAuth()) {
-            // Redirect will happen in checkAuth
-        }
-
-        // Load current content
-        const content = getContent();
-        
-        // Populate forms
-        if (content.homePage) {
-            document.getElementById('heroTitle').value = content.homePage.heroTitle || '';
-            document.getElementById('heroSubtitle').value = content.homePage.heroSubtitle || '';
-        }
-        
-        if (content.footer) {
-            document.getElementById('email').value = content.footer.email || '';
-            document.getElementById('phone').value = content.footer.phone || '';
-        }
-        
-        if (content.icons) {
-            document.getElementById('emailIcon').value = content.icons.emailIcon || 'bi-envelope-fill';
-            document.getElementById('phoneIcon').value = content.icons.phoneIcon || 'bi-telephone-fill';
-            document.getElementById('locationIcon').value = content.icons.locationIcon || 'bi-geo-alt-fill';
-            updateIconPreviews();
-        }
-
-        // Update icon previews
-        function updateIconPreviews() {
-            const emailIcon = document.getElementById('emailIcon').value || 'bi-envelope-fill';
-            const phoneIcon = document.getElementById('phoneIcon').value || 'bi-telephone-fill';
-            const locationIcon = document.getElementById('locationIcon').value || 'bi-geo-alt-fill';
-            
-            document.getElementById('emailIconPreview').className = `bi ${emailIcon}`;
-            document.getElementById('phoneIconPreview').className = `bi ${phoneIcon}`;
-            document.getElementById('locationIconPreview').className = `bi ${locationIcon}`;
-        }
-
-        // Icon input listeners
-        document.getElementById('emailIcon').addEventListener('input', updateIconPreviews);
-        document.getElementById('phoneIcon').addEventListener('input', updateIconPreviews);
-        document.getElementById('locationIcon').addEventListener('input', updateIconPreviews);
-
-        // Show message
-        function showMessage(text, type = 'success') {
-            const messageEl = document.getElementById('message');
-            messageEl.textContent = text;
-            messageEl.className = `message ${type} show`;
-            setTimeout(() => {
-                messageEl.classList.remove('show');
-            }, 5000);
-        }
-
-        // Home page form
-        document.getElementById('homePageForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const content = getContent();
-            content.homePage = {
-                heroTitle: document.getElementById('heroTitle').value,
-                heroSubtitle: document.getElementById('heroSubtitle').value
-            };
-            if (saveContent(content)) {
-                showMessage('Home page content saved successfully!');
-            } else {
-                showMessage('Error saving content', 'error');
-            }
-        });
-
-        // Contact form
-        document.getElementById('contactForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const content = getContent();
-            const email = document.getElementById('email').value;
-            const phone = document.getElementById('phone').value;
-            
-            content.footer = content.footer || {};
-            content.contact = content.contact || {};
-            content.homePage = content.homePage || {};
-            
-            content.footer.email = email;
-            content.footer.phone = phone;
-            content.contact.email = email;
-            content.contact.phone = phone;
-            content.homePage.email = email;
-            content.homePage.phone = phone;
-            
-            if (saveContent(content)) {
-                showMessage('Contact information saved successfully!');
-            } else {
-                showMessage('Error saving content', 'error');
-            }
-        });
-
-        // Icons form
-        document.getElementById('iconsForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const content = getContent();
-            content.icons = {
-                emailIcon: document.getElementById('emailIcon').value || 'bi-envelope-fill',
-                phoneIcon: document.getElementById('phoneIcon').value || 'bi-telephone-fill',
-                locationIcon: document.getElementById('locationIcon').value || 'bi-geo-alt-fill'
-            };
-            if (saveContent(content)) {
-                showMessage('Icons saved successfully!');
-                updateIconPreviews();
-            } else {
-                showMessage('Error saving content', 'error');
-            }
-        });
-
-        // Custom content form
-        document.getElementById('customContentForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const content = getContent();
-            if (!content.customContent) {
-                content.customContent = [];
-            }
-            
-            content.customContent.push({
-                id: Date.now().toString(),
-                title: document.getElementById('customTitle').value,
-                text: document.getElementById('customContent').value,
-                page: document.getElementById('customPage').value
-            });
-            
-            if (saveContent(content)) {
-                showMessage('Custom content added successfully!');
-                document.getElementById('customContentForm').reset();
-                loadCustomContent();
-            } else {
-                showMessage('Error saving content', 'error');
-            }
-        });
-
-        // Load and display custom content
-        function loadCustomContent() {
-            const content = getContent();
-            const container = document.getElementById('customContentItems');
-            container.innerHTML = '';
-            
-            if (!content.customContent || content.customContent.length === 0) {
-                container.innerHTML = '<p style="color: var(--text-secondary);">No custom content added yet.</p>';
-                return;
-            }
-            
-            content.customContent.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'custom-content-item';
-                div.innerHTML = `
-                    <h3>${item.title}</h3>
-                    <p style="color: var(--text-secondary);">${item.text}</p>
-                    <p style="color: var(--text-secondary); font-size: 0.875rem;">Page: ${item.page}</p>
-                    <button class="btn-remove" onclick="removeCustomContent('${item.id}')">
-                        <i class="bi bi-trash"></i> Remove
-                    </button>
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        // Remove custom content
-        function removeCustomContent(id) {
-            if (!confirm('Are you sure you want to remove this content?')) {
-                return;
-            }
-            
-            const content = getContent();
-            if (content.customContent) {
-                content.customContent = content.customContent.filter(item => item.id !== id);
-                if (saveContent(content)) {
-                    showMessage('Content removed successfully!');
-                    loadCustomContent();
+        // Ensure loadCurrentContentFromPage is available immediately
+        console.log('Setting up loadCurrentContentFromPage in inline script...');
+        window.loadCurrentContentFromPage = window.loadCurrentContentFromPage || function(page) {
+            console.log('loadCurrentContentFromPage called (inline fallback), page:', page);
+            if (page === 'projects') {
+                if (typeof window.extractProjectsDirectly === 'function') {
+                    window.extractProjectsDirectly();
                 } else {
-                    showMessage('Error removing content', 'error');
+                    alert('Extraction function not loaded. Please refresh the page.');
+                }
+            } else if (page === 'index' || page === 'home') {
+                if (typeof window.extractHomePageDirectly === 'function') {
+                    window.extractHomePageDirectly();
+                } else {
+                    alert('Extraction function not loaded. Please refresh the page.');
+                }
+            } else if (page === 'about') {
+                if (typeof window.extractAboutPageDirectly === 'function') {
+                    window.extractAboutPageDirectly();
+                } else {
+                    alert('Extraction function not loaded. Please refresh the page.');
+                }
+            } else if (page === 'contact') {
+                if (typeof window.extractContactPageDirectly === 'function') {
+                    window.extractContactPageDirectly();
+                } else {
+                    alert('Extraction function not loaded. Please refresh the page.');
                 }
             }
-        }
-
-        // Load custom content on page load
-        loadCustomContent();
+        };
+        console.log('loadCurrentContentFromPage defined:', typeof window.loadCurrentContentFromPage);
+        
+        // Ensure openFileSelector is available immediately (placeholder)
+        window.openFileSelector = window.openFileSelector || function(inputId, previewId, fileType, customSelector) {
+            console.log('openFileSelector called (placeholder), waiting for full function to load...', { inputId, previewId, fileType, customSelector });
+            setTimeout(() => {
+                if (typeof window.openFileSelector === 'function' && window.openFileSelector.toString().includes('currentFileSelector')) {
+                    window.openFileSelector(inputId, previewId, fileType, customSelector);
+                } else {
+                    console.error('openFileSelector not fully loaded yet');
+                    alert('File selector not ready. Please wait a moment and try again.');
+                }
+            }, 100);
+        };
+        console.log('openFileSelector placeholder defined:', typeof window.openFileSelector);
     </script>
+    <script src="js/admin-panel.js"></script>
+
+    <!-- File Selector Modal -->
+    <div class="file-selector-modal" id="fileSelectorModal">
+        <div class="file-selector-overlay" onclick="closeFileSelector()"></div>
+        <div class="file-selector-container">
+            <div class="file-selector-header">
+                <h3 id="fileSelectorTitle">Select File</h3>
+                <button class="file-selector-close" onclick="closeFileSelector()">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div class="file-selector-search">
+                <input type="text" id="fileSelectorSearch" placeholder="Search files...">
+                <i class="bi bi-search"></i>
+            </div>
+            <div class="file-selector-list" id="fileSelectorList">
+                <!-- Files will be populated here -->
+            </div>
+        </div>
+    </div>
 </body>
 </html>
-

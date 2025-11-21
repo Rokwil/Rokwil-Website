@@ -1106,6 +1106,21 @@ section {
     text-decoration: underline;
 }
 
+/* Icon spacing fixes */
+.footer p i,
+.footer-section p i,
+.cta-section h2 i,
+.cta-content h2 i {
+    margin-right: 0.5rem;
+    display: inline-block;
+}
+
+.footer a i,
+.footer-section a i {
+    margin-right: 0.5rem;
+    display: inline-block;
+}
+
 /* ============================================
    CONTACT PAGE
    ============================================ */

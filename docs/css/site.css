@@ -711,12 +711,12 @@ section {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.7) 100%);
+    background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.3) 40%, rgba(0, 0, 0, 0.85) 100%);
     transition: opacity var(--transition-base);
 }
 
 .showcase-item:hover .showcase-image::before {
-    opacity: 0.8;
+    opacity: 0.95;
 }
 
 .showcase-overlay {
@@ -727,6 +727,7 @@ section {
     padding: var(--spacing-xl);
     color: var(--text-light);
     z-index: 1;
+    background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.4) 100%);
 }
 
 .showcase-overlay h3 {
@@ -734,12 +735,21 @@ section {
     margin-bottom: var(--spacing-sm);
     color: var(--text-light);
     font-weight: 600;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8), 0 1px 3px rgba(0, 0, 0, 0.9);
+    line-height: 1.2;
 }
 
 .showcase-overlay p {
-    color: rgba(255, 255, 255, 0.95);
+    color: rgba(255, 255, 255, 1);
     font-size: 1rem;
     margin-bottom: var(--spacing-md);
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8), 0 1px 2px rgba(0, 0, 0, 0.9);
+    line-height: 1.5;
+}
+
+.showcase-overlay .btn {
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
 
 /* ============================================

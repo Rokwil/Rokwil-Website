@@ -243,24 +243,111 @@
             transform: translateY(-2px);
             box-shadow: var(--shadow-md);
         }
-        .message {
-            padding: var(--spacing-sm);
-            border-radius: 6px;
-            margin-bottom: var(--spacing-md);
-            display: none;
+        /* Toast Notification System */
+        .toast-container {
+            position: fixed;
+            top: 100px;
+            right: var(--spacing-md);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+            pointer-events: none;
         }
-        .message.show {
-            display: block;
+        .toast {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: var(--spacing-md) var(--spacing-lg);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            min-width: 300px;
+            max-width: 400px;
+            pointer-events: auto;
+            transform: translateX(400px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            animation: slideInToast 0.3s ease forwards;
         }
-        .message.success {
+        @keyframes slideInToast {
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        .toast.success {
+            border-left: 4px solid #10b981;
             background: #d1fae5;
             color: #065f46;
-            border: 1px solid #a7f3d0;
         }
-        .message.error {
+        .toast.error {
+            border-left: 4px solid #ef4444;
             background: #fee2e2;
             color: #991b1b;
-            border: 1px solid #fecaca;
+        }
+        .toast.info {
+            border-left: 4px solid #3b82f6;
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        .toast.warning {
+            border-left: 4px solid #f59e0b;
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .toast-icon {
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+        .toast-content {
+            flex: 1;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+        .toast-close {
+            background: none;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            padding: 0;
+            font-size: 1.25rem;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+            flex-shrink: 0;
+        }
+        .toast-close:hover {
+            opacity: 1;
+        }
+        .toast.fade-out {
+            animation: slideOutToast 0.3s ease forwards;
+        }
+        @keyframes slideOutToast {
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+        body.dark-mode .toast.success {
+            background: rgba(16, 185, 129, 0.2);
+            color: #6ee7b7;
+            border-left-color: #10b981;
+        }
+        body.dark-mode .toast.error {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            border-left-color: #ef4444;
+        }
+        body.dark-mode .toast.info {
+            background: rgba(59, 130, 246, 0.2);
+            color: #93c5fd;
+            border-left-color: #3b82f6;
+        }
+        body.dark-mode .toast.warning {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fcd34d;
+            border-left-color: #f59e0b;
         }
         .editable-item {
             background: var(--bg-secondary);
@@ -377,6 +464,77 @@
         }
         .meta-items-list {
             margin-bottom: 0.5rem;
+        }
+        .section-item-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+            padding: 0.75rem;
+            background: var(--bg-secondary);
+            border-radius: 6px;
+        }
+        .section-item-row .section-heading-input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+        .section-item-row .section-content-input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            resize: vertical;
+        }
+        .sections-list {
+            margin-bottom: 0.5rem;
+        }
+        .feature-item-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            background: var(--bg-primary);
+            border-radius: 6px;
+        }
+        .feature-item-row .feature-tag-input {
+            flex: 1;
+            padding: 0.4rem 0.5rem !important;
+            line-height: 1.3;
+            height: auto !important;
+            min-height: auto !important;
+        }
+        .features-list {
+            margin-bottom: 0.5rem;
+        }
+        .project-section-group {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+        .project-section-group h4 {
+            margin: 0 0 1rem 0;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .project-section-group .form-group {
+            margin-bottom: 1rem;
+        }
+        .project-section-group .form-group:last-child {
+            margin-bottom: 0;
         }
         .btn-add {
             background: var(--secondary-color);
@@ -862,17 +1020,6 @@
             color: #ffffff;
         }
         
-        body.dark-mode .message.success {
-            background: rgba(16, 185, 129, 0.2);
-            color: #ffffff;
-            border-color: rgba(16, 185, 129, 0.4);
-        }
-        
-        body.dark-mode .message.error {
-            background: rgba(239, 68, 68, 0.2);
-            color: #ffffff;
-            border-color: rgba(239, 68, 68, 0.4);
-        }
         
         body.dark-mode .file-upload-label {
             color: #ffffff;
@@ -930,10 +1077,15 @@
     <div class="admin-wrapper">
         <nav class="admin-navbar">
             <div class="admin-navbar-content">
-                <h1>
-                    <i class="bi bi-gear-fill"></i>
-                    Admin Panel
-                </h1>
+                <div style="display: flex; align-items: center; gap: var(--spacing-md);">
+                    <h1>
+                        <i class="bi bi-gear-fill"></i>
+                        Admin Panel
+                    </h1>
+                    <button type="button" class="btn-load-current" id="loadCurrentAllBtn" onclick="loadCurrentFromActiveTab()" style="margin-left: var(--spacing-sm);">
+                        <i class="bi bi-download"></i> Load Current
+                </button>
+            </div>
                 <div class="admin-navbar-actions">
                     <button class="dark-mode-toggle" id="darkModeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
                         <span class="toggle-icon">
@@ -952,7 +1104,7 @@
         </nav>
 
         <div class="admin-container">
-            <div id="message" class="message"></div>
+            <div class="toast-container" id="toastContainer"></div>
 
             <div class="admin-tabs">
                 <button class="admin-tab active" data-tab="home">
@@ -970,25 +1122,28 @@
                 <button class="admin-tab" data-tab="global">
                     <i class="bi bi-globe"></i>Global Settings
                 </button>
-            </div>
+                </div>
 
             <!-- Home Tab -->
             <div class="admin-tab-content active" id="tab-home">
                 <div class="admin-section">
                     <h2><i class="bi bi-house-fill"></i>Home Page</h2>
                     
-                    <h3>Hero Section <button type="button" class="btn-load-current" onclick="loadCurrentContentFromPage('index')">
-                        <i class="bi bi-download"></i> Load Current
-                    </button></h3>
-                    <form id="homeHeroForm">
+                    <div class="collapsible-section collapsible">
+                        <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                            <h3>Hero Section</h3>
+                            <i class="bi bi-chevron-down"></i>
+                </div>
+                        <div class="collapsible-content expanded">
+                            <form id="homeHeroForm">
                         <div class="form-group">
                             <label for="heroTitle">Hero Title</label>
                             <input type="text" id="heroTitle" name="heroTitle" placeholder="Enter hero title">
-                        </div>
+                </div>
                         <div class="form-group">
                             <label for="heroSubtitle">Hero Subtitle</label>
                             <textarea id="heroSubtitle" name="heroSubtitle" placeholder="Enter hero subtitle"></textarea>
-                        </div>
+                </div>
                         <div class="grid-2">
                             <div class="form-group">
                                 <label for="heroImage1">Hero Background Image 1</label>
@@ -997,7 +1152,7 @@
                                     <button type="button" class="btn-select-file" onclick="openFileSelector('heroImage1', 'heroImage1Preview', 'image')" title="Select from existing files">
                                         <i class="bi bi-folder"></i>
                                     </button>
-                                </div>
+                </div>
                                 <div class="file-upload-wrapper" style="margin-top: 0.5rem;">
                                     <input type="file" id="heroImage1Upload" class="file-upload-input" accept="image/*">
                                     <label for="heroImage1Upload" class="file-upload-label">
@@ -1032,10 +1187,17 @@
                                 <i class="bi bi-save"></i>Save Hero Section
                             </button>
                         </div>
-                    </form>
+                            </form>
+                        </div>
+                    </div>
 
-                    <h3>Video Section</h3>
-                    <form id="homeVideoForm">
+                    <div class="collapsible-section collapsible">
+                        <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                            <h3>Video Section</h3>
+                            <i class="bi bi-chevron-down"></i>
+                        </div>
+                        <div class="collapsible-content">
+                            <form id="homeVideoForm">
                         <div class="form-group">
                             <label for="videoTitle">Video Section Title</label>
                             <input type="text" id="videoTitle" name="videoTitle" placeholder="Experience Rokwil">
@@ -1051,8 +1213,8 @@
                                     <input type="text" id="videoSrc" name="videoSrc" placeholder="videos/Rokwil.mp4" style="flex: 1; padding: 0.4rem 0.5rem !important; line-height: 1.3; height: auto; min-height: auto;">
                                     <button type="button" class="btn-select-file" onclick="openFileSelector('videoSrc', 'videoSrcPreview', 'video')" title="Select from existing files">
                                         <i class="bi bi-folder"></i>
-                                    </button>
-                                </div>
+                </button>
+            </div>
                                 <div class="file-upload-wrapper" style="margin-top: 0.5rem;">
                                     <input type="file" id="videoSrcUpload" class="file-upload-input" accept="video/*">
                                     <label for="videoSrcUpload" class="file-upload-label">
@@ -1087,10 +1249,22 @@
                                 <i class="bi bi-save"></i>Save Video Section
                             </button>
                         </div>
-                    </form>
+                            </form>
+                        </div>
+                    </div>
 
-                    <h3>Features Section</h3>
-                    <form id="homeFeaturesForm">
+                    <div class="collapsible-section collapsible">
+                        <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                            <h3 style="display: flex; align-items: center; justify-content: space-between; width: 100%; margin: 0;">
+                                <span>Features Section</span>
+                                <button type="button" class="btn-remove" id="toggleFeaturesSection" onclick="event.stopPropagation(); toggleHideFeaturesSection()" style="margin-left: auto;">
+                                    <i class="bi bi-eye-slash"></i> Hide Section
+                </button>
+                            </h3>
+                            <i class="bi bi-chevron-down"></i>
+                        </div>
+                        <div class="collapsible-content">
+                            <form id="homeFeaturesForm">
                         <div class="form-group">
                             <label for="featuresTitle">Features Title</label>
                             <input type="text" id="featuresTitle" name="featuresTitle" placeholder="What We Do">
@@ -1100,39 +1274,57 @@
                             <input type="text" id="featuresSubtitle" name="featuresSubtitle" placeholder="Transforming landscapes through strategic property development">
                         </div>
                         <div id="featuresList"></div>
-                        <button type="button" class="btn-add" onclick="addFeature()">
-                            <i class="bi bi-plus-circle"></i>Add Feature
-                        </button>
                         <div class="btn-group">
                             <button type="submit" class="btn-save">
                                 <i class="bi bi-save"></i>Save Features
                             </button>
                         </div>
-                    </form>
+                            </form>
+                        </div>
+            </div>
 
-                    <h3>Showcase Section</h3>
-                    <form id="homeShowcaseForm">
+                    <div class="collapsible-section collapsible">
+                        <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                            <h3 style="display: flex; align-items: center; justify-content: space-between; width: 100%; margin: 0;">
+                                <span>Showcase Section</span>
+                                <button type="button" class="btn-remove" id="toggleShowcaseSection" onclick="event.stopPropagation(); toggleHideShowcaseSection()" style="margin-left: auto;">
+                                    <i class="bi bi-eye-slash"></i> Hide Section
+                                </button>
+                            </h3>
+                            <i class="bi bi-chevron-down"></i>
+                        </div>
+                        <div class="collapsible-content">
+                            <form id="homeShowcaseForm">
                         <div class="form-group">
                             <label for="showcaseTitle">Showcase Title</label>
                             <input type="text" id="showcaseTitle" name="showcaseTitle" placeholder="Featured Projects">
-                        </div>
+                    </div>
                         <div class="form-group">
                             <label for="showcaseSubtitle">Showcase Subtitle</label>
                             <input type="text" id="showcaseSubtitle" name="showcaseSubtitle" placeholder="Discover our landmark developments">
                         </div>
                         <div id="showcaseList"></div>
-                        <button type="button" class="btn-add" onclick="addShowcase()">
-                            <i class="bi bi-plus-circle"></i>Add Showcase Item
-                        </button>
                         <div class="btn-group">
                             <button type="submit" class="btn-save">
                                 <i class="bi bi-save"></i>Save Showcase
                             </button>
-                        </div>
-                    </form>
+                    </div>
+                            </form>
+                </div>
+            </div>
 
-                    <h3>Testimonials Section</h3>
-                    <form id="homeTestimonialsForm">
+                    <div class="collapsible-section collapsible">
+                        <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                            <h3 style="display: flex; align-items: center; justify-content: space-between; width: 100%; margin: 0;">
+                                <span>Testimonials Section</span>
+                                <button type="button" class="btn-remove" id="toggleTestimonialsSection" onclick="event.stopPropagation(); toggleHideTestimonialsSection()" style="margin-left: auto;">
+                                    <i class="bi bi-eye-slash"></i> Hide Section
+                                </button>
+                            </h3>
+                            <i class="bi bi-chevron-down"></i>
+                    </div>
+                        <div class="collapsible-content">
+                            <form id="homeTestimonialsForm">
                         <div class="form-group">
                             <label for="testimonialsTitle">Testimonials Title</label>
                             <input type="text" id="testimonialsTitle" name="testimonialsTitle" placeholder="What Our Partners Say">
@@ -1142,49 +1334,66 @@
                             <input type="text" id="testimonialsSubtitle" name="testimonialsSubtitle" placeholder="Trusted by leading businesses across South Africa">
                         </div>
                         <div id="testimonialsList"></div>
-                        <button type="button" class="btn-add" onclick="addTestimonial()">
-                            <i class="bi bi-plus-circle"></i>Add Testimonial
-                        </button>
                         <div class="btn-group">
                             <button type="submit" class="btn-save">
                                 <i class="bi bi-save"></i>Save Testimonials
                             </button>
                         </div>
                     </form>
+                </div>
+            </div>
 
-                    <h3>News Section</h3>
-                    <form id="homeNewsForm">
-                        <div class="form-group">
+                    <div class="collapsible-section collapsible">
+                        <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                            <h3 style="display: flex; align-items: center; justify-content: space-between; width: 100%; margin: 0;">
+                                <span>News Section</span>
+                                <button type="button" class="btn-remove" id="toggleNewsSection" onclick="event.stopPropagation(); toggleHideNewsSection()" style="margin-left: auto;">
+                                    <i class="bi bi-eye-slash"></i> Hide Section
+                                </button>
+                            </h3>
+                            <i class="bi bi-chevron-down"></i>
+                    </div>
+                        <div class="collapsible-content">
+                            <form id="homeNewsForm">
+                            <div class="form-group">
                             <label for="newsTitle">News Title</label>
                             <input type="text" id="newsTitle" name="newsTitle" placeholder="Latest News & Updates">
-                        </div>
+                                </div>
                         <div class="form-group">
                             <label for="newsSubtitle">News Subtitle</label>
                             <input type="text" id="newsSubtitle" name="newsSubtitle" placeholder="Stay informed about our developments and milestones">
-                        </div>
+                            </div>
                         <div id="newsList"></div>
-                        <button type="button" class="btn-add" onclick="addNews()">
-                            <i class="bi bi-plus-circle"></i>Add News Item
-                        </button>
                         <div class="btn-group">
                             <button type="submit" class="btn-save">
                                 <i class="bi bi-save"></i>Save News
                             </button>
                         </div>
-                    </form>
-
-                    <h3>Stats Section</h3>
-                    <form id="homeStatsForm">
-                        <div id="statsList"></div>
-                        <button type="button" class="btn-add" onclick="addStat()">
-                            <i class="bi bi-plus-circle"></i>Add Stat
-                        </button>
-                        <div class="btn-group">
-                            <button type="submit" class="btn-save">
-                                <i class="bi bi-save"></i>Save Stats
-                            </button>
+                            </form>
                         </div>
-                    </form>
+                    </div>
+
+                    <div class="collapsible-section collapsible">
+                        <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                            <h3 style="display: flex; align-items: center; justify-content: space-between; width: 100%; margin: 0;">
+                                <span>Stats Section</span>
+                                <button type="button" class="btn-remove" id="toggleStatsSection" onclick="event.stopPropagation(); toggleHideStatsSection()" style="margin-left: auto;">
+                                    <i class="bi bi-eye-slash"></i> Hide Section
+                                </button>
+                            </h3>
+                            <i class="bi bi-chevron-down"></i>
+                        </div>
+                        <div class="collapsible-content">
+                            <form id="homeStatsForm">
+                                <div id="statsList"></div>
+                                <div class="btn-group">
+                                    <button type="submit" class="btn-save">
+                                        <i class="bi bi-save"></i>Save Stats
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -1195,21 +1404,19 @@
                     
                     <div class="collapsible-section collapsible">
                         <div class="collapsible-header" onclick="toggleCollapsible(this)">
-                            <h3>Page Hero <button type="button" class="btn-load-current" onclick="event.stopPropagation(); loadCurrentContentFromPage('about')">
-                                <i class="bi bi-download"></i> Load Current
-                            </button></h3>
+                            <h3>Page Hero</h3>
                             <i class="bi bi-chevron-down"></i>
                         </div>
                         <div class="collapsible-content expanded">
                             <form id="aboutHeroForm">
-                        <div class="form-group">
+                            <div class="form-group">
                             <label for="aboutHeroTitle">Hero Title</label>
                             <input type="text" id="aboutHeroTitle" name="aboutHeroTitle" placeholder="About Rokwil">
-                        </div>
+                                </div>
                         <div class="form-group">
                             <label for="aboutHeroSubtitle">Hero Subtitle</label>
                             <input type="text" id="aboutHeroSubtitle" name="aboutHeroSubtitle" placeholder="Pioneering property development in KwaZulu-Natal">
-                        </div>
+                            </div>
                         <div class="form-group">
                             <label for="aboutHeroImage">Hero Background Image</label>
                             <div style="display: flex; gap: 0.5rem; align-items: flex-start;">
@@ -1217,7 +1424,7 @@
                                 <button type="button" class="btn-select-file" onclick="openFileSelector('aboutHeroImage', 'aboutHeroImagePreview', 'image')" title="Select from existing files">
                                     <i class="bi bi-folder"></i>
                                 </button>
-                            </div>
+                        </div>
                             <div class="file-upload-wrapper" style="margin-top: 0.5rem;">
                                 <input type="file" id="aboutHeroImageUpload" class="file-upload-input" accept="image/*">
                                 <label for="aboutHeroImageUpload" class="file-upload-label">
@@ -1232,23 +1439,18 @@
                                 <i class="bi bi-save"></i>Save Hero
                             </button>
                         </div>
-                            </form>
-                        </div>
-                    </div>
+                    </form>
+                </div>
+            </div>
 
                     <div class="collapsible-section collapsible">
                         <div class="collapsible-header" onclick="toggleCollapsible(this)">
-                            <h3>Stats Banner <button type="button" class="btn-load-current" onclick="event.stopPropagation(); loadCurrentContentFromPage('about')">
-                                <i class="bi bi-download"></i> Load Current
-                            </button></h3>
+                            <h3>Stats Banner</h3>
                             <i class="bi bi-chevron-down"></i>
-                        </div>
+                    </div>
                         <div class="collapsible-content">
                             <form id="aboutStatsForm">
                         <div id="aboutStatsList"></div>
-                        <button type="button" class="btn-add" onclick="addAboutStat()">
-                            <i class="bi bi-plus-circle"></i>Add Stat
-                        </button>
                         <div class="btn-group">
                             <button type="submit" class="btn-save">
                                 <i class="bi bi-save"></i>Save Stats
@@ -1265,19 +1467,19 @@
                         </div>
                         <div class="collapsible-content">
                             <form id="aboutContentForm">
-                        <div class="form-group">
+                            <div class="form-group">
                             <label for="aboutStoryBadge">Story Badge Text</label>
                             <input type="text" id="aboutStoryBadge" name="aboutStoryBadge" placeholder="Our Story">
-                        </div>
+                                </div>
                         <div class="form-group">
                             <label for="aboutStoryHeading">Story Heading</label>
                             <input type="text" id="aboutStoryHeading" name="aboutStoryHeading" placeholder="Building the Future of KZN">
-                        </div>
-                        <div class="form-group">
+                            </div>
+                            <div class="form-group">
                             <label for="aboutStory">Story Paragraphs (one per line)</label>
                             <textarea id="aboutStory" name="aboutStory" rows="8" placeholder="First paragraph...&#10;Second paragraph...&#10;Third paragraph..."></textarea>
                             <small>Each paragraph on a new line</small>
-                        </div>
+                                </div>
                         <div class="form-group">
                             <label for="aboutImage">About Image</label>
                             <div style="display: flex; gap: 0.5rem; align-items: flex-start;">
@@ -1311,17 +1513,17 @@
                         </div>
                         <div class="collapsible-content">
                             <form id="aboutMissionForm">
-                        <div class="form-group">
+                            <div class="form-group">
                             <label for="missionIcon">Mission Icon Class</label>
                             <input type="text" id="missionIcon" name="missionIcon" placeholder="bi-bullseye">
                             <button type="button" class="icon-picker-btn" onclick="createIconPicker('missionIcon', document.getElementById('missionIcon').value)">
                                 <i class="bi bi-palette"></i> Pick Icon
                             </button>
-                        </div>
+                                </div>
                         <div class="form-group">
                             <label for="missionTitle">Mission Title</label>
                             <input type="text" id="missionTitle" name="missionTitle" placeholder="Our Mission">
-                        </div>
+                            </div>
                         <div class="form-group">
                             <label for="missionText">Mission Text</label>
                             <textarea id="missionText" name="missionText" rows="3" placeholder="To create world-class property developments..."></textarea>
@@ -1331,15 +1533,15 @@
                                 <i class="bi bi-save"></i>Save Mission
                             </button>
                         </div>
-                            </form>
-                        </div>
-                    </div>
+                    </form>
+                </div>
+            </div>
 
                     <div class="collapsible-section collapsible">
                         <div class="collapsible-header" onclick="toggleCollapsible(this)">
                             <h3>Timeline Section</h3>
                             <i class="bi bi-chevron-down"></i>
-                        </div>
+                    </div>
                         <div class="collapsible-content">
                             <form id="aboutTimelineHeaderForm">
                         <div class="form-group">
@@ -1388,29 +1590,29 @@
                                 <i class="bi bi-save"></i>Save Values
                             </button>
                         </div>
-                            </form>
+                    </form>
                         </div>
-                    </div>
+                </div>
 
                     <div class="collapsible-section collapsible">
                         <div class="collapsible-header" onclick="toggleCollapsible(this)">
                             <h3>Leadership Section</h3>
                             <i class="bi bi-chevron-down"></i>
-                        </div>
+                    </div>
                         <div class="collapsible-content">
                             <form id="aboutLeadershipForm">
                         <div class="form-group">
                             <label for="leadershipTitle">Leadership Title</label>
                             <input type="text" id="leadershipTitle" name="leadershipTitle" placeholder="Leadership">
-                        </div>
+                    </div>
                         <div class="form-group">
                             <label for="leadershipSubtitle">Leadership Subtitle</label>
                             <input type="text" id="leadershipSubtitle" name="leadershipSubtitle" placeholder="Visionary leadership driving transformation">
-                        </div>
+                </div>
                         <div class="form-group">
                             <label for="leaderInitials">Leader Initials</label>
                             <input type="text" id="leaderInitials" name="leaderInitials" placeholder="RS">
-                        </div>
+            </div>
                         <div class="form-group">
                             <label for="leaderName">Leader Name</label>
                             <input type="text" id="leaderName" name="leaderName" placeholder="Rod Stainton">
@@ -1435,7 +1637,7 @@
                         </div>
                             </form>
                         </div>
-                    </div>
+    </div>
 
                     <div class="collapsible-section collapsible">
                         <div class="collapsible-header" onclick="toggleCollapsible(this)">
@@ -1453,9 +1655,6 @@
                             <input type="text" id="csrSubtitle" name="csrSubtitle" placeholder="Making a positive impact in our communities">
                         </div>
                         <div id="csrList"></div>
-                        <button type="button" class="btn-add" onclick="addCSRItem()">
-                            <i class="bi bi-plus-circle"></i>Add CSR Item
-                        </button>
                         <div class="btn-group">
                             <button type="submit" class="btn-save">
                                 <i class="bi bi-save"></i>Save CSR
@@ -1481,9 +1680,6 @@
                             <input type="text" id="recognitionSubtitle" name="recognitionSubtitle" placeholder="Trusted by industry leaders and recognised by authorities">
                         </div>
                         <div id="recognitionList"></div>
-                        <button type="button" class="btn-add" onclick="addRecognitionItem()">
-                            <i class="bi bi-plus-circle"></i>Add Recognition Item
-                        </button>
                         <div class="btn-group">
                             <button type="submit" class="btn-save">
                                 <i class="bi bi-save"></i>Save Recognition
@@ -1534,9 +1730,7 @@
                         </div>
                     </form>
 
-                    <h3>Projects <button type="button" class="btn-load-current" onclick="loadCurrentContentFromPage('projects')">
-                        <i class="bi bi-download"></i> Load Current
-                    </button></h3>
+                    <h3>Projects</h3>
                     <p style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: var(--spacing-md);">
                         <i class="bi bi-info-circle"></i> Click "Load Current" to extract all projects from the projects page. 
                         Make sure you've visited <a href="projects.html" target="_blank" style="color: var(--secondary-color);">projects.html</a> first.
@@ -1558,9 +1752,7 @@
                 <div class="admin-section">
                     <h2><i class="bi bi-envelope-fill"></i>Contact Page</h2>
                     
-                    <h3>Page Hero <button type="button" class="btn-load-current" onclick="loadCurrentContentFromPage('contact')">
-                        <i class="bi bi-download"></i> Load Current
-                    </button></h3>
+                    <h3>Page Hero</h3>
                     <form id="contactHeroForm">
                         <div class="form-group">
                             <label for="contactHeroTitle">Hero Title</label>
@@ -1749,8 +1941,8 @@
                 <h3 id="fileSelectorTitle">Select File</h3>
                 <button class="file-selector-close" onclick="closeFileSelector()">
                     <i class="bi bi-x"></i>
-                </button>
-            </div>
+                        </button>
+                    </div>
             <div class="file-selector-search">
                 <input type="text" id="fileSelectorSearch" placeholder="Search files...">
                 <i class="bi bi-search"></i>

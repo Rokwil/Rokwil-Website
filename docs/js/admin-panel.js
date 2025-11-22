@@ -112,6 +112,39 @@ window.loadCurrentContentFromPage = function(page) {
     }
 };
 
+// Load current content from the active tab
+window.loadCurrentFromActiveTab = function() {
+    // Find the active tab
+    const activeTab = document.querySelector('.admin-tab.active');
+    if (!activeTab) {
+        showMessage('No active tab found. Please select a tab first.', 'error');
+        return;
+    }
+    
+    const tabName = activeTab.getAttribute('data-tab');
+    
+    // Map tab names to page names
+    const pageMap = {
+        'home': 'index',
+        'about': 'about',
+        'projects': 'projects',
+        'contact': 'contact',
+        'global': 'index' // Global settings can load from index as fallback
+    };
+    
+    const pageName = pageMap[tabName];
+    if (!pageName) {
+        showMessage(`No page mapping found for tab: ${tabName}`, 'error');
+        return;
+    }
+    
+    // Show loading message
+    showMessage(`Loading all content from ${tabName} page...`, 'info');
+    
+    // Load the content
+    loadCurrentContentFromPage(pageName);
+};
+
 // Check authentication on page load
 if (typeof checkAuth === 'function' && !checkAuth()) {
     // Redirect will happen in checkAuth
@@ -547,24 +580,29 @@ function loadHomeContent(content) {
             document.getElementById('featuresTitle').value = content.homePage.features.title || '';
             document.getElementById('featuresSubtitle').value = content.homePage.features.subtitle || '';
             renderFeatures(content.homePage.features.items || []);
+            updateSectionToggleButton('toggleFeaturesSection', content.homePage.features.hidden);
         }
         if (content.homePage.showcase) {
             document.getElementById('showcaseTitle').value = content.homePage.showcase.title || '';
             document.getElementById('showcaseSubtitle').value = content.homePage.showcase.subtitle || '';
             renderShowcase(content.homePage.showcase.items || []);
+            updateSectionToggleButton('toggleShowcaseSection', content.homePage.showcase.hidden);
         }
         if (content.homePage.testimonials) {
             document.getElementById('testimonialsTitle').value = content.homePage.testimonials.title || '';
             document.getElementById('testimonialsSubtitle').value = content.homePage.testimonials.subtitle || '';
             renderTestimonials(content.homePage.testimonials.items || []);
+            updateSectionToggleButton('toggleTestimonialsSection', content.homePage.testimonials.hidden);
         }
         if (content.homePage.news) {
             document.getElementById('newsTitle').value = content.homePage.news.title || '';
             document.getElementById('newsSubtitle').value = content.homePage.news.subtitle || '';
             renderNews(content.homePage.news.items || []);
+            updateSectionToggleButton('toggleNewsSection', content.homePage.news.hidden);
         }
         if (content.homePage.stats) {
             renderStats(content.homePage.stats.items || []);
+            updateSectionToggleButton('toggleStatsSection', content.homePage.stats.hidden);
         }
     }
 }
@@ -595,7 +633,8 @@ function loadAboutContent(content) {
             if (storyHeadingEl) storyHeadingEl.value = content.aboutPage.content.storyHeading || '';
             if (storyEl) {
                 if (Array.isArray(content.aboutPage.content.story)) {
-                    storyEl.value = content.aboutPage.content.story.join('\n\n');
+                    // Join with single newline (one paragraph per line as indicated in the UI)
+                    storyEl.value = content.aboutPage.content.story.join('\n');
                 } else {
                     storyEl.value = content.aboutPage.content.story || '';
                 }
@@ -747,9 +786,6 @@ function renderFeatures(items) {
         div.innerHTML = `
             <div class="editable-item-header">
                 <span class="editable-item-title">Feature ${index + 1}</span>
-                <button type="button" class="btn-remove" onclick="removeFeature(${index})">
-                    <i class="bi bi-trash"></i> Remove
-                </button>
             </div>
             <div class="form-group">
                 <label>Icon Class 
@@ -794,9 +830,9 @@ function renderShowcase(items) {
         div.className = 'editable-item';
         div.innerHTML = `
             <div class="editable-item-header">
-                <span class="editable-item-title">Showcase Item ${index + 1}</span>
-                <button type="button" class="btn-remove" onclick="removeShowcase(${index})">
-                    <i class="bi bi-trash"></i> Remove
+                <span class="editable-item-title">Showcase Item ${index + 1}${item.hidden ? ' <span style="color: #dc2626; font-size: 0.85em;">(Hidden)</span>' : ''}</span>
+                <button type="button" class="btn-remove" onclick="toggleHideShowcase(${index})">
+                    <i class="bi ${item.hidden ? 'bi-eye' : 'bi-eye-slash'}"></i> ${item.hidden ? 'Unhide' : 'Hide'}
                 </button>
             </div>
             <div class="grid-2">
@@ -888,9 +924,9 @@ function renderTestimonials(items) {
         div.className = 'editable-item';
         div.innerHTML = `
             <div class="editable-item-header">
-                <span class="editable-item-title">Testimonial ${index + 1}</span>
-                <button type="button" class="btn-remove" onclick="removeTestimonial(${index})">
-                    <i class="bi bi-trash"></i> Remove
+                <span class="editable-item-title">Testimonial ${index + 1}${item.hidden ? ' <span style="color: #dc2626; font-size: 0.85em;">(Hidden)</span>' : ''}</span>
+                <button type="button" class="btn-remove" onclick="toggleHideTestimonial(${index})">
+                    <i class="bi ${item.hidden ? 'bi-eye' : 'bi-eye-slash'}"></i> ${item.hidden ? 'Unhide' : 'Hide'}
                 </button>
             </div>
             <div class="form-group">
@@ -924,9 +960,9 @@ function renderNews(items) {
         div.className = 'editable-item';
         div.innerHTML = `
             <div class="editable-item-header">
-                <span class="editable-item-title">News Item ${index + 1}</span>
-                <button type="button" class="btn-remove" onclick="removeNews(${index})">
-                    <i class="bi bi-trash"></i> Remove
+                <span class="editable-item-title">News Item ${index + 1}${item.hidden ? ' <span style="color: #dc2626; font-size: 0.85em;">(Hidden)</span>' : ''}</span>
+                <button type="button" class="btn-remove" onclick="toggleHideNews(${index})">
+                    <i class="bi ${item.hidden ? 'bi-eye' : 'bi-eye-slash'}"></i> ${item.hidden ? 'Unhide' : 'Hide'}
                 </button>
             </div>
             <div class="grid-2">
@@ -1030,9 +1066,9 @@ function renderStats(items) {
         div.className = 'editable-item';
         div.innerHTML = `
             <div class="editable-item-header">
-                <span class="editable-item-title">Stat ${index + 1}</span>
-                <button type="button" class="btn-remove" onclick="removeStat(${index})">
-                    <i class="bi bi-trash"></i> Remove
+                <span class="editable-item-title">Stat ${index + 1}${item.hidden ? ' <span style="color: #dc2626; font-size: 0.85em;">(Hidden)</span>' : ''}</span>
+                <button type="button" class="btn-remove" onclick="toggleHideStat(${index})">
+                    <i class="bi ${item.hidden ? 'bi-eye' : 'bi-eye-slash'}"></i> ${item.hidden ? 'Unhide' : 'Hide'}
                 </button>
             </div>
             <div class="grid-2">
@@ -1060,9 +1096,6 @@ function renderAboutStats(items) {
         div.innerHTML = `
             <div class="editable-item-header">
                 <span class="editable-item-title">Stat ${index + 1}</span>
-                <button type="button" class="btn-remove" onclick="removeAboutStat(${index})">
-                    <i class="bi bi-trash"></i> Remove
-                </button>
             </div>
             <div class="grid-2">
                 <div class="form-group">
@@ -1136,12 +1169,15 @@ function renderCSR(items) {
     items.forEach((item, index) => {
         const div = document.createElement('div');
         div.className = 'editable-item';
+        if (item.hidden) {
+            div.classList.add('hidden');
+        }
         const iconId = `csr-icon-${index}`;
         div.innerHTML = `
             <div class="editable-item-header">
-                <span class="editable-item-title">CSR Item ${index + 1}</span>
-                <button type="button" class="btn-remove" onclick="removeCSRItem(${index})">
-                    <i class="bi bi-trash"></i> Remove
+                <span class="editable-item-title">CSR Item ${index + 1}${item.hidden ? ' <span style="color: var(--text-secondary); font-size: 0.9em;">(Hidden)</span>' : ''}</span>
+                <button type="button" class="btn-remove" onclick="toggleHideCSRItem(${index})">
+                    <i class="bi ${item.hidden ? 'bi-eye' : 'bi-eye-slash'}"></i> ${item.hidden ? 'Unhide' : 'Hide'}
                 </button>
             </div>
             <div class="form-group">
@@ -1185,12 +1221,15 @@ function renderRecognition(items) {
     items.forEach((item, index) => {
         const div = document.createElement('div');
         div.className = 'editable-item';
+        if (item.hidden) {
+            div.classList.add('hidden');
+        }
         const iconId = `recognition-icon-${index}`;
         div.innerHTML = `
             <div class="editable-item-header">
-                <span class="editable-item-title">Recognition Item ${index + 1}</span>
-                <button type="button" class="btn-remove" onclick="removeRecognitionItem(${index})">
-                    <i class="bi bi-trash"></i> Remove
+                <span class="editable-item-title">Recognition Item ${index + 1}${item.hidden ? ' <span style="color: var(--text-secondary); font-size: 0.9em;">(Hidden)</span>' : ''}</span>
+                <button type="button" class="btn-remove" onclick="toggleHideRecognitionItem(${index})">
+                    <i class="bi ${item.hidden ? 'bi-eye' : 'bi-eye-slash'}"></i> ${item.hidden ? 'Unhide' : 'Hide'}
                 </button>
             </div>
             <div class="form-group">
@@ -1403,114 +1442,192 @@ function renderProjects(items) {
                 </button>
             </div>
             <div class="collapsible-content ${isExpanded ? 'expanded' : ''}">
-                <div class="form-group">
-                    <label>Project Title</label>
-                    <input type="text" class="project-name" value="${item.name || item.title || ''}" placeholder="Project Name">
+                <!-- Basic Information Section -->
+                <div class="project-section-group" style="margin-bottom: 1.5rem; padding: 1rem; background: var(--bg-secondary); border-radius: 8px;">
+                    <h4 style="margin: 0 0 1rem 0; color: var(--text-primary); font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="bi bi-info-circle"></i> Basic Information
+                    </h4>
+                    <div class="form-group">
+                        <label>Project Title</label>
+                        <input type="text" class="project-name" value="${item.name || item.title || ''}" placeholder="Project Name">
+                    </div>
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" class="project-featured" ${item.featured ? 'checked' : ''} style="width: auto;">
+                            Featured Project
+                        </label>
+                        <small>Check if this project should be featured on the homepage</small>
+                    </div>
+                    <div class="form-group">
+                        <label>External Link (optional)</label>
+                        <input type="text" class="project-link" value="${item.link || ''}" placeholder="https://...">
+                        <small>Optional external link for more information</small>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Featured Project?</label>
-                    <input type="checkbox" class="project-featured" ${item.featured ? 'checked' : ''}>
-                    <small>Check if this is a featured project</small>
-                </div>
-                <div class="form-group">
-                    <label>Main Image URL</label>
-                    <div style="display: flex; gap: 0.5rem; align-items: flex-start;">
-                        <input type="text" class="project-main-image" value="${item.mainImage || item.images?.[0] || ''}" placeholder="images/Projects/..." style="flex: 1; padding: 0.4rem 0.5rem !important; line-height: 1.3; height: auto; min-height: auto;">
-                        <button type="button" class="btn-select-file project-main-file-btn" data-index="${index}" title="Select from existing files">
-                            <i class="bi bi-folder"></i>
+
+                <!-- Images Section -->
+                <div class="project-section-group" style="margin-bottom: 1.5rem; padding: 1rem; background: var(--bg-secondary); border-radius: 8px;">
+                    <h4 style="margin: 0 0 1rem 0; color: var(--text-primary); font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="bi bi-images"></i> Images
+                    </h4>
+                    <div class="form-group">
+                        <label>Main Image</label>
+                        <div style="display: flex; gap: 0.5rem; align-items: flex-start;">
+                            <input type="text" class="project-main-image" value="${item.mainImage || item.images?.[0] || ''}" placeholder="images/Projects/..." style="flex: 1; padding: 0.4rem 0.5rem !important; line-height: 1.3; height: auto; min-height: auto;">
+                            <button type="button" class="btn-select-file project-main-file-btn" data-index="${index}" title="Select from existing files">
+                                <i class="bi bi-folder"></i>
+                            </button>
+                        </div>
+                        <div class="file-upload-wrapper" style="margin-top: 0.5rem;">
+                            <input type="file" class="project-image-upload file-upload-input" accept="image/*" data-index="${index}">
+                            <label for="project-image-upload-${index}" class="file-upload-label">
+                                <i class="bi bi-upload"></i>
+                                <span>Upload Image</span>
+                            </label>
+                        </div>
+                        <img class="image-preview project-main-image-preview" style="display: none; max-width: 100%; max-height: 150px; margin-top: 0.5rem; border-radius: 4px; border: 1px solid var(--border-color);">
+                    </div>
+                    <div class="form-group">
+                        <label>Additional Images</label>
+                        <div class="project-additional-images" data-index="${index}">
+                            ${(item.images || []).slice(1).map((img, imgIndex) => `
+                                <div class="additional-image-item" style="margin-bottom: 0.75rem;">
+                                    <div style="display: flex; gap: 0.5rem; align-items: flex-start;">
+                                        <input type="text" class="additional-image-input" value="${img}" placeholder="images/Projects/..." style="flex: 1; padding: 0.4rem 0.5rem !important; line-height: 1.3; height: auto; min-height: auto;">
+                                        <button type="button" class="btn-select-file additional-image-file-btn" data-project="${index}" data-image="${imgIndex}" title="Select from existing files">
+                                            <i class="bi bi-folder"></i>
+                                        </button>
+                                        <button type="button" class="btn-remove-small" onclick="removeAdditionalImage(${index}, ${imgIndex})" title="Remove image">
+                                            <i class="bi bi-x"></i>
+                                        </button>
+                                    </div>
+                                    <div class="file-upload-wrapper" style="margin-top: 0.5rem;">
+                                        <input type="file" class="additional-image-upload file-upload-input" accept="image/*" data-project="${index}" data-image="${imgIndex}">
+                                        <label class="file-upload-label">
+                                            <i class="bi bi-upload"></i>
+                                            <span>Upload Image</span>
+                                        </label>
+                                    </div>
+                                    <img class="image-preview additional-image-preview" style="display: none; max-width: 100%; max-height: 150px; margin-top: 0.5rem; border-radius: 4px; border: 1px solid var(--border-color);">
+                                </div>
+                            `).join('')}
+                        </div>
+                        <button type="button" class="btn-add-small" onclick="addAdditionalImage(${index})" style="margin-top: 0.75rem; display: inline-flex; align-items: center; gap: 0.5rem;">
+                            <i class="bi bi-plus-circle"></i> Add Image
                         </button>
                     </div>
-                    <div class="file-upload-wrapper" style="margin-top: 0.5rem;">
-                        <input type="file" class="project-image-upload file-upload-input" accept="image/*" data-index="${index}">
-                        <label for="project-image-upload-${index}" class="file-upload-label">
-                            <i class="bi bi-upload"></i>
-                            <span>Upload Image</span>
-                        </label>
+                </div>
+
+                <!-- Quick Info Section -->
+                <div class="project-section-group" style="margin-bottom: 1.5rem; padding: 1rem; background: var(--bg-secondary); border-radius: 8px;">
+                    <h4 style="margin: 0 0 1rem 0; color: var(--text-primary); font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="bi bi-tags"></i> Quick Info
+                    </h4>
+                    <div class="form-group">
+                        <label>Meta Items</label>
+                        <div class="meta-items-list" data-project-index="${index}">
+                            ${(item.meta || []).map((m, metaIndex) => {
+                                const icon = typeof m === 'string' ? (m.split('|')[0] || 'bi-info') : (m.icon || 'bi-info');
+                                const value = typeof m === 'string' ? (m.split('|')[2] || m.split('|')[1] || '') : (m.value || m.label || '');
+                                return `
+                                    <div class="meta-item-row" data-meta-index="${metaIndex}">
+                                        <button type="button" class="icon-picker-btn" onclick="createIconPicker('meta-icon-${index}-${metaIndex}', '${icon}')">
+                                            <i class="bi ${icon}" id="meta-icon-preview-${index}-${metaIndex}"></i>
+                                            <span>Pick Icon</span>
+                                        </button>
+                                        <input type="text" class="meta-icon-input" id="meta-icon-${index}-${metaIndex}" value="${icon}" style="display: none;">
+                                        <input type="text" class="meta-value-input" placeholder="Text (e.g., Hammarsdale–Cato Ridge, N3 Corridor)" value="${value}" style="flex: 1;">
+                                        <button type="button" class="btn-remove-small" onclick="removeMetaItem(${index}, ${metaIndex})">
+                                            <i class="bi bi-x"></i>
+                                        </button>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                        <button type="button" class="btn-add-small" onclick="addMetaItem(${index})">
+                            <i class="bi bi-plus-circle"></i> Add Meta Item
+                        </button>
                     </div>
-                    <img class="image-preview project-main-image-preview" style="display: none; max-width: 100%; max-height: 150px; margin-top: 0.5rem; border-radius: 4px; border: 1px solid var(--border-color);">
-                </div>
-                <div class="form-group">
-                    <label>Additional Images</label>
-                    <div class="project-additional-images" data-index="${index}">
-                        ${(item.images || []).slice(1).map((img, imgIndex) => `
-                            <div class="additional-image-item" style="margin-bottom: 0.75rem;">
-                                <div style="display: flex; gap: 0.5rem; align-items: flex-start;">
-                                    <input type="text" class="additional-image-input" value="${img}" placeholder="images/Projects/..." style="flex: 1; padding: 0.4rem 0.5rem !important; line-height: 1.3; height: auto; min-height: auto;">
-                                    <button type="button" class="btn-select-file additional-image-file-btn" data-project="${index}" data-image="${imgIndex}" title="Select from existing files">
-                                        <i class="bi bi-folder"></i>
-                                    </button>
-                                    <button type="button" class="btn-remove-small" onclick="removeAdditionalImage(${index}, ${imgIndex})" title="Remove image">
-                                        <i class="bi bi-x"></i>
-                                    </button>
-                                </div>
-                                <div class="file-upload-wrapper" style="margin-top: 0.5rem;">
-                                    <input type="file" class="additional-image-upload file-upload-input" accept="image/*" data-project="${index}" data-image="${imgIndex}">
-                                    <label class="file-upload-label">
-                                        <i class="bi bi-upload"></i>
-                                        <span>Upload Image</span>
-                                    </label>
-                                </div>
-                                <img class="image-preview additional-image-preview" style="display: none; max-width: 100%; max-height: 150px; margin-top: 0.5rem; border-radius: 4px; border: 1px solid var(--border-color);">
-                            </div>
-                        `).join('')}
+                    <div class="form-group">
+                        <label>Feature Tags</label>
+                        <div class="features-list" data-project-index="${index}">
+                            ${(item.features || []).map((feature, featureIndex) => {
+                                // Handle both old format (string) and new format (object with icon and text)
+                                const featureObj = typeof feature === 'string' ? { text: feature, icon: 'bi-tag' } : feature;
+                                const featureIcon = featureObj.icon || 'bi-tag';
+                                const featureText = featureObj.text || featureObj || '';
+                                return `
+                                    <div class="feature-item-row" data-feature-index="${featureIndex}">
+                                        <button type="button" class="icon-picker-btn" onclick="createIconPicker('feature-icon-${index}-${featureIndex}', '${featureIcon}')">
+                                            <i class="bi ${featureIcon.startsWith('bi-') ? featureIcon : 'bi-' + featureIcon}" id="feature-icon-preview-${index}-${featureIndex}"></i>
+                                            <span>Pick Icon</span>
+                                        </button>
+                                        <input type="text" class="feature-icon-input" id="feature-icon-${index}-${featureIndex}" value="${featureIcon}" style="display: none;">
+                                        <input type="text" class="feature-tag-input" placeholder="Feature tag (e.g., Logistics Hub)" value="${featureText}" style="flex: 1;">
+                                        <button type="button" class="btn-remove-small" onclick="removeFeatureTag(${index}, ${featureIndex})">
+                                            <i class="bi bi-x"></i>
+                                        </button>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                        <button type="button" class="btn-add-small" onclick="addFeatureTag(${index})">
+                            <i class="bi bi-plus-circle"></i> Add Feature Tag
+                        </button>
                     </div>
-                    <button type="button" class="btn-add-small" onclick="addAdditionalImage(${index})" style="margin-top: 0.75rem; display: inline-flex; align-items: center; gap: 0.5rem;">
-                        <i class="bi bi-plus-circle"></i> Add Image
-                    </button>
                 </div>
-                <div class="form-group">
-                    <label>Meta Items</label>
-                    <div class="meta-items-list" data-project-index="${index}">
-                        ${(item.meta || []).map((m, metaIndex) => {
-                            const icon = typeof m === 'string' ? (m.split('|')[0] || 'bi-info') : (m.icon || 'bi-info');
-                            // Handle both old format (with label) and new format (value only)
-                            const value = typeof m === 'string' ? (m.split('|')[2] || m.split('|')[1] || '') : (m.value || m.label || '');
-                            return `
-                                <div class="meta-item-row" data-meta-index="${metaIndex}">
-                                    <button type="button" class="icon-picker-btn" onclick="createIconPicker('meta-icon-${index}-${metaIndex}', '${icon}')">
-                                        <i class="bi ${icon}" id="meta-icon-preview-${index}-${metaIndex}"></i>
-                                        <span>Pick Icon</span>
-                                    </button>
-                                    <input type="text" class="meta-icon-input" id="meta-icon-${index}-${metaIndex}" value="${icon}" style="display: none;">
-                                    <input type="text" class="meta-value-input" placeholder="Text (e.g., Hammarsdale–Cato Ridge, N3 Corridor)" value="${value || label}" style="flex: 1;">
-                                    <button type="button" class="btn-remove-small" onclick="removeMetaItem(${index}, ${metaIndex})">
-                                        <i class="bi bi-x"></i>
-                                    </button>
-                                </div>
-                            `;
-                        }).join('')}
+
+                <!-- Content Section -->
+                <div class="project-section-group" style="margin-bottom: 1.5rem; padding: 1rem; background: var(--bg-secondary); border-radius: 8px;">
+                    <h4 style="margin: 0 0 1rem 0; color: var(--text-primary); font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="bi bi-file-text"></i> Content
+                    </h4>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea class="project-description" rows="6" placeholder="First paragraph...&#10;&#10;Second paragraph...">${(item.description || (item.descriptions || [])).join ? (item.description || (item.descriptions || [])).join('\n\n') : (item.description || '')}</textarea>
+                        <small>Each paragraph separated by a blank line</small>
                     </div>
-                    <button type="button" class="btn-add-small" onclick="addMetaItem(${index})">
-                        <i class="bi bi-plus-circle"></i> Add Meta Item
-                    </button>
+                    <div class="form-group">
+                        <label>Custom Content Sections</label>
+                        <small style="display: block; margin-bottom: 0.75rem; color: var(--text-secondary); line-height: 1.5;">
+                            Add custom sections with headings and content (e.g., "Sustainability & Infrastructure Resilience", "Progress Updates", etc.). <strong>Note:</strong> "Anchor Occupiers & Facilities" is automatically created from the Tenants list above, so you don't need to add it here.
+                        </small>
+                        <div class="sections-list" data-project-index="${index}">
+                            ${(item.sections || []).map((s, sectionIndex) => {
+                                const heading = typeof s === 'string' ? (s.split('|')[0] || '') : (s.heading || '');
+                                const content = typeof s === 'string' ? (s.split('|')[1] || '') : (s.content || '');
+                                return `
+                                    <div class="section-item-row" data-section-index="${sectionIndex}">
+                                        <div style="display: flex; flex-direction: column; gap: 0.5rem; flex: 1;">
+                                            <input type="text" class="section-heading-input" placeholder="Section Heading (e.g., Sustainability & Infrastructure Resilience)" value="${heading}" style="width: 100%;">
+                                            <textarea class="section-content-input" rows="3" placeholder="Section content (paragraphs, lists, etc.)...">${content}</textarea>
+                                        </div>
+                                        <button type="button" class="btn-remove-small" onclick="removeSectionItem(${index}, ${sectionIndex})" style="align-self: flex-start; margin-top: 0;">
+                                            <i class="bi bi-x"></i>
+                                        </button>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                        <button type="button" class="btn-add-small" onclick="addSectionItem(${index})" style="margin-top: 0.75rem;">
+                            <i class="bi bi-plus-circle"></i> Add Custom Section
+                        </button>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Description Paragraphs (one per line)</label>
-                    <textarea class="project-description" rows="6" placeholder="First paragraph...&#10;&#10;Second paragraph...">${(item.description || (item.descriptions || [])).join ? (item.description || (item.descriptions || [])).join('\n\n') : (item.description || '')}</textarea>
-                    <small>Each paragraph separated by a blank line</small>
-                </div>
-                <div class="form-group">
-                    <label>Section Headings & Content (one per line: Heading|Content)</label>
-                    <textarea class="project-sections" rows="4" placeholder="Anchor Occupiers & Facilities|List of tenants...&#10;Sustainability|Sustainability info...">${(item.sections || []).map(s => {
-                        if (typeof s === 'string') return s;
-                        return `${s.heading || ''}|${s.content || ''}`;
-                    }).join('\n')}</textarea>
-                    <small>Format: Heading|Content (one per line)</small>
-                </div>
-                <div class="form-group">
-                    <label>Tenants/Occupiers (one per line)</label>
-                    <textarea class="project-tenants" rows="4" placeholder="Mr Price Group - National Distribution Centre&#10;Ackermans - Mega Distribution Centre">${(item.tenants || []).join('\n')}</textarea>
-                    <small>One tenant per line</small>
-                </div>
-                <div class="form-group">
-                    <label>Feature Tags (comma-separated)</label>
-                    <input type="text" class="project-features" value="${(item.features || []).join(', ')}" placeholder="Logistics Hub, Mega DCs, N3 Corridor">
-                    <small>Comma-separated feature tags</small>
-                </div>
-                <div class="form-group">
-                    <label>External Link (optional)</label>
-                    <input type="text" class="project-link" value="${item.link || ''}" placeholder="https://...">
-                    <small>Optional external link for more information</small>
+
+                <!-- Tenants Section -->
+                <div class="project-section-group" style="margin-bottom: 1.5rem; padding: 1rem; background: var(--bg-secondary); border-radius: 8px;">
+                    <h4 style="margin: 0 0 1rem 0; color: var(--text-primary); font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="bi bi-building"></i> Tenants & Occupiers List
+                    </h4>
+                    <div class="form-group">
+                        <label>Tenants & Occupiers</label>
+                        <small style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary); line-height: 1.5;">
+                            <strong>This automatically creates the "Anchor Occupiers & Facilities" section.</strong> Each tenant on a separate line. This will appear as a bulleted list under the "Anchor Occupiers & Facilities" heading on the project page.
+                        </small>
+                        <textarea class="project-tenants" rows="6" placeholder="Mr Price Group - National Distribution Centre, Phase 1: 56,000 m² (completed 2017)&#10;Ackermans - Mega Distribution Centre, 94,000 m² DC operational since September 2018&#10;Pepkor / PEP - National Distribution Centre, 122,000 m² fully automated mega-facility">${(item.tenants || []).join('\n')}</textarea>
+                        <small style="color: var(--text-secondary);">One tenant per line. This will automatically create/update the "Anchor Occupiers & Facilities" section.</small>
+                    </div>
                 </div>
             </div>
         `;
@@ -1674,15 +1791,21 @@ function addAboutStat() {
     renderAboutStats(content.aboutPage.stats.items);
 }
 
-function addValue() {
-    const content = getContent();
-    if (!content.aboutPage) content.aboutPage = {};
-    if (!content.aboutPage.values) content.aboutPage.values = { items: [] };
-    if (!content.aboutPage.values.items) content.aboutPage.values.items = [];
-    content.aboutPage.values.items.push({ icon: 'bi-star', title: '', description: '' });
-    saveContent(content);
-    renderValues(content.aboutPage.values.items);
-}
+window.addValue = function() {
+    try {
+        const content = getContent();
+        if (!content.aboutPage) content.aboutPage = {};
+        if (!content.aboutPage.values) content.aboutPage.values = { items: [] };
+        if (!content.aboutPage.values.items) content.aboutPage.values.items = [];
+        content.aboutPage.values.items.push({ icon: 'bi-star', title: '', description: '' });
+        saveContent(content);
+        renderValues(content.aboutPage.values.items);
+        showMessage('Value added successfully!');
+    } catch (error) {
+        console.error('Error adding value:', error);
+        showMessage('Error adding value: ' + error.message, 'error');
+    }
+};
 
 function addCSRItem() {
     const content = getContent();
@@ -1879,15 +2002,32 @@ window.extractProjectsManually = function(doc) {
             });
         }
         
-        // Get features
+        // Get features (with icons)
         const features = [];
         card.querySelectorAll('.feature-tag').forEach(tag => {
             const icon = tag.querySelector('i');
-            let text = tag.textContent.trim();
-            if (icon) {
-                text = text.replace(icon.textContent, '').trim();
+            // Clone the tag to safely remove icon and get text
+            const clone = tag.cloneNode(true);
+            const cloneIcon = clone.querySelector('i');
+            if (cloneIcon) {
+                cloneIcon.remove();
             }
-            if (text) features.push(text);
+            const text = clone.textContent.trim();
+            
+            if (text) {
+                // Extract icon class (e.g., "bi bi-truck me-1" -> "bi-truck")
+                let iconClass = 'bi-tag';
+                if (icon) {
+                    const fullClass = icon.className;
+                    // Find the bi-* class (skip "bi" and "me-1" etc.)
+                    const biMatch = fullClass.match(/\bbi-[\w-]+/);
+                    if (biMatch) {
+                        // Keep the full "bi-truck" format (don't remove "bi-")
+                        iconClass = biMatch[0];
+                    }
+                }
+                features.push({ icon: iconClass, text: text });
+            }
         });
         
         // Get link
@@ -1928,13 +2068,27 @@ window.extractProjectsManually = function(doc) {
     
     console.log(`Step 12: Extracted ${processedCount} projects total`);
     console.log('Step 13: Getting existing content');
-    const existingContent = getContent();
+    // Use window.getContent if available, otherwise get from localStorage directly
+    let existingContent;
+    if (typeof window.getContent === 'function') {
+        existingContent = window.getContent();
+    } else {
+        // Fallback: get from localStorage directly
+        const stored = localStorage.getItem('rokwil_admin_content');
+        existingContent = stored ? JSON.parse(stored) : {};
+    }
     console.log('Step 14: Setting projects page data');
     if (!existingContent.projectsPage) existingContent.projectsPage = {};
     existingContent.projectsPage.projects = { items: projects };
     
     console.log('Step 15: Saving content to localStorage');
-    saveContent(existingContent);
+    // Use window.saveContent if available, otherwise save to localStorage directly
+    if (typeof window.saveContent === 'function') {
+        window.saveContent(existingContent);
+    } else {
+        // Fallback: save to localStorage directly
+        localStorage.setItem('rokwil_admin_content', JSON.stringify(existingContent));
+    }
     console.log('Step 16: Verifying save');
     const verify = localStorage.getItem('rokwil_admin_content');
     console.log('Step 17: Save verified, content length:', verify ? verify.length : 0);
@@ -1958,59 +2112,109 @@ window.extractProjectsManually = function(doc) {
     console.log('=== EXTRACTION COMPLETE ===');
 }
 
-// Remove functions - Make them global
-window.removeFeature = function(index) {
-    if (!confirm('Remove this feature?')) return;
-    const content = getContent();
-    if (content.homePage && content.homePage.features && content.homePage.features.items) {
-        content.homePage.features.items.splice(index, 1);
-        saveContent(content);
-        renderFeatures(content.homePage.features.items);
-        showMessage('Feature removed successfully!');
+// Helper function to update section toggle button
+function updateSectionToggleButton(buttonId, isHidden) {
+    const button = document.getElementById(buttonId);
+    if (button) {
+        if (isHidden) {
+            button.innerHTML = '<i class="bi bi-eye"></i> Unhide Section';
+            button.classList.add('hidden-section');
+        } else {
+            button.innerHTML = '<i class="bi bi-eye-slash"></i> Hide Section';
+            button.classList.remove('hidden-section');
+        }
     }
+}
+
+// Section-level toggle functions for home page - Make them global
+window.toggleHideFeaturesSection = function() {
+    const content = getContent();
+    if (!content.homePage) content.homePage = {};
+    if (!content.homePage.features) content.homePage.features = {};
+    content.homePage.features.hidden = !content.homePage.features.hidden;
+    saveContent(content);
+    updateSectionToggleButton('toggleFeaturesSection', content.homePage.features.hidden);
+    showMessage(content.homePage.features.hidden ? 'Features section hidden successfully!' : 'Features section unhidden successfully!');
 };
 
-window.removeShowcase = function(index) {
-    if (!confirm('Remove this showcase item?')) return;
+window.toggleHideTestimonialsSection = function() {
     const content = getContent();
-    if (content.homePage && content.homePage.showcase && content.homePage.showcase.items) {
-        content.homePage.showcase.items.splice(index, 1);
+    if (!content.homePage) content.homePage = {};
+    if (!content.homePage.testimonials) content.homePage.testimonials = {};
+    content.homePage.testimonials.hidden = !content.homePage.testimonials.hidden;
+    saveContent(content);
+    updateSectionToggleButton('toggleTestimonialsSection', content.homePage.testimonials.hidden);
+    showMessage(content.homePage.testimonials.hidden ? 'Testimonials section hidden successfully!' : 'Testimonials section unhidden successfully!');
+};
+
+window.toggleHideNewsSection = function() {
+    const content = getContent();
+    if (!content.homePage) content.homePage = {};
+    if (!content.homePage.news) content.homePage.news = {};
+    content.homePage.news.hidden = !content.homePage.news.hidden;
+    saveContent(content);
+    updateSectionToggleButton('toggleNewsSection', content.homePage.news.hidden);
+    showMessage(content.homePage.news.hidden ? 'News section hidden successfully!' : 'News section unhidden successfully!');
+};
+
+window.toggleHideStatsSection = function() {
+    const content = getContent();
+    if (!content.homePage) content.homePage = {};
+    if (!content.homePage.stats) content.homePage.stats = {};
+    content.homePage.stats.hidden = !content.homePage.stats.hidden;
+    saveContent(content);
+    updateSectionToggleButton('toggleStatsSection', content.homePage.stats.hidden);
+    showMessage(content.homePage.stats.hidden ? 'Stats section hidden successfully!' : 'Stats section unhidden successfully!');
+};
+
+window.toggleHideShowcaseSection = function() {
+    const content = getContent();
+    if (!content.homePage) content.homePage = {};
+    if (!content.homePage.showcase) content.homePage.showcase = {};
+    content.homePage.showcase.hidden = !content.homePage.showcase.hidden;
+    saveContent(content);
+    updateSectionToggleButton('toggleShowcaseSection', content.homePage.showcase.hidden);
+    showMessage(content.homePage.showcase.hidden ? 'Showcase section hidden successfully!' : 'Showcase section unhidden successfully!');
+};
+
+// Individual item toggle functions for home page - Make them global
+window.toggleHideShowcase = function(index) {
+    const content = getContent();
+    if (content.homePage && content.homePage.showcase && content.homePage.showcase.items && content.homePage.showcase.items[index]) {
+        content.homePage.showcase.items[index].hidden = !content.homePage.showcase.items[index].hidden;
         saveContent(content);
         renderShowcase(content.homePage.showcase.items);
-        showMessage('Showcase item removed successfully!');
+        showMessage(content.homePage.showcase.items[index].hidden ? 'Showcase item hidden successfully!' : 'Showcase item unhidden successfully!');
     }
 };
 
-window.removeTestimonial = function(index) {
-    if (!confirm('Remove this testimonial?')) return;
+window.toggleHideTestimonial = function(index) {
     const content = getContent();
-    if (content.homePage && content.homePage.testimonials && content.homePage.testimonials.items) {
-        content.homePage.testimonials.items.splice(index, 1);
+    if (content.homePage && content.homePage.testimonials && content.homePage.testimonials.items && content.homePage.testimonials.items[index]) {
+        content.homePage.testimonials.items[index].hidden = !content.homePage.testimonials.items[index].hidden;
         saveContent(content);
         renderTestimonials(content.homePage.testimonials.items);
-        showMessage('Testimonial removed successfully!');
+        showMessage(content.homePage.testimonials.items[index].hidden ? 'Testimonial hidden successfully!' : 'Testimonial unhidden successfully!');
     }
 };
 
-window.removeNews = function(index) {
-    if (!confirm('Remove this news item?')) return;
+window.toggleHideNews = function(index) {
     const content = getContent();
-    if (content.homePage && content.homePage.news && content.homePage.news.items) {
-        content.homePage.news.items.splice(index, 1);
+    if (content.homePage && content.homePage.news && content.homePage.news.items && content.homePage.news.items[index]) {
+        content.homePage.news.items[index].hidden = !content.homePage.news.items[index].hidden;
         saveContent(content);
         renderNews(content.homePage.news.items);
-        showMessage('News item removed successfully!');
+        showMessage(content.homePage.news.items[index].hidden ? 'News item hidden successfully!' : 'News item unhidden successfully!');
     }
 };
 
-window.removeStat = function(index) {
-    if (!confirm('Remove this stat?')) return;
+window.toggleHideStat = function(index) {
     const content = getContent();
-    if (content.homePage && content.homePage.stats && content.homePage.stats.items) {
-        content.homePage.stats.items.splice(index, 1);
+    if (content.homePage && content.homePage.stats && content.homePage.stats.items && content.homePage.stats.items[index]) {
+        content.homePage.stats.items[index].hidden = !content.homePage.stats.items[index].hidden;
         saveContent(content);
         renderStats(content.homePage.stats.items);
-        showMessage('Stat removed successfully!');
+        showMessage(content.homePage.stats.items[index].hidden ? 'Stat hidden successfully!' : 'Stat unhidden successfully!');
     }
 };
 
@@ -2036,25 +2240,27 @@ window.removeValue = function(index) {
     }
 };
 
-window.removeCSRItem = function(index) {
-    if (!confirm('Remove this CSR item?')) return;
+window.toggleHideCSRItem = function(index) {
     const content = getContent();
     if (content.aboutPage && content.aboutPage.csr && content.aboutPage.csr.items) {
-        content.aboutPage.csr.items.splice(index, 1);
-        saveContent(content);
-        renderCSR(content.aboutPage.csr.items);
-        showMessage('CSR item removed successfully!');
+        if (content.aboutPage.csr.items[index]) {
+            content.aboutPage.csr.items[index].hidden = !content.aboutPage.csr.items[index].hidden;
+            saveContent(content);
+            renderCSR(content.aboutPage.csr.items);
+            showMessage(content.aboutPage.csr.items[index].hidden ? 'CSR item hidden' : 'CSR item unhidden');
+        }
     }
 };
 
-window.removeRecognitionItem = function(index) {
-    if (!confirm('Remove this recognition item?')) return;
+window.toggleHideRecognitionItem = function(index) {
     const content = getContent();
     if (content.aboutPage && content.aboutPage.recognition && content.aboutPage.recognition.items) {
-        content.aboutPage.recognition.items.splice(index, 1);
-        saveContent(content);
-        renderRecognition(content.aboutPage.recognition.items);
-        showMessage('Recognition item removed successfully!');
+        if (content.aboutPage.recognition.items[index]) {
+            content.aboutPage.recognition.items[index].hidden = !content.aboutPage.recognition.items[index].hidden;
+            saveContent(content);
+            renderRecognition(content.aboutPage.recognition.items);
+            showMessage(content.aboutPage.recognition.items[index].hidden ? 'Recognition item hidden' : 'Recognition item unhidden');
+        }
     }
 };
 
@@ -2112,6 +2318,122 @@ window.addMetaItem = function(projectIndex) {
         iconInput.addEventListener('input', function() {
             const iconClass = this.value.trim() || 'bi-info';
             preview.className = `bi ${iconClass}`;
+        });
+    }
+};
+
+// Section item management functions
+window.addSectionItem = function(projectIndex) {
+    const projectItem = document.querySelectorAll('#projectsList .editable-item')[projectIndex];
+    if (!projectItem) return;
+    
+    const sectionsList = projectItem.querySelector('.sections-list');
+    if (!sectionsList) return;
+    
+    const sectionIndex = sectionsList.children.length;
+    const newRow = document.createElement('div');
+    newRow.className = 'section-item-row';
+    newRow.setAttribute('data-section-index', sectionIndex);
+    newRow.innerHTML = `
+        <div style="display: flex; flex-direction: column; gap: 0.5rem; flex: 1;">
+            <input type="text" class="section-heading-input" placeholder="Section Heading (e.g., Anchor Occupiers & Facilities)" value="" style="width: 100%;">
+            <textarea class="section-content-input" rows="3" placeholder="Section Content..."></textarea>
+        </div>
+        <button type="button" class="btn-remove-small" onclick="removeSectionItem(${projectIndex}, ${sectionIndex})" style="align-self: flex-start; margin-top: 0;">
+            <i class="bi bi-x"></i>
+        </button>
+    `;
+    sectionsList.appendChild(newRow);
+};
+
+window.removeSectionItem = function(projectIndex, sectionIndex) {
+    const projectItem = document.querySelectorAll('#projectsList .editable-item')[projectIndex];
+    if (!projectItem) return;
+    
+    const sectionsList = projectItem.querySelector('.sections-list');
+    if (!sectionsList) return;
+    
+    const row = sectionsList.querySelector(`[data-section-index="${sectionIndex}"]`);
+    if (row) {
+        row.remove();
+        // Re-index remaining items
+        Array.from(sectionsList.children).forEach((item, index) => {
+            item.setAttribute('data-section-index', index);
+            const removeBtn = item.querySelector('.btn-remove-small');
+            if (removeBtn) {
+                removeBtn.setAttribute('onclick', `removeSectionItem(${projectIndex}, ${index})`);
+            }
+        });
+    }
+};
+
+// Feature tag management functions
+window.addFeatureTag = function(projectIndex) {
+    const projectItem = document.querySelectorAll('#projectsList .editable-item')[projectIndex];
+    if (!projectItem) return;
+    
+    const featuresList = projectItem.querySelector('.features-list');
+    if (!featuresList) return;
+    
+    const featureIndex = featuresList.children.length;
+    const newRow = document.createElement('div');
+    newRow.className = 'feature-item-row';
+    newRow.setAttribute('data-feature-index', featureIndex);
+    newRow.innerHTML = `
+        <button type="button" class="icon-picker-btn" onclick="createIconPicker('feature-icon-${projectIndex}-${featureIndex}', 'bi-tag')">
+            <i class="bi bi-tag" id="feature-icon-preview-${projectIndex}-${featureIndex}"></i>
+            <span>Pick Icon</span>
+        </button>
+        <input type="text" class="feature-icon-input" id="feature-icon-${projectIndex}-${featureIndex}" value="bi-tag" style="display: none;">
+        <input type="text" class="feature-tag-input" placeholder="Feature tag (e.g., Logistics Hub)" value="" style="flex: 1;">
+        <button type="button" class="btn-remove-small" onclick="removeFeatureTag(${projectIndex}, ${featureIndex})">
+            <i class="bi bi-x"></i>
+        </button>
+    `;
+    featuresList.appendChild(newRow);
+    
+    // Setup icon preview update
+    const iconInput = newRow.querySelector('.feature-icon-input');
+    const preview = newRow.querySelector('i[id^="feature-icon-preview"]');
+    if (iconInput && preview) {
+        iconInput.addEventListener('input', function() {
+            let iconClass = this.value.trim() || 'bi-tag';
+            // Ensure it has bi- prefix
+            if (!iconClass.startsWith('bi-')) {
+                iconClass = 'bi-' + iconClass;
+            }
+            preview.className = `bi ${iconClass}`;
+        });
+    }
+};
+
+window.removeFeatureTag = function(projectIndex, featureIndex) {
+    const projectItem = document.querySelectorAll('#projectsList .editable-item')[projectIndex];
+    if (!projectItem) return;
+    
+    const featuresList = projectItem.querySelector('.features-list');
+    if (!featuresList) return;
+    
+    const row = featuresList.querySelector(`[data-feature-index="${featureIndex}"]`);
+    if (row) {
+        row.remove();
+        // Re-index remaining items
+        Array.from(featuresList.children).forEach((item, index) => {
+            item.setAttribute('data-feature-index', index);
+            const iconBtn = item.querySelector('.icon-picker-btn');
+            const iconInput = item.querySelector('.feature-icon-input');
+            const iconPreview = item.querySelector('i[id^="feature-icon-preview"]');
+            if (iconBtn && iconInput && iconPreview) {
+                const newId = `feature-icon-${projectIndex}-${index}`;
+                const currentIcon = iconInput.value || 'bi-tag';
+                iconInput.id = newId;
+                iconPreview.id = `feature-icon-preview-${projectIndex}-${index}`;
+                iconBtn.setAttribute('onclick', `createIconPicker('${newId}', '${currentIcon}')`);
+            }
+            const removeBtn = item.querySelector('.btn-remove-small');
+            if (removeBtn) {
+                removeBtn.setAttribute('onclick', `removeFeatureTag(${projectIndex}, ${index})`);
+            }
         });
     }
 };
@@ -2197,20 +2519,49 @@ function saveProjects() {
         const descriptionText = item.querySelector('.project-description')?.value || '';
         const descriptions = descriptionText.split('\n\n').filter(s => s.trim());
         
-        const sectionsText = item.querySelector('.project-sections')?.value || '';
-        const sections = sectionsText.split('\n').map(line => {
-            const parts = line.split('|').map(s => s.trim());
-            if (parts.length >= 2) {
-                return { heading: parts[0], content: parts[1] };
-            }
-            return null;
-        }).filter(s => s);
-        
+        // Get tenants first (before sections, so we can auto-create the section)
         const tenantsText = item.querySelector('.project-tenants')?.value || '';
         const tenants = tenantsText.split('\n').map(s => s.trim()).filter(s => s);
         
-        const featuresText = item.querySelector('.project-features')?.value || '';
-        const features = featuresText.split(',').map(s => s.trim()).filter(s => s);
+        // Get sections from new structure (excluding "Anchor Occupiers" sections - we'll add from tenants)
+        const sections = [];
+        const sectionRows = item.querySelectorAll('.section-item-row');
+        sectionRows.forEach(row => {
+            const headingInput = row.querySelector('.section-heading-input');
+            const contentInput = row.querySelector('.section-content-input');
+            const heading = headingInput?.value.trim() || '';
+            const content = contentInput?.value.trim() || '';
+            
+            // Skip "Anchor Occupiers & Facilities" sections - we'll add it automatically from tenants
+            if (heading.toLowerCase().includes('anchor occupiers')) {
+                return; // Skip this section, it will be created from tenants
+            }
+            
+            if (heading || content) {
+                sections.push({ heading, content });
+            }
+        });
+        
+        // Automatically create "Anchor Occupiers & Facilities" section from tenants list
+        if (tenants.length > 0) {
+            sections.push({ 
+                heading: 'Anchor Occupiers & Facilities', 
+                content: tenants.join('\n') 
+            });
+        }
+        
+        // Get features from new structure
+        const features = [];
+        const featureRows = item.querySelectorAll('.feature-item-row');
+        featureRows.forEach(row => {
+            const iconInput = row.querySelector('.feature-icon-input');
+            const featureInput = row.querySelector('.feature-tag-input');
+            const icon = iconInput?.value.trim() || 'bi-tag';
+            const text = featureInput?.value.trim() || '';
+            if (text) {
+                features.push({ icon, text });
+            }
+        });
         
         const link = item.querySelector('.project-link')?.value || '';
         
@@ -2699,11 +3050,41 @@ function filterFileSelector(searchTerm) {
 
 // Show message
 function showMessage(text, type = 'success') {
-    const messageEl = document.getElementById('message');
-    messageEl.textContent = text;
-    messageEl.className = `message ${type} show`;
+    const toastContainer = document.getElementById('toastContainer');
+    if (!toastContainer) {
+        console.warn('Toast container not found');
+        return;
+    }
+    
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    // Set icon based on type
+    let icon = 'bi-check-circle-fill';
+    if (type === 'error') icon = 'bi-x-circle-fill';
+    else if (type === 'info') icon = 'bi-info-circle-fill';
+    else if (type === 'warning') icon = 'bi-exclamation-triangle-fill';
+    
+    toast.innerHTML = `
+        <i class="bi ${icon} toast-icon"></i>
+        <span class="toast-content">${text}</span>
+        <button class="toast-close" onclick="this.parentElement.remove()">
+            <i class="bi bi-x"></i>
+        </button>
+    `;
+    
+    // Add to container
+    toastContainer.appendChild(toast);
+    
+    // Auto remove after 5 seconds
     setTimeout(() => {
-        messageEl.classList.remove('show');
+        toast.classList.add('fade-out');
+        setTimeout(() => {
+            if (toast.parentElement) {
+                toast.remove();
+            }
+        }, 300);
     }, 5000);
 }
 
@@ -2793,10 +3174,13 @@ document.addEventListener('DOMContentLoaded', () => {
             content.homePage.showcase.title = document.getElementById('showcaseTitle').value;
             content.homePage.showcase.subtitle = document.getElementById('showcaseSubtitle').value;
             
-            const items = Array.from(document.querySelectorAll('#showcaseList .editable-item')).map(item => ({
+            // Preserve hidden state when saving
+            const existingItems = content.homePage.showcase.items || [];
+            const items = Array.from(document.querySelectorAll('#showcaseList .editable-item')).map((item, index) => ({
                 image: item.querySelector('.showcase-image').value,
                 title: item.querySelector('.showcase-title').value,
-                description: item.querySelector('.showcase-description').value
+                description: item.querySelector('.showcase-description').value,
+                hidden: existingItems[index] ? existingItems[index].hidden : false
             }));
             
             content.homePage.showcase.items = items;
@@ -2818,11 +3202,14 @@ document.addEventListener('DOMContentLoaded', () => {
             content.homePage.testimonials.title = document.getElementById('testimonialsTitle').value;
             content.homePage.testimonials.subtitle = document.getElementById('testimonialsSubtitle').value;
             
-            const items = Array.from(document.querySelectorAll('#testimonialsList .editable-item')).map(item => ({
+            // Preserve hidden state when saving
+            const existingTestimonials = content.homePage.testimonials.items || [];
+            const items = Array.from(document.querySelectorAll('#testimonialsList .editable-item')).map((item, index) => ({
                 quote: item.querySelector('.testimonial-quote').value,
                 author: item.querySelector('.testimonial-author').value,
                 title: item.querySelector('.testimonial-title').value,
-                avatar: item.querySelector('.testimonial-avatar').value
+                avatar: item.querySelector('.testimonial-avatar').value,
+                hidden: existingTestimonials[index] ? existingTestimonials[index].hidden : false
             }));
             
             content.homePage.testimonials.items = items;
@@ -2844,13 +3231,16 @@ document.addEventListener('DOMContentLoaded', () => {
             content.homePage.news.title = document.getElementById('newsTitle').value;
             content.homePage.news.subtitle = document.getElementById('newsSubtitle').value;
             
-            const items = Array.from(document.querySelectorAll('#newsList .editable-item')).map(item => ({
+            // Preserve hidden state when saving
+            const existingNews = content.homePage.news.items || [];
+            const items = Array.from(document.querySelectorAll('#newsList .editable-item')).map((item, index) => ({
                 image: item.querySelector('.news-image').value,
                 date: item.querySelector('.news-date').value,
                 category: item.querySelector('.news-category').value,
                 title: item.querySelector('.news-title').value,
                 description: item.querySelector('.news-description').value,
-                link: item.querySelector('.news-link').value
+                link: item.querySelector('.news-link').value,
+                hidden: existingNews[index] ? existingNews[index].hidden : false
             }));
             
             content.homePage.news.items = items;
@@ -2934,7 +3324,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const storyValue = storyEl ? storyEl.value : '';
             content.aboutPage.content.storyBadge = document.getElementById('aboutStoryBadge')?.value || '';
             content.aboutPage.content.storyHeading = document.getElementById('aboutStoryHeading')?.value || '';
-            content.aboutPage.content.story = storyValue.split('\n\n').filter(p => p.trim());
+            // Split by single newline (one paragraph per line as indicated in the UI)
+            content.aboutPage.content.story = storyValue.split('\n').filter(p => p.trim());
             content.aboutPage.content.image = document.getElementById('aboutImage')?.value || '';
             if (saveContent(content)) {
                 showMessage('About content saved successfully!');
@@ -3034,13 +3425,17 @@ document.addEventListener('DOMContentLoaded', () => {
             
             content.aboutPage.csr.title = document.getElementById('csrTitle')?.value || '';
             content.aboutPage.csr.subtitle = document.getElementById('csrSubtitle')?.value || '';
+            
+            // Preserve hidden state when saving
+            const existingItems = content.aboutPage.csr.items || [];
             const items = [];
-            document.querySelectorAll('#csrList .editable-item').forEach(item => {
+            document.querySelectorAll('#csrList .editable-item').forEach((item, index) => {
                 const iconInput = item.querySelector('.csr-icon');
                 items.push({
                     icon: iconInput ? iconInput.value : '',
                     title: item.querySelector('.csr-title')?.value || '',
-                    description: item.querySelector('.csr-description')?.value || ''
+                    description: item.querySelector('.csr-description')?.value || '',
+                    hidden: existingItems[index] ? existingItems[index].hidden : false
                 });
             });
             content.aboutPage.csr.items = items;
@@ -3061,13 +3456,17 @@ document.addEventListener('DOMContentLoaded', () => {
             
             content.aboutPage.recognition.title = document.getElementById('recognitionTitle')?.value || '';
             content.aboutPage.recognition.subtitle = document.getElementById('recognitionSubtitle')?.value || '';
+            
+            // Preserve hidden state when saving
+            const existingItems = content.aboutPage.recognition.items || [];
             const items = [];
-            document.querySelectorAll('#recognitionList .editable-item').forEach(item => {
+            document.querySelectorAll('#recognitionList .editable-item').forEach((item, index) => {
                 const iconInput = item.querySelector('.recognition-icon');
                 items.push({
                     icon: iconInput ? iconInput.value : '',
                     title: item.querySelector('.recognition-title')?.value || '',
-                    description: item.querySelector('.recognition-description')?.value || ''
+                    description: item.querySelector('.recognition-description')?.value || '',
+                    hidden: existingItems[index] ? existingItems[index].hidden : false
                 });
             });
             content.aboutPage.recognition.items = items;

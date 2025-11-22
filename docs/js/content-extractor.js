@@ -420,7 +420,17 @@ function extractAboutPageContent() {
     }
 
     // Extract recognition
-    const recognitionSection = document.querySelector('div:has(.recognition-card)');
+    // Find Recognition section - it has bg-secondary background, padding 80px, and contains recognition-card
+    const allBgSecondaryDivs = document.querySelectorAll('div[style*="background: var(--bg-secondary)"]');
+    let recognitionSection = null;
+    for (const div of allBgSecondaryDivs) {
+        const style = div.getAttribute('style') || '';
+        if (style.includes('padding: 80px') && div.querySelector('.recognition-card')) {
+            recognitionSection = div;
+            break;
+        }
+    }
+    
     if (recognitionSection) {
         const recognitionTitle = recognitionSection.querySelector('.section-title');
         const recognitionSubtitle = recognitionSection.querySelector('.section-subtitle');
@@ -581,19 +591,32 @@ function extractProjectsPageContent() {
             });
         }
         
-        // Extract features (strip icons from text)
+        // Extract features (with icons)
         const features = [];
         const featureTags = card.querySelectorAll('.feature-tag');
         featureTags.forEach(tag => {
-            // Get text content, which will exclude the icon
             const icon = tag.querySelector('i');
-            let text = tag.textContent.trim();
-            // Remove icon text if present
-            if (icon) {
-                text = text.replace(icon.textContent, '').trim();
+            // Clone the tag to safely remove icon and get text
+            const clone = tag.cloneNode(true);
+            const cloneIcon = clone.querySelector('i');
+            if (cloneIcon) {
+                cloneIcon.remove();
             }
+            const text = clone.textContent.trim();
+            
             if (text) {
-                features.push(text);
+                // Extract icon class (e.g., "bi bi-truck me-1" -> "bi-truck")
+                let iconClass = 'bi-tag';
+                if (icon) {
+                    const fullClass = icon.className;
+                    // Find the bi-* class (skip "bi" and "me-1" etc.)
+                    const biMatch = fullClass.match(/\bbi-[\w-]+/);
+                    if (biMatch) {
+                        // Keep the full "bi-truck" format (don't remove "bi-")
+                        iconClass = biMatch[0];
+                    }
+                }
+                features.push({ icon: iconClass, text: text });
             }
         });
         

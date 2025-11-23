@@ -815,6 +815,76 @@
         body.dark-mode .btn-select-file:hover {
             color: #ffffff;
         }
+        /* Rich Text Editor Styles */
+        .rich-text-toolbar {
+            user-select: none;
+        }
+        .rich-text-btn {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            transition: all var(--transition-base);
+            font-family: var(--font-primary);
+        }
+        .rich-text-btn:hover {
+            background: var(--secondary-color);
+            color: var(--text-light);
+            border-color: var(--secondary-color);
+        }
+        .rich-text-btn:active {
+            transform: scale(0.95);
+        }
+        .rich-text-editor {
+            line-height: 1.8;
+        }
+        .rich-text-editor h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 1.5rem 0 1rem 0;
+            color: var(--text-primary);
+        }
+        .rich-text-editor h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 1.25rem 0 0.75rem 0;
+            color: var(--text-primary);
+        }
+        .rich-text-editor p {
+            margin: 0.75rem 0;
+        }
+        .rich-text-editor ul,
+        .rich-text-editor ol {
+            margin: 0.75rem 0;
+            padding-left: 2rem;
+        }
+        .rich-text-editor li {
+            margin: 0.5rem 0;
+        }
+        .rich-text-editor strong {
+            font-weight: 600;
+        }
+        .rich-text-editor em {
+            font-style: italic;
+        }
+        .rich-text-editor u {
+            text-decoration: underline;
+        }
+        .rich-text-editor hr {
+            border: none;
+            border-top: 2px solid var(--border-color);
+            margin: 1.5rem 0;
+        }
+        .rich-text-editor i.bi {
+            font-size: 1.1em;
+            margin: 0 0.25rem;
+        }
         .file-selector-modal {
             position: fixed;
             top: 0;

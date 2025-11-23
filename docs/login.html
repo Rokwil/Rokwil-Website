@@ -207,7 +207,7 @@
             if (loginTime > 0 && hoursSinceLogin < 24) {
                 // Still authenticated with valid session, redirect to admin
                 window.location.href = 'admin.html';
-                return; // Prevent further execution
+                // Redirect will prevent further execution, no return needed
             } else {
                 // Session expired or invalid
                 sessionStorage.removeItem('admin_authenticated');

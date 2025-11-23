@@ -1186,7 +1186,7 @@ function applyProjectsPageContent(content) {
                                         // Update existing - preserve <strong> tags if present
                                         const existingText = listItems[tenantIndex].textContent.trim();
                                         // Check if tenant name should be bold (before dash or colon)
-                                        const boldMatch = tenantLine.match(/^([^–-:]+)/);
+                                        const boldMatch = tenantLine.match(/^([^–:\-]+)/);
                                         if (boldMatch) {
                                             const tenantName = boldMatch[1].trim();
                                             const rest = tenantLine.substring(boldMatch[0].length).trim();
@@ -1197,7 +1197,7 @@ function applyProjectsPageContent(content) {
                                     } else {
                                         // Create new list item
                                         const newLi = document.createElement('li');
-                                        const boldMatch = tenantLine.match(/^([^–-:]+)/);
+                                        const boldMatch = tenantLine.match(/^([^–:\-]+)/);
                                         if (boldMatch) {
                                             const tenantName = boldMatch[1].trim();
                                             const rest = tenantLine.substring(boldMatch[0].length).trim();

@@ -467,7 +467,7 @@ const BOOTSTRAP_ICONS = [
     'zoom-in', 'zoom-out'
 ];
 
-function createIconPicker(targetInputId, currentIcon = '') {
+function createIconPicker(targetInputId, currentIcon = '', callback = null) {
     const modal = document.createElement('div');
     modal.className = 'icon-picker-modal';
     modal.innerHTML = `
@@ -518,12 +518,26 @@ function createIconPicker(targetInputId, currentIcon = '') {
     iconGrid.querySelectorAll('.icon-picker-item').forEach(item => {
         item.addEventListener('click', () => {
             const iconClass = item.getAttribute('data-icon');
-            const targetInput = document.getElementById(targetInputId);
-            if (targetInput) {
-                targetInput.value = iconClass;
-                // Trigger input event to update preview
-                targetInput.dispatchEvent(new Event('input'));
+            
+            // If callback provided, use it
+            if (callback && typeof callback === 'function') {
+                callback(iconClass);
+            } else {
+                // Otherwise, update input field
+                const targetInput = document.getElementById(targetInputId);
+                if (targetInput) {
+                    targetInput.value = iconClass;
+                    // Trigger input event to update preview
+                    targetInput.dispatchEvent(new Event('input'));
+                    
+                    // Check if there's a rich text callback
+                    if (targetInput._richTextCallback) {
+                        targetInput._richTextCallback(iconClass);
+                        targetInput._richTextCallback = null;
+                    }
+                }
             }
+            
             modal.remove();
         });
     });

@@ -59,6 +59,142 @@ const observer = new IntersectionObserver((entries) => {
     });
 }, observerOptions);
 
+// Dark Mode Toggle - Fun & Interactive!
+// Define functions outside DOMContentLoaded so they're always available
+function createToggleEffect(element, iconClass) {
+    const effect = document.createElement('div');
+    const icon = document.createElement('i');
+    icon.className = 'bi ' + iconClass;
+    effect.appendChild(icon);
+    effect.style.position = 'fixed';
+    effect.style.fontSize = '2rem';
+    effect.style.pointerEvents = 'none';
+    effect.style.zIndex = '9999';
+    effect.style.transition = 'all 0.6s ease-out';
+    effect.style.color = 'var(--secondary-color)';
+    
+    const rect = element.getBoundingClientRect();
+    effect.style.left = rect.left + rect.width / 2 + 'px';
+    effect.style.top = rect.top + rect.height / 2 + 'px';
+    effect.style.transform = 'translate(-50%, -50%) scale(0)';
+    effect.style.opacity = '1';
+    
+    document.body.appendChild(effect);
+    
+    // Animate
+    requestAnimationFrame(() => {
+        effect.style.transform = 'translate(-50%, -50%) scale(1.5) translateY(-50px)';
+        effect.style.opacity = '0';
+    });
+    
+    // Remove after animation
+    setTimeout(() => {
+        effect.remove();
+    }, 600);
+}
+
+// Dark mode toggle handler - simple and direct
+function toggleDarkMode() {
+    document.body.classList.toggle('dark-mode');
+    const isDark = document.body.classList.contains('dark-mode');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    
+    // Animation
+    const btn = document.getElementById('darkModeToggle');
+    if (btn) {
+        btn.style.transform = 'scale(0.9)';
+        setTimeout(() => {
+            btn.style.transform = '';
+        }, 150);
+    }
+}
+
+// Make toggle function globally available for testing
+window.toggleDarkMode = toggleDarkMode;
+
+// Initialize dark mode theme on page load
+function applyDarkModeTheme() {
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    if (currentTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+    } else {
+        document.body.classList.remove('dark-mode');
+    }
+}
+
+// Set up dark mode toggle - use event delegation that works immediately
+// Use capture phase to catch clicks early, before any other handlers
+(function() {
+    let darkModeClickHandler = function(e) {
+        // Check if click is on dark mode toggle button or any of its children
+        const clickedElement = e.target;
+        const toggleBtn = clickedElement.closest && clickedElement.closest('#darkModeToggle') 
+            ? clickedElement.closest('#darkModeToggle')
+            : (clickedElement.id === 'darkModeToggle' ? clickedElement : null);
+        
+        if (toggleBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            toggleDarkMode();
+            return false;
+        }
+    };
+    
+    // Add listener in capture phase (true) to catch it before anything else
+    document.addEventListener('click', darkModeClickHandler, true);
+})();
+
+// Also set up direct onclick as backup
+function setupDarkModeToggle() {
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    if (darkModeToggle) {
+        // Remove any existing handlers
+        darkModeToggle.onclick = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleDarkMode();
+            return false;
+        };
+    }
+}
+
+// Apply theme immediately if possible
+if (document.body) {
+    applyDarkModeTheme();
+} else {
+    document.addEventListener('DOMContentLoaded', applyDarkModeTheme);
+}
+
+// Set up toggle button when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+        applyDarkModeTheme();
+        setupDarkModeToggle();
+    });
+} else {
+    applyDarkModeTheme();
+    setupDarkModeToggle();
+}
+
+// Retry setup in case button loads late
+setTimeout(setupDarkModeToggle, 500);
+setTimeout(setupDarkModeToggle, 1000);
+
+// Listen for system theme changes
+const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+if (prefersDark && prefersDark.addEventListener) {
+    prefersDark.addEventListener('change', (e) => {
+        if (!localStorage.getItem('theme')) {
+            if (e.matches) {
+                document.body.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+        }
+    });
+}
+
 // Observe elements for animation
 document.addEventListener('DOMContentLoaded', function() {
     const animateElements = document.querySelectorAll('.feature-card, .showcase-item, .value-card, .project-card');
@@ -264,86 +400,6 @@ document.addEventListener('DOMContentLoaded', function() {
         statsObserver.observe(statsSection);
     }
 
-    // Dark Mode Toggle - Fun & Interactive!
-    const darkModeToggle = document.getElementById('darkModeToggle');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
-    
-    // Check for saved theme preference or default to light mode
-    const currentTheme = localStorage.getItem('theme') || 'light';
-    
-    // Apply theme on page load
-    if (currentTheme === 'dark') {
-        document.body.classList.add('dark-mode');
-    }
-    
-    // Toggle dark mode
-    if (darkModeToggle) {
-        darkModeToggle.addEventListener('click', function() {
-            document.body.classList.toggle('dark-mode');
-            const isDark = document.body.classList.contains('dark-mode');
-            
-            // Always save preference
-            localStorage.setItem('theme', isDark ? 'dark' : 'light');
-            
-            // Add a fun bounce animation
-            this.style.transform = 'scale(0.9)';
-            setTimeout(() => {
-                this.style.transform = '';
-            }, 150);
-            
-            // Optional: Add icon effect on toggle (for extra fun!)
-            if (isDark) {
-                createToggleEffect(this, 'bi-moon');
-            } else {
-                createToggleEffect(this, 'bi-sun');
-            }
-        });
-    }
-    
-    // Listen for system theme changes
-    prefersDark.addEventListener('change', (e) => {
-        if (!localStorage.getItem('theme')) {
-            if (e.matches) {
-                document.body.classList.add('dark-mode');
-            } else {
-                document.body.classList.remove('dark-mode');
-            }
-        }
-    });
-    
-    // Fun toggle effect function
-    function createToggleEffect(element, iconClass) {
-        const effect = document.createElement('div');
-        const icon = document.createElement('i');
-        icon.className = 'bi ' + iconClass;
-        effect.appendChild(icon);
-        effect.style.position = 'fixed';
-        effect.style.fontSize = '2rem';
-        effect.style.pointerEvents = 'none';
-        effect.style.zIndex = '9999';
-        effect.style.transition = 'all 0.6s ease-out';
-        effect.style.color = 'var(--secondary-color)';
-        
-        const rect = element.getBoundingClientRect();
-        effect.style.left = rect.left + rect.width / 2 + 'px';
-        effect.style.top = rect.top + rect.height / 2 + 'px';
-        effect.style.transform = 'translate(-50%, -50%) scale(0)';
-        effect.style.opacity = '1';
-        
-        document.body.appendChild(effect);
-        
-        // Animate
-        requestAnimationFrame(() => {
-            effect.style.transform = 'translate(-50%, -50%) scale(1.5) translateY(-50px)';
-            effect.style.opacity = '0';
-        });
-        
-        // Remove after animation
-        setTimeout(() => {
-            effect.remove();
-        }, 600);
-    }
-
     // Load and apply admin content changes
     (function() {
         'use strict';
@@ -508,9 +564,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 const heroSection = document.querySelector('.hero');
                 if (heroSection && content.homePage.hero.image1) {
-                    let bgImage = `url('${content.homePage.hero.image1}')`;
-                    if (content.homePage.hero.image2) {
-                        bgImage += `, url('${content.homePage.hero.image2}')`;
+                    // Normalize paths: decode if URL-encoded, then use as-is (CSS will handle encoding)
+                    // The key is to have regular spaces in the path, not %20
+                    let image1 = content.homePage.hero.image1.includes('%') 
+                        ? decodeURIComponent(content.homePage.hero.image1) 
+                        : content.homePage.hero.image1;
+                    let image2 = content.homePage.hero.image2 
+                        ? (content.homePage.hero.image2.includes('%') 
+                            ? decodeURIComponent(content.homePage.hero.image2) 
+                            : content.homePage.hero.image2)
+                        : null;
+                    // Use encodeURI to properly encode spaces for CSS url()
+                    // This ensures the browser requests the file correctly
+                    let bgImage = `url('${encodeURI(image1)}')`;
+                    if (image2) {
+                        bgImage += `, url('${encodeURI(image2)}')`;
                     }
                     heroSection.style.backgroundImage = bgImage;
                     console.log('Applied hero background image');
@@ -598,7 +666,13 @@ document.addEventListener('DOMContentLoaded', function() {
                                         const image = showcaseItems[index].querySelector('.showcase-image');
                                         const title = showcaseItems[index].querySelector('.showcase-overlay h3');
                                         const description = showcaseItems[index].querySelector('.showcase-overlay p');
-                                        if (image && item.image) image.style.backgroundImage = `url('${item.image}')`;
+                                        if (image && item.image) {
+                                            // Normalize: decode if URL-encoded, then encode properly for CSS
+                                            const normalizedImage = item.image.includes('%') 
+                                                ? decodeURIComponent(item.image) 
+                                                : item.image;
+                                            image.style.backgroundImage = `url('${encodeURI(normalizedImage)}')`;
+                                        }
                                         if (title && item.title) title.textContent = item.title;
                                         if (description && item.description) description.textContent = item.description;
                                     }
@@ -696,7 +770,13 @@ document.addEventListener('DOMContentLoaded', function() {
                                         const title = newsCards[visibleIndex].querySelector('.news-content h3');
                                         const description = newsCards[visibleIndex].querySelector('.news-content p');
                                         const link = newsCards[visibleIndex].querySelector('.news-link');
-                                        if (image && item.image) image.style.backgroundImage = `url('${item.image}')`;
+                                        if (image && item.image) {
+                                            // Normalize: decode if URL-encoded, then encode properly for CSS
+                                            const normalizedImage = item.image.includes('%') 
+                                                ? decodeURIComponent(item.image) 
+                                                : item.image;
+                                            image.style.backgroundImage = `url('${encodeURI(normalizedImage)}')`;
+                                        }
                                         if (date && item.date) date.textContent = item.date;
                                         if (category && item.category) category.textContent = item.category;
                                         if (title && item.title) title.textContent = item.title;
@@ -770,7 +850,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (heroTitle && content.aboutPage.hero.title) heroTitle.textContent = content.aboutPage.hero.title;
                 if (heroSubtitle && content.aboutPage.hero.subtitle) heroSubtitle.textContent = content.aboutPage.hero.subtitle;
                 if (heroSection && content.aboutPage.hero.image) {
-                    heroSection.style.backgroundImage = `url('${content.aboutPage.hero.image}')`;
+                    const normalizedImage = content.aboutPage.hero.image.includes('%')
+                        ? decodeURIComponent(content.aboutPage.hero.image)
+                        : content.aboutPage.hero.image;
+                    heroSection.style.backgroundImage = `url('${encodeURI(normalizedImage)}')`;
                 }
             }
             
@@ -1234,9 +1317,19 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         
+        // Helper function to escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
         // Apply projects page content
         function applyProjectsPageContent(content) {
             if (!content.projectsPage) return;
+            
+            // Track which projects we've already processed to prevent duplicates
+            const processedProjects = new Set();
             
             if (content.projectsPage.hero) {
                 const heroTitle = document.querySelector('.page-hero-content h1');
@@ -1245,7 +1338,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (heroTitle && content.projectsPage.hero.title) heroTitle.textContent = content.projectsPage.hero.title;
                 if (heroSubtitle && content.projectsPage.hero.subtitle) heroSubtitle.textContent = content.projectsPage.hero.subtitle;
                 if (heroSection && content.projectsPage.hero.image) {
-                    heroSection.style.backgroundImage = `url('${content.projectsPage.hero.image}')`;
+                    const normalizedImage = content.projectsPage.hero.image.includes('%')
+                        ? decodeURIComponent(content.projectsPage.hero.image)
+                        : content.projectsPage.hero.image;
+                    heroSection.style.backgroundImage = `url('${encodeURI(normalizedImage)}')`;
                 }
             }
             
@@ -1278,6 +1374,166 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                     
                     if (projectCard) {
+                        // Skip if we've already processed this project
+                        const projectId = project.name || project.title || index;
+                        if (processedProjects.has(projectId)) {
+                            console.warn(`Skipping duplicate processing of project: ${projectId}`);
+                        } else {
+                            processedProjects.add(projectId);
+                        
+                        // Update project description/content with HTML rendering
+                        const projectDetails = projectCard.querySelector('.project-details');
+                        if (projectDetails) {
+                            // Clear existing content (but keep h2 title, meta, and features)
+                            const h2 = projectDetails.querySelector('h2');
+                            const meta = projectDetails.querySelector('.project-meta');
+                            const features = projectDetails.querySelector('.project-features');
+                            
+                            // Remove ALL existing rich content containers (in case of duplicates)
+                            const existingContainers = projectDetails.querySelectorAll('.project-rich-content-container');
+                            existingContainers.forEach(container => container.remove());
+                            
+                            // Remove ALL content elements (paragraphs, headings, lists, divs) that are not h2, meta, or features
+                            // Use querySelectorAll to get all elements, then filter
+                            const allParagraphs = projectDetails.querySelectorAll('p');
+                            allParagraphs.forEach(p => {
+                                if (!p.closest('.project-meta') && !p.closest('.project-features') && !p.closest('.project-rich-content-container')) {
+                                    p.remove();
+                                }
+                            });
+                            
+                            const allHeadings = projectDetails.querySelectorAll('h3, h4, h5, h6');
+                            allHeadings.forEach(h => {
+                                if (!h.closest('.project-meta') && !h.closest('.project-features') && !h.closest('.project-rich-content-container')) {
+                                    h.remove();
+                                }
+                            });
+                            
+                            const allLists = projectDetails.querySelectorAll('ul, ol');
+                            allLists.forEach(ul => {
+                                if (!ul.closest('.project-meta') && !ul.closest('.project-features') && !ul.closest('.project-rich-content-container')) {
+                                    ul.remove();
+                                }
+                            });
+                            
+                            const allDivs = projectDetails.querySelectorAll('div:not(.project-meta):not(.project-features):not(.project-rich-content-container)');
+                            allDivs.forEach(div => {
+                                // Only remove if it's not a parent of meta or features
+                                if (!div.contains(meta) && !div.contains(features) && !div.contains(h2)) {
+                                    div.remove();
+                                }
+                            });
+                            
+                            // Create a fresh container for the rich content
+                            const contentContainer = document.createElement('div');
+                            contentContainer.className = 'project-rich-content-container';
+                            // Insert after meta or h2, before features
+                            if (meta && meta.nextSibling) {
+                                meta.parentNode.insertBefore(contentContainer, meta.nextSibling);
+                            } else if (h2 && h2.nextSibling) {
+                                h2.parentNode.insertBefore(contentContainer, h2.nextSibling);
+                            } else if (features) {
+                                projectDetails.insertBefore(contentContainer, features);
+                            } else {
+                                projectDetails.appendChild(contentContainer);
+                            }
+                            
+                            // Use richContent if available (from rich text editor), otherwise build from old format
+                            if (project.richContent) {
+                                
+                                // Direct HTML rendering from rich text editor
+                                // Create a temporary container to process the HTML
+                                const tempDiv = document.createElement('div');
+                                tempDiv.innerHTML = project.richContent;
+                                
+                                // Auto-detect and apply tenant-list class to lists after headings with "Anchor Occupiers" or "Tenants"
+                                const headings = tempDiv.querySelectorAll('h2, h3');
+                                headings.forEach(heading => {
+                                    const headingText = heading.textContent.toLowerCase();
+                                    if (headingText.includes('anchor occupiers') || headingText.includes('tenant') || headingText.includes('occupiers')) {
+                                        // Find the next ul sibling and add tenant-list class
+                                        let nextElement = heading.nextElementSibling;
+                                        while (nextElement) {
+                                            if (nextElement.tagName === 'UL') {
+                                                nextElement.classList.add('tenant-list');
+                                                break;
+                                            }
+                                            if (nextElement.tagName === 'H2' || nextElement.tagName === 'H3') {
+                                                break; // Stop at next heading
+                                            }
+                                            nextElement = nextElement.nextElementSibling;
+                                        }
+                                    }
+                                });
+                                
+                                // Ensure h3 headings with icons get proper styling
+                                const h3Headings = tempDiv.querySelectorAll('h3');
+                                h3Headings.forEach(h3 => {
+                                    if (h3.querySelector('i')) {
+                                        h3.classList.add('project-section-heading');
+                                    }
+                                });
+                                
+                                contentContainer.innerHTML = tempDiv.innerHTML;
+                            } else {
+                                // Build HTML from descriptions, sections, and tenants (backward compatibility)
+                                let htmlContent = '';
+                                
+                                // Add descriptions as paragraphs
+                                const descriptions = project.descriptions || (project.description ? project.description.split('\n\n') : []);
+                                descriptions.forEach(desc => {
+                                    if (desc.trim()) {
+                                        htmlContent += `<p>${escapeHtml(desc.trim())}</p>`;
+                                    }
+                                });
+                                
+                                // Add sections
+                                if (project.sections && project.sections.length > 0) {
+                                    project.sections.forEach(section => {
+                                        const heading = section.heading || '';
+                                        const content = section.content || '';
+                                        
+                                        if (heading || content) {
+                                            if (heading) {
+                                                htmlContent += `<h3 class="project-section-heading"><i class="bi bi-diagram-3-fill"></i>${escapeHtml(heading)}</h3>`;
+                                            }
+                                            
+                                            if (content) {
+                                                // Check if content is "Anchor Occupiers" - render as list
+                                                if (heading.toLowerCase().includes('anchor occupiers')) {
+                                                    const tenantLines = content.split('\n').filter(l => l.trim());
+                                                    htmlContent += '<ul class="tenant-list">';
+                                                    tenantLines.forEach(line => {
+                                                        // Check if line has bold text (format: "Name - description")
+                                                        const parts = line.split(' - ');
+                                                        if (parts.length > 1) {
+                                                            htmlContent += `<li><strong>${escapeHtml(parts[0].trim())}</strong> - ${escapeHtml(parts.slice(1).join(' - ').trim())}</li>`;
+                                                        } else {
+                                                            htmlContent += `<li>${escapeHtml(line.trim())}</li>`;
+                                                        }
+                                                    });
+                                                    htmlContent += '</ul>';
+                                                } else {
+                                                    // Regular section content
+                                                    const lines = content.split('\n').filter(l => l.trim());
+                                                    if (lines.length > 1) {
+                                                        htmlContent += '<ul>';
+                                                        lines.forEach(line => htmlContent += `<li>${escapeHtml(line.trim())}</li>`);
+                                                        htmlContent += '</ul>';
+                                                    } else {
+                                                        htmlContent += `<p>${escapeHtml(content)}</p>`;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    });
+                                }
+                                
+                                // Set the HTML content
+                                contentContainer.innerHTML = htmlContent || '<p></p>';
+                            }
+                        }
+                        
                         // Update meta items
                         if (project.meta && project.meta.length > 0) {
                             let projectMeta = projectCard.querySelector('.project-meta');
@@ -1406,8 +1662,10 @@ document.addEventListener('DOMContentLoaded', function() {
                             });
                         }
                         
-                        // Update sections (including "Anchor Occupiers & Facilities" from tenants)
-                        if (project.sections && project.sections.length > 0) {
+                        // Skip old sections processing if richContent exists (to avoid duplication)
+                        if (!project.richContent) {
+                            // Update sections (including "Anchor Occupiers & Facilities" from tenants)
+                            if (project.sections && project.sections.length > 0) {
                             const projectDetails = projectCard.querySelector('.project-details');
                             if (projectDetails) {
                                 // Get all existing section headings
@@ -1471,7 +1729,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                         tenantLines.forEach((tenantLine, tenantIndex) => {
                                             if (listItems[tenantIndex]) {
                                                 // Update existing - preserve <strong> tags if present
-                                                const boldMatch = tenantLine.match(/^([^–-:]+)/);
+                                                const boldMatch = tenantLine.match(/^([^–:\-]+)/);
                                                 if (boldMatch) {
                                                     const tenantName = boldMatch[1].trim();
                                                     const rest = tenantLine.substring(boldMatch[0].length).trim();
@@ -1482,7 +1740,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                             } else {
                                                 // Create new list item
                                                 const newLi = document.createElement('li');
-                                                const boldMatch = tenantLine.match(/^([^–-:]+)/);
+                                                const boldMatch = tenantLine.match(/^([^–:\-]+)/);
                                                 if (boldMatch) {
                                                     const tenantName = boldMatch[1].trim();
                                                     const rest = tenantLine.substring(boldMatch[0].length).trim();
@@ -1530,6 +1788,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                 });
                             }
                         }
+                        } // End of if (!project.richContent) check
+                        } // End of else block for processedProjects check
                     }
                 });
             }
@@ -1546,7 +1806,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (heroTitle && content.contactPage.hero.title) heroTitle.textContent = content.contactPage.hero.title;
                 if (heroSubtitle && content.contactPage.hero.subtitle) heroSubtitle.textContent = content.contactPage.hero.subtitle;
                 if (heroSection && content.contactPage.hero.image) {
-                    heroSection.style.backgroundImage = `url('${content.contactPage.hero.image}')`;
+                    const normalizedImage = content.contactPage.hero.image.includes('%')
+                        ? decodeURIComponent(content.contactPage.hero.image)
+                        : content.contactPage.hero.image;
+                    heroSection.style.backgroundImage = `url('${encodeURI(normalizedImage)}')`;
                 }
             }
             
@@ -1624,40 +1887,77 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         
+        // Helper function to recursively fix URL-encoded paths in content object
+        function fixUrlEncodedPaths(obj) {
+            if (typeof obj !== 'object' || obj === null) {
+                // If it's a string with URL encoding, decode it
+                if (typeof obj === 'string' && obj.includes('%')) {
+                    try {
+                        return decodeURIComponent(obj);
+                    } catch (e) {
+                        return obj; // Return original if decoding fails
+                    }
+                }
+                return obj;
+            }
+            
+            if (Array.isArray(obj)) {
+                return obj.map(item => fixUrlEncodedPaths(item));
+            }
+            
+            const fixed = {};
+            for (const key in obj) {
+                if (obj.hasOwnProperty(key)) {
+                    fixed[key] = fixUrlEncodedPaths(obj[key]);
+                }
+            }
+            return fixed;
+        }
+        
         // Apply changes when DOM is ready (after a delay to ensure DOM is fully loaded)
-        // Use multiple attempts to ensure content is applied
+        // Use a guard to prevent multiple executions
+        let adminContentApplied = false;
         function applyWithRetry(attempts = 0) {
-            if (attempts > 5) return; // Max 5 attempts
+            if (attempts > 2) return; // Max 2 attempts
+            if (adminContentApplied && attempts > 0) return; // Don't retry if already applied
             
             const ADMIN_CONTENT_KEY = 'rokwil_admin_content';
             const stored = localStorage.getItem(ADMIN_CONTENT_KEY);
             if (stored) {
                 try {
-                    const content = JSON.parse(stored);
+                    let content = JSON.parse(stored);
+                    // Automatically fix URL-encoded paths in content
+                    const contentStr = JSON.stringify(content);
+                    if (contentStr.includes('%20') || contentStr.includes('%')) {
+                        console.log('Fixing URL-encoded paths in admin content...');
+                        content = fixUrlEncodedPaths(content);
+                        // Save the fixed content back to localStorage
+                        localStorage.setItem(ADMIN_CONTENT_KEY, JSON.stringify(content));
+                    }
                     applyContentChangesFallback(content);
+                    adminContentApplied = true; // Mark as applied
                 } catch (e) {
                     console.error('Error applying admin content:', e);
                 }
+            } else {
+                // No admin content, mark as applied to prevent retries
+                adminContentApplied = true;
             }
             
-            // Retry after a delay if elements might not be ready
-            if (attempts < 2) {
-                setTimeout(() => applyWithRetry(attempts + 1), 300);
+            // Retry once after a delay if elements might not be ready
+            if (attempts < 1 && !adminContentApplied) {
+                setTimeout(() => applyWithRetry(attempts + 1), 500);
             }
         }
         
+        // Apply only once when DOM is ready
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => {
-                setTimeout(() => applyWithRetry(0), 100);
+                setTimeout(() => applyWithRetry(0), 200);
             });
         } else {
-            setTimeout(() => applyWithRetry(0), 100);
+            setTimeout(() => applyWithRetry(0), 200);
         }
-        
-        // Also apply on window load (after all resources are loaded)
-        window.addEventListener('load', () => {
-            setTimeout(() => applyWithRetry(0), 100);
-        });
     })();
 });
 

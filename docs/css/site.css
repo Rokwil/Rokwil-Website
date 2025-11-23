@@ -262,6 +262,8 @@ body.dark-mode .navbar {
     margin-right: var(--spacing-sm);
     display: flex;
     align-items: center;
+    z-index: 1001;
+    pointer-events: auto;
 }
 
 .dark-mode-toggle:hover {
@@ -1016,6 +1018,168 @@ section {
     color: var(--text-secondary);
     line-height: 1.8;
     margin-bottom: var(--spacing-md);
+}
+
+/* Rich content container */
+.project-rich-content-container {
+    margin: var(--spacing-md) 0;
+    width: 100%;
+}
+
+/* Rich content typography and spacing */
+.project-rich-content-container p {
+    margin-bottom: var(--spacing-sm);
+    color: var(--text-secondary);
+    line-height: 1.7;
+}
+
+.project-rich-content-container p:first-of-type {
+    margin-top: 0;
+}
+
+.project-rich-content-container p:last-child {
+    margin-bottom: 0;
+}
+
+/* Headings in rich content */
+.project-rich-content-container h2,
+.project-rich-content-container h3 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.project-rich-content-container h2 {
+    font-size: 1.5rem;
+}
+
+.project-rich-content-container h3 {
+    font-size: 1.3rem;
+}
+
+/* If h3 has an icon, style it like project-section-heading */
+.project-rich-content-container h3 i {
+    color: var(--secondary-color);
+    margin-right: 0.5rem;
+}
+
+/* Lists in rich content */
+.project-rich-content-container ul,
+.project-rich-content-container ol {
+    margin: var(--spacing-md) 0;
+    padding-left: 1.5rem;
+    color: var(--text-secondary);
+}
+
+.project-rich-content-container ul li,
+.project-rich-content-container ol li {
+    margin-bottom: 0.5rem;
+    line-height: 1.7;
+}
+
+.project-rich-content-container ul li strong,
+.project-rich-content-container ol li strong {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+/* If ul has tenant-list class, apply tenant list styles */
+.project-rich-content-container ul.tenant-list {
+    list-style: none;
+    padding-left: 0;
+}
+
+.project-rich-content-container ul.tenant-list li {
+    padding: var(--spacing-sm) 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.project-rich-content-container ul.tenant-list li:last-child {
+    border-bottom: none;
+}
+
+/* Horizontal rules */
+.project-rich-content-container hr {
+    margin: var(--spacing-md) 0;
+    border: none;
+    border-top: 1px solid var(--border-color);
+}
+
+/* Text colors from brand color picker */
+.project-rich-content-container [style*="color: #2d2d2d"],
+.project-rich-content-container [style*="color:#2d2d2d"] {
+    color: #2d2d2d !important;
+}
+
+.project-rich-content-container [style*="color: #1e3a5f"],
+.project-rich-content-container [style*="color:#1e3a5f"] {
+    color: #1e3a5f !important;
+}
+
+.project-rich-content-container [style*="color: #2c4a6b"],
+.project-rich-content-container [style*="color:#2c4a6b"] {
+    color: #2c4a6b !important;
+}
+
+/* Ensure proper spacing between elements */
+.project-rich-content-container > *:first-child {
+    margin-top: 0;
+}
+
+.project-rich-content-container > *:last-child {
+    margin-bottom: 0;
+}
+
+/* Icons in rich text - appear on their own line */
+.project-rich-content-container .rich-text-icon-wrapper {
+    display: block;
+    margin: var(--spacing-sm) 0;
+    text-align: left;
+}
+
+.project-rich-content-container .rich-text-icon-wrapper .rich-text-icon {
+    font-size: 1.5rem;
+    color: var(--secondary-color);
+    display: inline-block;
+}
+
+/* Editor styling - icons should be editable and on their own line */
+.rich-text-editor .rich-text-icon-wrapper {
+    display: block;
+    margin: 0.5rem 0;
+    min-height: 1.5rem;
+}
+
+.rich-text-editor .rich-text-icon-wrapper .rich-text-icon {
+    font-size: 1.5rem;
+    color: var(--secondary-color);
+    display: inline-block;
+}
+
+/* Ensure empty paragraphs after icons don't take up too much space */
+.rich-text-editor p:empty {
+    min-height: 1em;
+}
+
+/* Brand Color Picker Styles */
+.brand-color-picker {
+    min-width: 200px;
+}
+
+.brand-color-btn {
+    transition: all var(--transition-fast);
+}
+
+.brand-color-btn:hover {
+    background: var(--bg-secondary) !important;
+    border-color: var(--secondary-color) !important;
+    transform: translateX(2px);
+}
+
+.color-picker-wrapper {
+    position: relative;
 }
 
 .project-features {

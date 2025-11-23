@@ -177,9 +177,27 @@ tabs.forEach(tab => {
     });
 });
 
+// Helper function to safely get content
+function getContentSafe() {
+    if (typeof window.getContent === 'function') {
+        return window.getContent();
+    }
+    // Fallback: try to get from localStorage directly
+    const ADMIN_CONTENT_KEY = 'rokwil_admin_content';
+    const stored = localStorage.getItem(ADMIN_CONTENT_KEY);
+    if (stored) {
+        try {
+            return JSON.parse(stored);
+        } catch (e) {
+            console.error('Error parsing stored content:', e);
+        }
+    }
+    return {};
+}
+
 // Load content for specific tab
 function loadTabContent(tabName) {
-    const content = getContent();
+    const content = getContentSafe();
     
     switch(tabName) {
         case 'home':
@@ -1577,56 +1595,97 @@ function renderProjects(items) {
                     </div>
                 </div>
 
-                <!-- Content Section -->
+                <!-- Rich Content Editor -->
                 <div class="project-section-group" style="margin-bottom: 1.5rem; padding: 1rem; background: var(--bg-secondary); border-radius: 8px;">
                     <h4 style="margin: 0 0 1rem 0; color: var(--text-primary); font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem;">
-                        <i class="bi bi-file-text"></i> Content
+                        <i class="bi bi-file-text"></i> Content & Description
                     </h4>
                     <div class="form-group">
-                        <label>Description</label>
-                        <textarea class="project-description" rows="6" placeholder="First paragraph...&#10;&#10;Second paragraph...">${(item.description || (item.descriptions || [])).join ? (item.description || (item.descriptions || [])).join('\n\n') : (item.description || '')}</textarea>
-                        <small>Each paragraph separated by a blank line</small>
-                    </div>
-                    <div class="form-group">
-                        <label>Custom Content Sections</label>
+                        <label>Project Content</label>
                         <small style="display: block; margin-bottom: 0.75rem; color: var(--text-secondary); line-height: 1.5;">
-                            Add custom sections with headings and content (e.g., "Sustainability & Infrastructure Resilience", "Progress Updates", etc.). <strong>Note:</strong> "Anchor Occupiers & Facilities" is automatically created from the Tenants list above, so you don't need to add it here.
+                            Create rich content with formatting, headings, icons, and lists. Use headings (H2, H3) for section titles like "Anchor Occupiers & Facilities" or "Sustainability & Infrastructure Resilience". Use lists for tenant information.
                         </small>
-                        <div class="sections-list" data-project-index="${index}">
-                            ${(item.sections || []).map((s, sectionIndex) => {
-                                const heading = typeof s === 'string' ? (s.split('|')[0] || '') : (s.heading || '');
-                                const content = typeof s === 'string' ? (s.split('|')[1] || '') : (s.content || '');
-                                return `
-                                    <div class="section-item-row" data-section-index="${sectionIndex}">
-                                        <div style="display: flex; flex-direction: column; gap: 0.5rem; flex: 1;">
-                                            <input type="text" class="section-heading-input" placeholder="Section Heading (e.g., Sustainability & Infrastructure Resilience)" value="${heading}" style="width: 100%;">
-                                            <textarea class="section-content-input" rows="3" placeholder="Section content (paragraphs, lists, etc.)...">${content}</textarea>
-                                        </div>
-                                        <button type="button" class="btn-remove-small" onclick="removeSectionItem(${index}, ${sectionIndex})" style="align-self: flex-start; margin-top: 0;">
-                                            <i class="bi bi-x"></i>
+                        
+                        <!-- Rich Text Editor Toolbar -->
+                        <div class="rich-text-toolbar" data-project-index="${index}" style="display: flex; flex-wrap: wrap; gap: 0.5rem; padding: 0.75rem; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 4px 4px 0 0; border-bottom: none;">
+                            <button type="button" class="rich-text-btn" onclick="richTextCommand('undo', ${index})" title="Undo">
+                                <i class="bi bi-arrow-counterclockwise"></i>
+                            </button>
+                            <button type="button" class="rich-text-btn" onclick="richTextCommand('redo', ${index})" title="Redo">
+                                <i class="bi bi-arrow-clockwise"></i>
+                            </button>
+                            <div style="width: 1px; background: var(--border-color); margin: 0 0.25rem;"></div>
+                            <button type="button" class="rich-text-btn" onclick="richTextCommand('bold', ${index})" title="Bold">
+                                <i class="bi bi-type-bold"></i>
+                            </button>
+                            <button type="button" class="rich-text-btn" onclick="richTextCommand('italic', ${index})" title="Italic">
+                                <i class="bi bi-type-italic"></i>
+                            </button>
+                            <button type="button" class="rich-text-btn" onclick="richTextCommand('underline', ${index})" title="Underline">
+                                <i class="bi bi-type-underline"></i>
+                            </button>
+                            <div class="color-picker-wrapper" style="position: relative;">
+                                <button type="button" class="rich-text-btn" onclick="toggleBrandColorPicker(${index})" title="Text Color">
+                                    <i class="bi bi-palette"></i> Color
+                                </button>
+                                <div class="brand-color-picker" id="color-picker-${index}" style="display: none; position: absolute; top: 100%; left: 0; margin-top: 0.25rem; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 4px; padding: 0.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000;">
+                                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                        <button type="button" class="brand-color-btn" onclick="applyBrandColor(${index}, '#2d2d2d')" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; background: transparent; border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; color: var(--text-primary);">
+                                            <span style="display: inline-block; width: 24px; height: 24px; background: #2d2d2d; border-radius: 4px; border: 1px solid var(--border-color);"></span>
+                                            <span>Primary (Charcoal)</span>
+                                        </button>
+                                        <button type="button" class="brand-color-btn" onclick="applyBrandColor(${index}, '#1e3a5f')" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; background: transparent; border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; color: var(--text-primary);">
+                                            <span style="display: inline-block; width: 24px; height: 24px; background: #1e3a5f; border-radius: 4px; border: 1px solid var(--border-color);"></span>
+                                            <span>Secondary (Dark Blue)</span>
+                                        </button>
+                                        <button type="button" class="brand-color-btn" onclick="applyBrandColor(${index}, '#2c4a6b')" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; background: transparent; border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; color: var(--text-primary);">
+                                            <span style="display: inline-block; width: 24px; height: 24px; background: #2c4a6b; border-radius: 4px; border: 1px solid var(--border-color);"></span>
+                                            <span>Accent (Blue)</span>
+                                        </button>
+                                        <button type="button" class="brand-color-btn" onclick="applyBrandColor(${index}, '')" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; background: transparent; border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; color: var(--text-primary);">
+                                            <span style="display: inline-block; width: 24px; height: 24px; background: transparent; border: 1px solid var(--border-color); border-radius: 4px; position: relative;">
+                                                <span style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(45deg); width: 2px; height: 100%; background: var(--text-secondary);"></span>
+                                            </span>
+                                            <span>Reset (Default)</span>
                                         </button>
                                     </div>
-                                `;
-                            }).join('')}
+                                </div>
+                            </div>
+                            <div style="width: 1px; background: var(--border-color); margin: 0 0.25rem;"></div>
+                            <button type="button" class="rich-text-btn" onclick="richTextCommand('formatBlock', ${index}, 'h2')" title="Heading 2">
+                                <i class="bi bi-type-h2"></i> H2
+                            </button>
+                            <button type="button" class="rich-text-btn" onclick="richTextCommand('formatBlock', ${index}, 'h3')" title="Heading 3">
+                                <i class="bi bi-type-h3"></i> H3
+                            </button>
+                            <button type="button" class="rich-text-btn" onclick="richTextCommand('formatBlock', ${index}, 'p')" title="Paragraph">
+                                <i class="bi bi-paragraph"></i> P
+                            </button>
+                            <div style="width: 1px; background: var(--border-color); margin: 0 0.25rem;"></div>
+                            <button type="button" class="rich-text-btn" onclick="richTextCommand('insertUnorderedList', ${index})" title="Bullet List">
+                                <i class="bi bi-list-ul"></i>
+                            </button>
+                            <button type="button" class="rich-text-btn" onclick="richTextCommand('insertOrderedList', ${index})" title="Numbered List">
+                                <i class="bi bi-list-ol"></i>
+                            </button>
+                            <div style="width: 1px; background: var(--border-color); margin: 0 0.25rem;"></div>
+                            <button type="button" class="rich-text-btn" onclick="openIconPickerForRichText(${index})" title="Insert Icon">
+                                <i class="bi bi-emoji-smile"></i> Icon
+                            </button>
+                            <button type="button" class="rich-text-btn" onclick="richTextCommand('insertHorizontalRule', ${index})" title="Horizontal Line">
+                                <i class="bi bi-hr"></i>
+                            </button>
                         </div>
-                        <button type="button" class="btn-add-small" onclick="addSectionItem(${index})" style="margin-top: 0.75rem;">
-                            <i class="bi bi-plus-circle"></i> Add Custom Section
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Tenants Section -->
-                <div class="project-section-group" style="margin-bottom: 1.5rem; padding: 1rem; background: var(--bg-secondary); border-radius: 8px;">
-                    <h4 style="margin: 0 0 1rem 0; color: var(--text-primary); font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem;">
-                        <i class="bi bi-building"></i> Tenants & Occupiers List
-                    </h4>
-                    <div class="form-group">
-                        <label>Tenants & Occupiers</label>
-                        <small style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary); line-height: 1.5;">
-                            <strong>This automatically creates the "Anchor Occupiers & Facilities" section.</strong> Each tenant on a separate line. This will appear as a bulleted list under the "Anchor Occupiers & Facilities" heading on the project page.
-                        </small>
-                        <textarea class="project-tenants" rows="6" placeholder="Mr Price Group - National Distribution Centre, Phase 1: 56,000 m² (completed 2017)&#10;Ackermans - Mega Distribution Centre, 94,000 m² DC operational since September 2018&#10;Pepkor / PEP - National Distribution Centre, 122,000 m² fully automated mega-facility">${(item.tenants || []).join('\n')}</textarea>
-                        <small style="color: var(--text-secondary);">One tenant per line. This will automatically create/update the "Anchor Occupiers & Facilities" section.</small>
+                        
+                        <!-- Rich Text Editor Content Area -->
+                        <div class="rich-text-editor" 
+                             data-project-index="${index}"
+                             contenteditable="true" 
+                             style="min-height: 400px; padding: 1rem; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 0 0 4px 4px; outline: none; font-family: inherit; font-size: 1rem; line-height: 1.6; color: var(--text-primary); overflow-y: auto;"
+                             oninput="updateRichTextContent(${index})">
+                            ${convertProjectContentToHTML(item)}
+                        </div>
+                        <input type="hidden" class="project-rich-content" data-project-index="${index}" value="${escapeHtml(convertProjectContentToHTML(item))}">
                     </div>
                 </div>
             </div>
@@ -1732,7 +1791,7 @@ function renderProjects(items) {
 
 // Add functions
 function addFeature() {
-    const content = getContent();
+    const content = getContentSafe();
     if (!content.homePage) content.homePage = {};
     if (!content.homePage.features) content.homePage.features = { items: [] };
     if (!content.homePage.features.items) content.homePage.features.items = [];
@@ -1742,7 +1801,7 @@ function addFeature() {
 }
 
 function addShowcase() {
-    const content = getContent();
+    const content = getContentSafe();
     if (!content.homePage) content.homePage = {};
     if (!content.homePage.showcase) content.homePage.showcase = { items: [] };
     if (!content.homePage.showcase.items) content.homePage.showcase.items = [];
@@ -1752,7 +1811,7 @@ function addShowcase() {
 }
 
 function addTestimonial() {
-    const content = getContent();
+    const content = getContentSafe();
     if (!content.homePage) content.homePage = {};
     if (!content.homePage.testimonials) content.homePage.testimonials = { items: [] };
     if (!content.homePage.testimonials.items) content.homePage.testimonials.items = [];
@@ -1762,7 +1821,7 @@ function addTestimonial() {
 }
 
 function addNews() {
-    const content = getContent();
+    const content = getContentSafe();
     if (!content.homePage) content.homePage = {};
     if (!content.homePage.news) content.homePage.news = { items: [] };
     if (!content.homePage.news.items) content.homePage.news.items = [];
@@ -1772,7 +1831,7 @@ function addNews() {
 }
 
 function addStat() {
-    const content = getContent();
+    const content = getContentSafe();
     if (!content.homePage) content.homePage = {};
     if (!content.homePage.stats) content.homePage.stats = { items: [] };
     if (!content.homePage.stats.items) content.homePage.stats.items = [];
@@ -1782,7 +1841,7 @@ function addStat() {
 }
 
 function addAboutStat() {
-    const content = getContent();
+    const content = getContentSafe();
     if (!content.aboutPage) content.aboutPage = {};
     if (!content.aboutPage.stats) content.aboutPage.stats = { items: [] };
     if (!content.aboutPage.stats.items) content.aboutPage.stats.items = [];
@@ -1793,7 +1852,7 @@ function addAboutStat() {
 
 window.addValue = function() {
     try {
-        const content = getContent();
+        const content = getContentSafe();
         if (!content.aboutPage) content.aboutPage = {};
         if (!content.aboutPage.values) content.aboutPage.values = { items: [] };
         if (!content.aboutPage.values.items) content.aboutPage.values.items = [];
@@ -1808,7 +1867,7 @@ window.addValue = function() {
 };
 
 function addCSRItem() {
-    const content = getContent();
+    const content = getContentSafe();
     if (!content.aboutPage) content.aboutPage = {};
     if (!content.aboutPage.csr) content.aboutPage.csr = { items: [] };
     if (!content.aboutPage.csr.items) content.aboutPage.csr.items = [];
@@ -1818,7 +1877,7 @@ function addCSRItem() {
 }
 
 function addRecognitionItem() {
-    const content = getContent();
+    const content = getContentSafe();
     if (!content.aboutPage) content.aboutPage = {};
     if (!content.aboutPage.recognition) content.aboutPage.recognition = { items: [] };
     if (!content.aboutPage.recognition.items) content.aboutPage.recognition.items = [];
@@ -1828,7 +1887,7 @@ function addRecognitionItem() {
 }
 
 function addTimelineItem() {
-    const content = getContent();
+    const content = getContentSafe();
     if (!content.aboutPage) content.aboutPage = {};
     if (!content.aboutPage.timeline) content.aboutPage.timeline = { items: [] };
     if (!content.aboutPage.timeline.items) content.aboutPage.timeline.items = [];
@@ -1838,7 +1897,7 @@ function addTimelineItem() {
 }
 
 function addProject() {
-    const content = getContent();
+    const content = getContentSafe();
     if (!content.projectsPage) content.projectsPage = {};
     if (!content.projectsPage.projects) content.projectsPage.projects = { items: [] };
     if (!content.projectsPage.projects.items) content.projectsPage.projects.items = [];
@@ -2128,7 +2187,7 @@ function updateSectionToggleButton(buttonId, isHidden) {
 
 // Section-level toggle functions for home page - Make them global
 window.toggleHideFeaturesSection = function() {
-    const content = getContent();
+    const content = getContentSafe();
     if (!content.homePage) content.homePage = {};
     if (!content.homePage.features) content.homePage.features = {};
     content.homePage.features.hidden = !content.homePage.features.hidden;
@@ -2138,7 +2197,7 @@ window.toggleHideFeaturesSection = function() {
 };
 
 window.toggleHideTestimonialsSection = function() {
-    const content = getContent();
+    const content = getContentSafe();
     if (!content.homePage) content.homePage = {};
     if (!content.homePage.testimonials) content.homePage.testimonials = {};
     content.homePage.testimonials.hidden = !content.homePage.testimonials.hidden;
@@ -2148,7 +2207,7 @@ window.toggleHideTestimonialsSection = function() {
 };
 
 window.toggleHideNewsSection = function() {
-    const content = getContent();
+    const content = getContentSafe();
     if (!content.homePage) content.homePage = {};
     if (!content.homePage.news) content.homePage.news = {};
     content.homePage.news.hidden = !content.homePage.news.hidden;
@@ -2158,7 +2217,7 @@ window.toggleHideNewsSection = function() {
 };
 
 window.toggleHideStatsSection = function() {
-    const content = getContent();
+    const content = getContentSafe();
     if (!content.homePage) content.homePage = {};
     if (!content.homePage.stats) content.homePage.stats = {};
     content.homePage.stats.hidden = !content.homePage.stats.hidden;
@@ -2168,7 +2227,7 @@ window.toggleHideStatsSection = function() {
 };
 
 window.toggleHideShowcaseSection = function() {
-    const content = getContent();
+    const content = getContentSafe();
     if (!content.homePage) content.homePage = {};
     if (!content.homePage.showcase) content.homePage.showcase = {};
     content.homePage.showcase.hidden = !content.homePage.showcase.hidden;
@@ -2179,7 +2238,7 @@ window.toggleHideShowcaseSection = function() {
 
 // Individual item toggle functions for home page - Make them global
 window.toggleHideShowcase = function(index) {
-    const content = getContent();
+    const content = getContentSafe();
     if (content.homePage && content.homePage.showcase && content.homePage.showcase.items && content.homePage.showcase.items[index]) {
         content.homePage.showcase.items[index].hidden = !content.homePage.showcase.items[index].hidden;
         saveContent(content);
@@ -2189,7 +2248,7 @@ window.toggleHideShowcase = function(index) {
 };
 
 window.toggleHideTestimonial = function(index) {
-    const content = getContent();
+    const content = getContentSafe();
     if (content.homePage && content.homePage.testimonials && content.homePage.testimonials.items && content.homePage.testimonials.items[index]) {
         content.homePage.testimonials.items[index].hidden = !content.homePage.testimonials.items[index].hidden;
         saveContent(content);
@@ -2199,7 +2258,7 @@ window.toggleHideTestimonial = function(index) {
 };
 
 window.toggleHideNews = function(index) {
-    const content = getContent();
+    const content = getContentSafe();
     if (content.homePage && content.homePage.news && content.homePage.news.items && content.homePage.news.items[index]) {
         content.homePage.news.items[index].hidden = !content.homePage.news.items[index].hidden;
         saveContent(content);
@@ -2209,7 +2268,7 @@ window.toggleHideNews = function(index) {
 };
 
 window.toggleHideStat = function(index) {
-    const content = getContent();
+    const content = getContentSafe();
     if (content.homePage && content.homePage.stats && content.homePage.stats.items && content.homePage.stats.items[index]) {
         content.homePage.stats.items[index].hidden = !content.homePage.stats.items[index].hidden;
         saveContent(content);
@@ -2220,7 +2279,7 @@ window.toggleHideStat = function(index) {
 
 window.removeAboutStat = function(index) {
     if (!confirm('Remove this stat?')) return;
-    const content = getContent();
+    const content = getContentSafe();
     if (content.aboutPage && content.aboutPage.stats && content.aboutPage.stats.items) {
         content.aboutPage.stats.items.splice(index, 1);
         saveContent(content);
@@ -2231,7 +2290,7 @@ window.removeAboutStat = function(index) {
 
 window.removeValue = function(index) {
     if (!confirm('Remove this value?')) return;
-    const content = getContent();
+    const content = getContentSafe();
     if (content.aboutPage && content.aboutPage.values && content.aboutPage.values.items) {
         content.aboutPage.values.items.splice(index, 1);
         saveContent(content);
@@ -2241,7 +2300,7 @@ window.removeValue = function(index) {
 };
 
 window.toggleHideCSRItem = function(index) {
-    const content = getContent();
+    const content = getContentSafe();
     if (content.aboutPage && content.aboutPage.csr && content.aboutPage.csr.items) {
         if (content.aboutPage.csr.items[index]) {
             content.aboutPage.csr.items[index].hidden = !content.aboutPage.csr.items[index].hidden;
@@ -2253,7 +2312,7 @@ window.toggleHideCSRItem = function(index) {
 };
 
 window.toggleHideRecognitionItem = function(index) {
-    const content = getContent();
+    const content = getContentSafe();
     if (content.aboutPage && content.aboutPage.recognition && content.aboutPage.recognition.items) {
         if (content.aboutPage.recognition.items[index]) {
             content.aboutPage.recognition.items[index].hidden = !content.aboutPage.recognition.items[index].hidden;
@@ -2266,7 +2325,7 @@ window.toggleHideRecognitionItem = function(index) {
 
 window.removeTimelineItem = function(index) {
     if (!confirm('Remove this timeline item?')) return;
-    const content = getContent();
+    const content = getContentSafe();
     if (content.aboutPage && content.aboutPage.timeline && content.aboutPage.timeline.items) {
         content.aboutPage.timeline.items.splice(index, 1);
         saveContent(content);
@@ -2277,7 +2336,7 @@ window.removeTimelineItem = function(index) {
 
 window.removeProject = function(index) {
     if (!confirm('Remove this project?')) return;
-    const content = getContent();
+    const content = getContentSafe();
     if (content.projectsPage && content.projectsPage.projects && content.projectsPage.projects.items) {
         content.projectsPage.projects.items.splice(index, 1);
         saveContent(content);
@@ -2473,7 +2532,7 @@ window.removeMetaItem = function(projectIndex, metaIndex) {
 
 // Save functions
 function saveTimeline() {
-    const content = getContent();
+    const content = getContentSafe();
     if (!content.aboutPage) content.aboutPage = {};
     if (!content.aboutPage.timeline) content.aboutPage.timeline = { items: [] };
     
@@ -2490,11 +2549,11 @@ function saveTimeline() {
 }
 
 function saveProjects() {
-    const content = getContent();
+    const content = getContentSafe();
     if (!content.projectsPage) content.projectsPage = {};
     if (!content.projectsPage.projects) content.projectsPage.projects = { items: [] };
     
-    const items = Array.from(document.querySelectorAll('#projectsList .editable-item')).map(item => {
+    const items = Array.from(document.querySelectorAll('#projectsList .editable-item')).map((item, index) => {
         const name = item.querySelector('.project-name')?.value || '';
         const featured = item.querySelector('.project-featured')?.checked || false;
         const mainImage = item.querySelector('.project-main-image')?.value || '';
@@ -2516,39 +2575,19 @@ function saveProjects() {
         });
         const meta = metaItems;
         
-        const descriptionText = item.querySelector('.project-description')?.value || '';
-        const descriptions = descriptionText.split('\n\n').filter(s => s.trim());
+        // Get rich text content and parse it
+        const richTextEditor = item.querySelector(`.rich-text-editor[data-project-index="${index}"]`);
+        const richContent = richTextEditor ? richTextEditor.innerHTML : '';
         
-        // Get tenants first (before sections, so we can auto-create the section)
-        const tenantsText = item.querySelector('.project-tenants')?.value || '';
-        const tenants = tenantsText.split('\n').map(s => s.trim()).filter(s => s);
+        // Store the raw HTML content for direct rendering
+        // Also parse it for backward compatibility with existing display logic
+        const parsed = parseRichTextContent(richContent);
+        const descriptions = parsed.descriptions;
+        const sections = parsed.sections;
+        const tenants = parsed.tenants;
         
-        // Get sections from new structure (excluding "Anchor Occupiers" sections - we'll add from tenants)
-        const sections = [];
-        const sectionRows = item.querySelectorAll('.section-item-row');
-        sectionRows.forEach(row => {
-            const headingInput = row.querySelector('.section-heading-input');
-            const contentInput = row.querySelector('.section-content-input');
-            const heading = headingInput?.value.trim() || '';
-            const content = contentInput?.value.trim() || '';
-            
-            // Skip "Anchor Occupiers & Facilities" sections - we'll add it automatically from tenants
-            if (heading.toLowerCase().includes('anchor occupiers')) {
-                return; // Skip this section, it will be created from tenants
-            }
-            
-            if (heading || content) {
-                sections.push({ heading, content });
-            }
-        });
-        
-        // Automatically create "Anchor Occupiers & Facilities" section from tenants list
-        if (tenants.length > 0) {
-            sections.push({ 
-                heading: 'Anchor Occupiers & Facilities', 
-                content: tenants.join('\n') 
-            });
-        }
+        // Store raw HTML for direct rendering (new approach)
+        const richContentHtml = richContent;
         
         // Get features from new structure
         const features = [];
@@ -2577,7 +2616,8 @@ function saveProjects() {
             sections: sections,
             tenants: tenants,
             features: features,
-            link: link
+            link: link,
+            richContent: richContentHtml // Store raw HTML for direct rendering
         };
     });
     
@@ -3095,7 +3135,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (homeHeroForm) {
         homeHeroForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const content = getContent();
+            const content = getContentSafe();
             if (!content.homePage) content.homePage = {};
             content.homePage.hero = {
                 title: document.getElementById('heroTitle').value,
@@ -3120,7 +3160,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (homeVideoForm) {
         homeVideoForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const content = getContent();
+            const content = getContentSafe();
             if (!content.homePage) content.homePage = {};
             content.homePage.video = {
                 title: document.getElementById('videoTitle').value,
@@ -3139,7 +3179,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (homeFeaturesForm) {
         homeFeaturesForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const content = getContent();
+            const content = getContentSafe();
             if (!content.homePage) content.homePage = {};
             if (!content.homePage.features) content.homePage.features = {};
             
@@ -3167,7 +3207,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (homeShowcaseForm) {
         homeShowcaseForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const content = getContent();
+            const content = getContentSafe();
             if (!content.homePage) content.homePage = {};
             if (!content.homePage.showcase) content.homePage.showcase = {};
             
@@ -3195,7 +3235,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (homeTestimonialsForm) {
         homeTestimonialsForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const content = getContent();
+            const content = getContentSafe();
             if (!content.homePage) content.homePage = {};
             if (!content.homePage.testimonials) content.homePage.testimonials = {};
             
@@ -3224,7 +3264,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (homeNewsForm) {
         homeNewsForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const content = getContent();
+            const content = getContentSafe();
             if (!content.homePage) content.homePage = {};
             if (!content.homePage.news) content.homePage.news = {};
             
@@ -3255,7 +3295,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (homeStatsForm) {
         homeStatsForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const content = getContent();
+            const content = getContentSafe();
             if (!content.homePage) content.homePage = {};
             if (!content.homePage.stats) content.homePage.stats = {};
             
@@ -3276,7 +3316,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (aboutHeroForm) {
         aboutHeroForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const content = getContent();
+            const content = getContentSafe();
             if (!content.aboutPage) content.aboutPage = {};
             content.aboutPage.hero = {
                 title: document.getElementById('aboutHeroTitle').value,
@@ -3294,7 +3334,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (aboutStatsForm) {
         aboutStatsForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const content = getContent();
+            const content = getContentSafe();
             if (!content.aboutPage) content.aboutPage = {};
             if (!content.aboutPage.stats) content.aboutPage.stats = { items: [] };
             
@@ -3317,7 +3357,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (aboutContentForm) {
         aboutContentForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const content = getContent();
+            const content = getContentSafe();
             if (!content.aboutPage) content.aboutPage = {};
             if (!content.aboutPage.content) content.aboutPage.content = {};
             const storyEl = document.getElementById('aboutStory');
@@ -3338,7 +3378,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (aboutMissionForm) {
         aboutMissionForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const content = getContent();
+            const content = getContentSafe();
             if (!content.aboutPage) content.aboutPage = {};
             if (!content.aboutPage.mission) content.aboutPage.mission = {};
             content.aboutPage.mission.icon = document.getElementById('missionIcon')?.value || '';
@@ -3355,7 +3395,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (aboutTimelineHeaderForm) {
         aboutTimelineHeaderForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const content = getContent();
+            const content = getContentSafe();
             if (!content.aboutPage) content.aboutPage = {};
             if (!content.aboutPage.timeline) content.aboutPage.timeline = {};
             content.aboutPage.timeline.title = document.getElementById('timelineTitle')?.value || '';
@@ -3371,7 +3411,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (aboutValuesForm) {
         aboutValuesForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const content = getContent();
+            const content = getContentSafe();
             if (!content.aboutPage) content.aboutPage = {};
             if (!content.aboutPage.values) content.aboutPage.values = { items: [] };
             
@@ -3397,7 +3437,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (aboutLeadershipForm) {
         aboutLeadershipForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const content = getContent();
+            const content = getContentSafe();
             if (!content.aboutPage) content.aboutPage = {};
             if (!content.aboutPage.leadership) content.aboutPage.leadership = {};
             content.aboutPage.leadership.title = document.getElementById('leadershipTitle')?.value || '';
@@ -3419,7 +3459,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (aboutCSRForm) {
         aboutCSRForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const content = getContent();
+            const content = getContentSafe();
             if (!content.aboutPage) content.aboutPage = {};
             if (!content.aboutPage.csr) content.aboutPage.csr = { items: [] };
             
@@ -3450,7 +3490,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (aboutRecognitionForm) {
         aboutRecognitionForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const content = getContent();
+            const content = getContentSafe();
             if (!content.aboutPage) content.aboutPage = {};
             if (!content.aboutPage.recognition) content.aboutPage.recognition = { items: [] };
             
@@ -3481,7 +3521,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (projectsHeroForm) {
         projectsHeroForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const content = getContent();
+            const content = getContentSafe();
             if (!content.projectsPage) content.projectsPage = {};
             content.projectsPage.hero = {
                 title: document.getElementById('projectsHeroTitle').value,
@@ -3499,7 +3539,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (contactHeroForm) {
         contactHeroForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const content = getContent();
+            const content = getContentSafe();
             if (!content.contactPage) content.contactPage = {};
             content.contactPage.hero = {
                 title: document.getElementById('contactHeroTitle').value,
@@ -3517,7 +3557,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (contactInfoForm) {
         contactInfoForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const content = getContent();
+            const content = getContentSafe();
             if (!content.contactPage) content.contactPage = {};
             if (!content.contactPage.info) content.contactPage.info = {};
             content.contactPage.info.email = document.getElementById('contactEmail').value;
@@ -3535,7 +3575,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (globalContactForm) {
         globalContactForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const content = getContent();
+            const content = getContentSafe();
             if (!content.global) content.global = {};
             content.global.email = document.getElementById('globalEmail').value;
             content.global.phone = document.getElementById('globalPhone').value;
@@ -3550,7 +3590,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (iconsForm) {
         iconsForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const content = getContent();
+            const content = getContentSafe();
             if (!content.icons) content.icons = {};
             content.icons.emailIcon = document.getElementById('emailIcon').value || 'bi-envelope-fill';
             content.icons.phoneIcon = document.getElementById('phoneIcon').value || 'bi-telephone-fill';
@@ -3562,4 +3602,417 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+// ==================== Rich Text Editor Functions ====================
+
+// Convert project content (description, sections, tenants) to HTML for rich text editor
+function convertProjectContentToHTML(item) {
+    let html = '';
+    
+    // Add description paragraphs
+    const descriptions = item.descriptions || (item.description ? item.description.split('\n\n') : []);
+    descriptions.forEach(desc => {
+        if (desc.trim()) {
+            html += `<p>${escapeHtml(desc.trim())}</p>`;
+        }
+    });
+    
+    // Add tenants as "Anchor Occupiers & Facilities" section FIRST (before other sections)
+    const tenants = item.tenants || [];
+    if (tenants.length > 0) {
+        html += '<h3>Anchor Occupiers & Facilities</h3><ul>';
+        tenants.forEach(tenant => {
+            if (tenant.trim()) {
+                html += `<li>${escapeHtml(tenant.trim())}</li>`;
+            }
+        });
+        html += '</ul>';
+    }
+    
+    // Add other sections (excluding "Anchor Occupiers" which comes from tenants)
+    const sections = item.sections || [];
+    sections.forEach(section => {
+        const heading = typeof section === 'string' ? (section.split('|')[0] || '') : (section.heading || '');
+        const content = typeof section === 'string' ? (section.split('|')[1] || '') : (section.content || '');
+        
+        // Skip "Anchor Occupiers" sections - they're already added from tenants
+        if (heading.toLowerCase().includes('anchor occupiers')) {
+            return;
+        }
+        
+        if (heading || content) {
+            if (heading) {
+                html += `<h3>${escapeHtml(heading)}</h3>`;
+            }
+            if (content) {
+                // Check if content is a list (newline-separated)
+                const lines = content.split('\n').filter(l => l.trim());
+                if (lines.length > 1) {
+                    html += '<ul>';
+                    lines.forEach(line => {
+                        html += `<li>${escapeHtml(line.trim())}</li>`;
+                    });
+                    html += '</ul>';
+                } else {
+                    html += `<p>${escapeHtml(content)}</p>`;
+                }
+            }
+        }
+    });
+    
+    return html || '<p></p>'; // Return at least an empty paragraph
+}
+
+// Parse rich text HTML content back into structured data
+function parseRichTextContent(html) {
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = html;
+    
+    const descriptions = [];
+    const sections = [];
+    const tenants = [];
+    
+    let currentSection = null;
+    let currentContent = [];
+    
+    // Process all child nodes
+    Array.from(tempDiv.childNodes).forEach(node => {
+        if (node.nodeType === 1) { // Element node
+            const tagName = node.tagName.toLowerCase();
+            
+            if (tagName === 'h2' || tagName === 'h3') {
+                // Save previous section if exists
+                if (currentSection && currentContent.length > 0) {
+                    sections.push({
+                        heading: currentSection,
+                        content: currentContent.join('\n')
+                    });
+                }
+                
+                // Start new section
+                currentSection = node.textContent.trim();
+                currentContent = [];
+            } else if (tagName === 'p') {
+                const text = node.textContent.trim();
+                if (text) {
+                    if (currentSection) {
+                        currentContent.push(text);
+                    } else {
+                        descriptions.push(text);
+                    }
+                }
+            } else if (tagName === 'ul' || tagName === 'ol') {
+                const listItems = Array.from(node.querySelectorAll('li')).map(li => li.textContent.trim()).filter(t => t);
+                if (listItems.length > 0) {
+                    if (currentSection && currentSection.toLowerCase().includes('anchor occupiers')) {
+                        // This is the tenants list
+                        tenants.push(...listItems);
+                    } else if (currentSection) {
+                        // This is a section list
+                        currentContent.push(listItems.join('\n'));
+                    } else {
+                        // This is a description list (convert to paragraphs)
+                        listItems.forEach(item => descriptions.push(item));
+                    }
+                }
+            } else if (tagName === 'li') {
+                // Handle standalone list items
+                const text = node.textContent.trim();
+                if (text) {
+                    if (currentSection && currentSection.toLowerCase().includes('anchor occupiers')) {
+                        tenants.push(text);
+                    } else if (currentSection) {
+                        currentContent.push(text);
+                    } else {
+                        descriptions.push(text);
+                    }
+                }
+            }
+        }
+    });
+    
+    // Save last section if exists
+    if (currentSection && currentContent.length > 0) {
+        sections.push({
+            heading: currentSection,
+            content: currentContent.join('\n')
+        });
+    }
+    
+    return { descriptions, sections, tenants };
+}
+
+// Rich text editor command handler
+function richTextCommand(command, projectIndex, value = null) {
+    const editor = document.querySelector(`.rich-text-editor[data-project-index="${projectIndex}"]`);
+    if (!editor) return;
+    
+    editor.focus();
+    
+    if (command === 'undo' || command === 'redo') {
+        // Use browser's native undo/redo
+        document.execCommand(command, false, null);
+    } else if (command === 'formatBlock' && value) {
+        document.execCommand('formatBlock', false, value);
+    } else {
+        document.execCommand(command, false, null);
+    }
+    
+    updateRichTextContent(projectIndex);
+}
+
+// Update hidden input with rich text content
+function updateRichTextContent(projectIndex) {
+    const editor = document.querySelector(`.rich-text-editor[data-project-index="${projectIndex}"]`);
+    const hiddenInput = document.querySelector(`.project-rich-content[data-project-index="${projectIndex}"]`);
+    
+    if (editor && hiddenInput) {
+        hiddenInput.value = editor.innerHTML;
+    }
+}
+
+// Toggle brand color picker dropdown
+function toggleBrandColorPicker(projectIndex) {
+    const picker = document.getElementById(`color-picker-${projectIndex}`);
+    if (!picker) return;
+    
+    // Close all other color pickers
+    document.querySelectorAll('.brand-color-picker').forEach(p => {
+        if (p !== picker) {
+            p.style.display = 'none';
+        }
+    });
+    
+    // Toggle current picker
+    const isVisible = picker.style.display === 'block';
+    if (isVisible) {
+        picker.style.display = 'none';
+    } else {
+        picker.style.display = 'block';
+        
+        // Close picker when clicking outside
+        setTimeout(() => {
+            const closePicker = (e) => {
+                if (!picker.contains(e.target) && !e.target.closest('.color-picker-wrapper')) {
+                    picker.style.display = 'none';
+                    document.removeEventListener('click', closePicker);
+                }
+            };
+            // Use setTimeout to avoid immediate closure
+            setTimeout(() => {
+                document.addEventListener('click', closePicker);
+            }, 10);
+        }, 10);
+    }
+}
+
+// Apply brand color to selected text
+function applyBrandColor(projectIndex, color) {
+    const editor = document.querySelector(`.rich-text-editor[data-project-index="${projectIndex}"]`);
+    if (!editor) return;
+    
+    editor.focus();
+    
+    if (color === '') {
+        // Remove color - use removeFormat command
+        document.execCommand('removeFormat', false, null);
+        // Also try to remove any font tags or color spans
+        const selection = window.getSelection();
+        if (selection.rangeCount > 0) {
+            const range = selection.getRangeAt(0);
+            if (!range.collapsed) {
+                // Find and remove color styles from selected elements
+                const walker = document.createTreeWalker(
+                    range.commonAncestorContainer,
+                    NodeFilter.SHOW_ELEMENT,
+                    null
+                );
+                let node;
+                const elementsToCheck = [];
+                while (node = walker.nextNode()) {
+                    if (range.intersectsNode(node)) {
+                        elementsToCheck.push(node);
+                    }
+                }
+                elementsToCheck.forEach(el => {
+                    if (el.style && el.style.color) {
+                        el.style.color = '';
+                        // If element has no other styles, remove the style attribute
+                        if (!el.style.cssText || el.style.cssText.trim() === '') {
+                            el.removeAttribute('style');
+                        }
+                    }
+                });
+            }
+        }
+    } else {
+        // Apply color using execCommand
+        document.execCommand('foreColor', false, color);
+    }
+    
+    // Close the color picker
+    const picker = document.getElementById(`color-picker-${projectIndex}`);
+    if (picker) {
+        picker.style.display = 'none';
+    }
+    
+    updateRichTextContent(projectIndex);
+}
+
+// Open icon picker for rich text editor
+function openIconPickerForRichText(projectIndex) {
+    const editor = document.querySelector(`.rich-text-editor[data-project-index="${projectIndex}"]`);
+    if (!editor) return;
+    
+    // Store current selection and range BEFORE opening the modal
+    const selection = window.getSelection();
+    let savedRange = null;
+    if (selection.rangeCount > 0) {
+        savedRange = selection.getRangeAt(0).cloneRange();
+    }
+    
+    // If no selection, create a range at the current cursor position
+    if (!savedRange) {
+        savedRange = document.createRange();
+        savedRange.selectNodeContents(editor);
+        savedRange.collapse(false); // Collapse to end
+    }
+    
+    // Create callback for icon selection
+    const iconCallback = (iconClass) => {
+        // Focus the editor first
+        editor.focus();
+        
+        // Restore the saved selection/range
+        let currentRange = savedRange;
+        if (savedRange) {
+            try {
+                // Check if the range is still valid
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(savedRange);
+                currentRange = savedRange;
+            } catch (e) {
+                // If range is invalid, try to get current selection or use fallback
+                const sel = window.getSelection();
+                if (sel.rangeCount > 0) {
+                    currentRange = sel.getRangeAt(0);
+                } else {
+                    // Create a range at the end as fallback
+                    currentRange = document.createRange();
+                    currentRange.selectNodeContents(editor);
+                    currentRange.collapse(false);
+                    sel.removeAllRanges();
+                    sel.addRange(currentRange);
+                }
+            }
+        } else {
+            // No saved range, try to get current selection
+            const sel = window.getSelection();
+            if (sel.rangeCount > 0) {
+                currentRange = sel.getRangeAt(0);
+            } else {
+                // Create a range at the end as fallback
+                currentRange = document.createRange();
+                currentRange.selectNodeContents(editor);
+                currentRange.collapse(false);
+                sel.removeAllRanges();
+                sel.addRange(currentRange);
+            }
+        }
+        
+        // Ensure we have a valid range before inserting
+        if (currentRange) {
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            try {
+                sel.addRange(currentRange);
+            } catch (e) {
+                // Range might be invalid, create a new one at cursor position
+                const newRange = document.createRange();
+                if (editor.childNodes.length > 0) {
+                    const lastNode = editor.childNodes[editor.childNodes.length - 1];
+                    if (lastNode.nodeType === 3) { // Text node
+                        newRange.setStart(lastNode, lastNode.textContent.length);
+                    } else {
+                        newRange.setStartAfter(lastNode);
+                    }
+                } else {
+                    newRange.setStart(editor, 0);
+                }
+                newRange.collapse(true);
+                sel.addRange(newRange);
+                currentRange = newRange;
+            }
+        }
+        
+        // Create the icon element
+        const iconWrapper = document.createElement('p');
+        iconWrapper.className = 'rich-text-icon-wrapper';
+        iconWrapper.style.cssText = 'margin: 0.5rem 0; min-height: 1.5rem;';
+        const icon = document.createElement('i');
+        icon.className = `bi ${iconClass} rich-text-icon`;
+        icon.style.cssText = 'font-size: 1.5rem; color: var(--secondary-color);';
+        iconWrapper.appendChild(icon);
+        
+        // Insert at the current cursor position using DOM manipulation
+        if (currentRange) {
+            try {
+                // Delete any selected content first
+                currentRange.deleteContents();
+                
+                // Insert the icon wrapper
+                currentRange.insertNode(iconWrapper);
+                
+                // Create a new paragraph after the icon for text input
+                const newP = document.createElement('p');
+                newP.innerHTML = '<br>';
+                iconWrapper.parentNode.insertBefore(newP, iconWrapper.nextSibling);
+                
+                // Set cursor in the new paragraph
+                const newRange = document.createRange();
+                newRange.setStart(newP, 0);
+                newRange.collapse(true);
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(newRange);
+            } catch (e) {
+                // Fallback: append to end if insertion fails
+                console.warn('Direct insertion failed, appending to end:', e);
+                editor.appendChild(iconWrapper);
+                const newP = document.createElement('p');
+                newP.innerHTML = '<br>';
+                editor.appendChild(newP);
+                const newRange = document.createRange();
+                newRange.setStart(newP, 0);
+                newRange.collapse(true);
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(newRange);
+            }
+        } else {
+            // Fallback: append to end
+            editor.appendChild(iconWrapper);
+            const newP = document.createElement('p');
+            newP.innerHTML = '<br>';
+            editor.appendChild(newP);
+        }
+        
+        updateRichTextContent(projectIndex);
+    };
+    
+    // Open icon picker with callback
+    if (typeof window.createIconPicker === 'function') {
+        window.createIconPicker(null, '', iconCallback);
+    } else {
+        alert('Icon picker not available. Please refresh the page.');
+    }
+}
+
+// Escape HTML to prevent XSS
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
 

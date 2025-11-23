@@ -81,6 +81,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
 
     revealElements.forEach(el => revealObserver.observe(el));
+    
+    // Make revealObserver globally available so firebase-content-loader can use it
+    window.revealObserver = revealObserver;
 
     // Set active nav link based on current page
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';

@@ -364,6 +364,22 @@
         return path;
     };
     
+    // Helper function to get the base path for GitHub Pages
+    window.getBasePath = function() {
+        // If we're on GitHub Pages, detect the repository name from the path
+        if (window.location.hostname === 'rokwil.github.io' || window.location.hostname.includes('github.io')) {
+            const pathParts = window.location.pathname.split('/').filter(p => p);
+            if (pathParts.length > 0 && pathParts[0] !== 'Rokwil-Website') {
+                // Repository name is the first part of the path
+                return '/' + pathParts[0] + '/';
+            }
+            // Default repository name
+            return '/Rokwil-Website/';
+        }
+        // Local development - no base path needed
+        return '/';
+    };
+    
     // Helper function to normalize image paths (convert relative to absolute if needed)
     window.normalizeImagePath = function(path) {
         if (!path) return path;
@@ -374,25 +390,39 @@
         // First, try to fix truncated paths
         path = window.fixTruncatedImagePath(path);
         
-        // If path doesn't start with /, http://, or https://, make it absolute
-        if (!path.startsWith('/') && !path.startsWith('http://') && !path.startsWith('https://')) {
-            // If it starts with 'images/' or 'admin/images/', convert to '/images/'
+        // If path is already a full URL, return as-is
+        if (path.startsWith('http://') || path.startsWith('https://')) {
+            return path;
+        }
+        
+        // Get base path for GitHub Pages
+        const basePath = window.getBasePath();
+        
+        // If path doesn't start with /, make it relative
+        if (!path.startsWith('/')) {
+            // If it starts with 'images/' or 'admin/images/', convert appropriately
             if (path.startsWith('images/')) {
-                return '/' + path;
+                return basePath + path;
             }
             if (path.startsWith('admin/images/')) {
-                return '/' + path.replace('admin/', '');
+                return basePath + path.replace('admin/', '');
             }
-            // Otherwise, assume it's relative to root
-            return '/' + path;
+            // Otherwise, assume it's relative to base
+            return basePath + path;
         }
         
-        // If path starts with '/admin/images/', fix it to '/images/'
+        // If path starts with '/admin/images/', fix it
         if (path.startsWith('/admin/images/')) {
-            return path.replace('/admin/images/', '/images/');
+            return basePath + path.replace('/admin/images/', 'images/');
         }
         
-        return path;
+        // If path starts with '/images/', prepend base path
+        if (path.startsWith('/images/')) {
+            return basePath + path.substring(1); // Remove leading / and prepend base
+        }
+        
+        // For other absolute paths, prepend base path
+        return basePath + path.substring(1);
     };
     
     // Helper function to normalize video paths (similar to image paths)
@@ -402,25 +432,39 @@
         // Remove any leading/trailing whitespace
         path = path.trim();
         
-        // If path doesn't start with /, http://, or https://, make it absolute
-        if (!path.startsWith('/') && !path.startsWith('http://') && !path.startsWith('https://')) {
-            // If it starts with 'videos/' or 'admin/videos/', convert to '/videos/'
+        // If path is already a full URL, return as-is
+        if (path.startsWith('http://') || path.startsWith('https://')) {
+            return path;
+        }
+        
+        // Get base path for GitHub Pages
+        const basePath = window.getBasePath();
+        
+        // If path doesn't start with /, make it relative
+        if (!path.startsWith('/')) {
+            // If it starts with 'videos/' or 'admin/videos/', convert appropriately
             if (path.startsWith('videos/')) {
-                return '/' + path;
+                return basePath + path;
             }
             if (path.startsWith('admin/videos/')) {
-                return '/' + path.replace('admin/', '');
+                return basePath + path.replace('admin/', '');
             }
-            // Otherwise, assume it's relative to root
-            return '/' + path;
+            // Otherwise, assume it's relative to base
+            return basePath + path;
         }
         
-        // If path starts with '/admin/videos/', fix it to '/videos/'
+        // If path starts with '/admin/videos/', fix it
         if (path.startsWith('/admin/videos/')) {
-            return path.replace('/admin/videos/', '/videos/');
+            return basePath + path.replace('/admin/videos/', 'videos/');
         }
         
-        return path;
+        // If path starts with '/videos/', prepend base path
+        if (path.startsWith('/videos/')) {
+            return basePath + path.substring(1); // Remove leading / and prepend base
+        }
+        
+        // For other absolute paths, prepend base path
+        return basePath + path.substring(1);
     };
     
     // Initialize image preview

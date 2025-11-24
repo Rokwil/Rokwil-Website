@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin - Home Page - Rokwil Property Development</title>
+    <link rel="stylesheet" href="../css/site.css" />
+    <link rel="stylesheet" href="css/admin.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="admin-body">
+    <header class="admin-header">
+        <div class="admin-header-left">
+            <div class="admin-logo">
+                <span class="logo-text">ROKWIL</span>
+                <span class="logo-subtitle">Admin Panel</span>
+            </div>
+            <nav class="admin-nav">
+                <a href="index-admin.html" class="admin-nav-link active">
+                    <i class="bi bi-house"></i> Home
+                </a>
+                <a href="about-admin.html" class="admin-nav-link">
+                    <i class="bi bi-info-circle"></i> About
+                </a>
+                <a href="projects-admin.html" class="admin-nav-link">
+                    <i class="bi bi-folder"></i> Projects
+                </a>
+                <a href="contact-admin.html" class="admin-nav-link">
+                    <i class="bi bi-envelope"></i> Contact
+                </a>
+                <a href="footer-admin.html" class="admin-nav-link">
+                    <i class="bi bi-layout-text-window"></i> Footer
+                </a>
+            </nav>
+        </div>
+        <div class="admin-header-right">
+            <div class="admin-user-info">
+                <i class="bi bi-person-circle"></i>
+                <span id="adminUserEmail">Loading...</span>
+            </div>
+            <button class="btn-logout" onclick="adminLogout()">
+                <i class="bi bi-box-arrow-right"></i> Logout
+            </button>
+        </div>
+    </header>
+
+    <div class="admin-container">
+        <div class="admin-page-header">
+            <h1><i class="bi bi-house-fill"></i> Home Page Editor</h1>
+            <p>Edit all content on the home page including hero section, features, projects, testimonials, news, and stats.</p>
+        </div>
+
+        <form id="homePageForm">
+            <!-- Hero Section -->
+            <div class="admin-section">
+                <div class="admin-section-header">
+                    <h2 class="admin-section-title">
+                        <i class="bi bi-image"></i> Hero Section
+                    </h2>
+                </div>
+                
+                <div class="admin-form-group">
+                    <label for="hero_title">Hero Title</label>
+                    <input type="text" id="hero_title" name="hero_title" required>
+                </div>
+                
+                <div class="admin-form-group">
+                    <label for="hero_subtitle">Hero Subtitle</label>
+                    <textarea id="hero_subtitle" name="hero_subtitle" rows="3" required></textarea>
+                </div>
+                
+                <div class="admin-form-group">
+                    <label for="hero_button1_text">Primary Button Text</label>
+                    <input type="text" id="hero_button1_text" name="hero_button1_text">
+                </div>
+                
+                <div class="admin-form-group">
+                    <label for="hero_button1_link">Primary Button Link</label>
+                    <input type="text" id="hero_button1_link" name="hero_button1_link">
+                </div>
+                
+                <div class="admin-form-group">
+                    <label for="hero_button2_text">Secondary Button Text</label>
+                    <input type="text" id="hero_button2_text" name="hero_button2_text">
+                </div>
+                
+                <div class="admin-form-group">
+                    <label for="hero_button2_link">Secondary Button Link</label>
+                    <input type="text" id="hero_button2_link" name="hero_button2_link">
+                </div>
+                
+                <div class="image-upload-container">
+                    <label>Hero Background Images (Upload files OR paste URLs)</label>
+                    
+                    <!-- Hero Image 1 -->
+                    <div class="hero-image-item" style="margin-bottom: 1.5rem;">
+                        <div class="admin-form-group">
+                            <label>Image 1 URL (or upload file below)</label>
+                            <div class="image-picker-dropdown" style="position: relative;">
+                                <input type="text" id="hero_image1_url" placeholder="images/Projects/..." style="width: 100%;" readonly>
+                                <button type="button" class="image-picker-toggle" style="position: absolute; right: 0; top: 0; height: 100%; padding: 0 0.75rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-left: none; border-radius: 0 8px 8px 0; cursor: pointer; display: flex; align-items: center;">
+                                    <i class="bi bi-chevron-down"></i>
+                                </button>
+                                <div class="image-picker-dropdown-menu" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--admin-bg-secondary); border: 1px solid var(--admin-border); border-radius: 8px; margin-top: 0.25rem; max-height: 400px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                                    <div class="image-picker-search" style="padding: 0.75rem; border-bottom: 1px solid var(--admin-border);">
+                                        <input type="text" class="image-picker-search-input" placeholder="Search images..." style="width: 100%; padding: 0.5rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-radius: 4px; color: var(--admin-text-primary);">
+                                    </div>
+                                    <div class="image-picker-list" style="padding: 0.5rem;">
+                                        <!-- Images will be populated here -->
+                                    </div>
+                                    <div style="padding: 0.75rem; border-top: 1px solid var(--admin-border);">
+                                        <input type="text" class="image-picker-manual-input" placeholder="Or enter URL manually..." style="width: 100%; padding: 0.5rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-radius: 4px; color: var(--admin-text-primary);">
+                                        <button type="button" class="admin-btn admin-btn-primary" style="width: 100%; margin-top: 0.5rem; padding: 0.5rem;">Use Manual URL</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="image-preview" id="hero_image1_preview">
+                            <div class="image-preview-placeholder">
+                                <i class="bi bi-image"></i>
+                                <p>No image selected</p>
+                            </div>
+                        </div>
+                        <input type="file" id="hero_image1" accept="image/*" style="display: none;">
+                        <button type="button" class="admin-btn admin-btn-secondary" id="hero_image1_upload_btn" style="margin-top: 0.5rem;">
+                            <i class="bi bi-upload"></i> Upload Image 1
+                        </button>
+                        <div id="hero_image1_folder_selector"></div>
+                    </div>
+                    
+                    <!-- Hero Image 2 -->
+                    <div class="hero-image-item">
+                        <div class="admin-form-group">
+                            <label>Image 2 URL (or upload file below)</label>
+                            <div class="image-picker-dropdown" style="position: relative;">
+                                <input type="text" id="hero_image2_url" placeholder="images/Projects/..." style="width: 100%;" readonly>
+                                <button type="button" class="image-picker-toggle" style="position: absolute; right: 0; top: 0; height: 100%; padding: 0 0.75rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-left: none; border-radius: 0 8px 8px 0; cursor: pointer; display: flex; align-items: center;">
+                                    <i class="bi bi-chevron-down"></i>
+                                </button>
+                                <div class="image-picker-dropdown-menu" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--admin-bg-secondary); border: 1px solid var(--admin-border); border-radius: 8px; margin-top: 0.25rem; max-height: 400px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                                    <div class="image-picker-search" style="padding: 0.75rem; border-bottom: 1px solid var(--admin-border);">
+                                        <input type="text" class="image-picker-search-input" placeholder="Search images..." style="width: 100%; padding: 0.5rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-radius: 4px; color: var(--admin-text-primary);">
+                                    </div>
+                                    <div class="image-picker-list" style="padding: 0.5rem;">
+                                        <!-- Images will be populated here -->
+                                    </div>
+                                    <div style="padding: 0.75rem; border-top: 1px solid var(--admin-border);">
+                                        <input type="text" class="image-picker-manual-input" placeholder="Or enter URL manually..." style="width: 100%; padding: 0.5rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-radius: 4px; color: var(--admin-text-primary);">
+                                        <button type="button" class="admin-btn admin-btn-primary" style="width: 100%; margin-top: 0.5rem; padding: 0.5rem;">Use Manual URL</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="image-preview" id="hero_image2_preview" style="margin-top: 1rem;">
+                            <div class="image-preview-placeholder">
+                                <i class="bi bi-image"></i>
+                                <p>No second image selected</p>
+                            </div>
+                        </div>
+                        <input type="file" id="hero_image2" accept="image/*" style="display: none;">
+                        <button type="button" class="admin-btn admin-btn-secondary" id="hero_image2_upload_btn" style="margin-top: 0.5rem;">
+                            <i class="bi bi-upload"></i> Upload Image 2
+                        </button>
+                        <div id="hero_image2_folder_selector"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Video Section -->
+            <div class="admin-section">
+                <div class="admin-section-header">
+                    <h2 class="admin-section-title">
+                        <i class="bi bi-play-circle"></i> Video Showcase Section
+                    </h2>
+                </div>
+                
+                <div class="admin-form-group">
+                    <label for="video_title">Video Section Title</label>
+                    <input type="text" id="video_title" name="video_title">
+                </div>
+                
+                <div class="admin-form-group">
+                    <label for="video_subtitle">Video Section Subtitle</label>
+                    <input type="text" id="video_subtitle" name="video_subtitle">
+                </div>
+                
+                <div class="video-upload-container">
+                    <label>Video File (URL or upload)</label>
+                    <div class="admin-form-group">
+                        <label>Video URL (or upload file below)</label>
+                        <input type="text" id="video_file_url" placeholder="videos/Rokwil.mp4 or https://...">
+                    </div>
+                    <div class="video-preview" id="video_preview">
+                        <div class="image-preview-placeholder">
+                            <i class="bi bi-play-circle"></i>
+                            <p>No video selected</p>
+                        </div>
+                    </div>
+                    <input type="file" id="video_file" accept="video/*" style="display: none;">
+                    <button type="button" class="admin-btn admin-btn-secondary" id="video_file_upload_btn" style="margin-top: 0.5rem;">
+                        <i class="bi bi-upload"></i> Upload Video
+                    </button>
+                </div>
+                
+                <div class="image-upload-container">
+                    <label>Video Poster Image (URL or upload)</label>
+                    <div class="admin-form-group">
+                        <label>Poster Image URL (or upload file below)</label>
+                        <input type="text" id="video_poster_url" placeholder="images/Projects/Keystone/Keystone 2.webp or https://...">
+                    </div>
+                    <div class="image-preview" id="video_poster_preview">
+                        <div class="image-preview-placeholder">
+                            <i class="bi bi-image"></i>
+                            <p>No poster image selected</p>
+                        </div>
+                    </div>
+                    <input type="file" id="video_poster" accept="image/*" style="display: none;">
+                    <button type="button" class="admin-btn admin-btn-secondary" id="video_poster_upload_btn" style="margin-top: 0.5rem;">
+                        <i class="bi bi-upload"></i> Upload Poster Image
+                    </button>
+                </div>
+            </div>
+
+            <!-- Features Section -->
+            <div class="admin-section">
+                <div class="admin-section-header">
+                    <h2 class="admin-section-title">
+                        <i class="bi bi-grid"></i> Features Section
+                    </h2>
+                    <label class="admin-toggle">
+                        <input type="checkbox" id="features_hidden">
+                        <span>Hide Section</span>
+                    </label>
+                </div>
+                
+                <div class="admin-form-group">
+                    <label for="features_title">Section Title</label>
+                    <input type="text" id="features_title" name="features_title">
+                </div>
+                
+                <div class="admin-form-group">
+                    <label for="features_subtitle">Section Subtitle</label>
+                    <input type="text" id="features_subtitle" name="features_subtitle">
+                </div>
+                
+                <div id="features_container">
+                    <!-- Features will be added here dynamically -->
+                </div>
+                
+                <button type="button" class="admin-btn admin-btn-secondary btn-add-item" onclick="addFeature()">
+                    <i class="bi bi-plus-circle"></i> Add Feature
+                </button>
+            </div>
+
+            <!-- Featured Projects Section -->
+            <div class="admin-section">
+                <div class="admin-section-header">
+                    <h2 class="admin-section-title">
+                        <i class="bi bi-star"></i> Featured Projects Section
+                    </h2>
+                    <label class="admin-toggle">
+                        <input type="checkbox" id="showcase_hidden">
+                        <span>Hide Section</span>
+                    </label>
+                </div>
+                
+                <div class="admin-form-group">
+                    <label for="showcase_title">Section Title</label>
+                    <input type="text" id="showcase_title" name="showcase_title">
+                </div>
+                
+                <div class="admin-form-group">
+                    <label for="showcase_subtitle">Section Subtitle</label>
+                    <input type="text" id="showcase_subtitle" name="showcase_subtitle">
+                </div>
+                
+                <div id="showcase_container">
+                    <!-- Showcase items will be added here dynamically -->
+                </div>
+                
+                <button type="button" class="admin-btn admin-btn-secondary btn-add-item" onclick="addShowcaseItem()">
+                    <i class="bi bi-plus-circle"></i> Add Featured Project
+                </button>
+            </div>
+
+            <!-- Testimonials Section -->
+            <div class="admin-section">
+                <div class="admin-section-header">
+                    <h2 class="admin-section-title">
+                        <i class="bi bi-chat-quote"></i> Testimonials Section
+                    </h2>
+                    <label class="admin-toggle">
+                        <input type="checkbox" id="testimonials_hidden">
+                        <span>Hide Section</span>
+                    </label>
+                </div>
+                
+                <div class="admin-form-group">
+                    <label for="testimonials_title">Section Title</label>
+                    <input type="text" id="testimonials_title" name="testimonials_title">
+                </div>
+                
+                <div class="admin-form-group">
+                    <label for="testimonials_subtitle">Section Subtitle</label>
+                    <input type="text" id="testimonials_subtitle" name="testimonials_subtitle">
+                </div>
+                
+                <div id="testimonials_container">
+                    <!-- Testimonials will be added here dynamically -->
+                </div>
+                
+                <button type="button" class="admin-btn admin-btn-secondary btn-add-item" onclick="addTestimonial()">
+                    <i class="bi bi-plus-circle"></i> Add Testimonial
+                </button>
+            </div>
+
+            <!-- News Section -->
+            <div class="admin-section">
+                <div class="admin-section-header">
+                    <h2 class="admin-section-title">
+                        <i class="bi bi-newspaper"></i> News Section
+                    </h2>
+                    <label class="admin-toggle">
+                        <input type="checkbox" id="news_hidden">
+                        <span>Hide Section</span>
+                    </label>
+                </div>
+                
+                <div class="admin-form-group">
+                    <label for="news_title">Section Title</label>
+                    <input type="text" id="news_title" name="news_title">
+                </div>
+                
+                <div class="admin-form-group">
+                    <label for="news_subtitle">Section Subtitle</label>
+                    <input type="text" id="news_subtitle" name="news_subtitle">
+                </div>
+                
+                <div id="news_container">
+                    <!-- News items will be added here dynamically -->
+                </div>
+                
+                <button type="button" class="admin-btn admin-btn-secondary btn-add-item" onclick="addNewsItem()">
+                    <i class="bi bi-plus-circle"></i> Add News Item
+                </button>
+            </div>
+
+            <!-- Stats Section -->
+            <div class="admin-section">
+                <div class="admin-section-header">
+                    <h2 class="admin-section-title">
+                        <i class="bi bi-bar-chart"></i> Statistics Section
+                    </h2>
+                </div>
+                
+                <div id="stats_container">
+                    <!-- Stats will be added here dynamically -->
+                </div>
+                
+                <button type="button" class="admin-btn admin-btn-secondary btn-add-item" onclick="addStat()">
+                    <i class="bi bi-plus-circle"></i> Add Statistic
+                </button>
+            </div>
+
+            <!-- Save Button -->
+            <div class="admin-section">
+                <button type="submit" class="admin-btn admin-btn-primary" style="width: 100%; padding: 1rem;">
+                    <i class="bi bi-save"></i> Save All Changes
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+    
+    <script src="../js/firebase-config.js"></script>
+    <script src="js/admin-auth.js"></script>
+    <script src="js/admin-firebase.js"></script>
+    <script src="js/icon-picker.js"></script>
+    <script src="js/index-admin.js"></script>
+</body>
+</html>
+

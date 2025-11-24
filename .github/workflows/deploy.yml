@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - master
   workflow_dispatch:
 
 permissions:
@@ -25,10 +26,44 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Create Firebase Config
+        run: |
+          cat > docs/js/firebase-config.js << EOF
+          // Firebase Configuration
+          // This file is auto-generated during deployment
+          
+          const firebaseConfig = {
+              apiKey: "${{ secrets.FIREBASE_API_KEY }}",
+              authDomain: "${{ secrets.FIREBASE_AUTH_DOMAIN }}",
+              projectId: "${{ secrets.FIREBASE_PROJECT_ID }}",
+              storageBucket: "${{ secrets.FIREBASE_STORAGE_BUCKET }}",
+              messagingSenderId: "${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}",
+              appId: "${{ secrets.FIREBASE_APP_ID }}",
+              measurementId: "${{ secrets.FIREBASE_MEASUREMENT_ID }}"
+          };
+          
+          // Initialize Firebase
+          firebase.initializeApp(firebaseConfig);
+          
+          // Initialize services
+          const db = firebase.firestore();
+          // Storage is optional - set to null if not available
+          let storage = null;
+          try {
+              storage = firebase.storage();
+          } catch (e) {
+              console.warn('Firebase Storage not available. You can use image/video URLs instead.');
+          }
+          const auth = firebase.auth();
+          EOF
+      
       - name: Setup Pages
         uses: actions/configure-pages@v4
-        with:
-          enablement: true
       
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
@@ -38,4 +73,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-

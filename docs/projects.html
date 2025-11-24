@@ -470,6 +470,7 @@
             </div>
             <div class="footer-bottom">
                 <p>&copy; 2025 Rokwil Property Development. All rights reserved.</p>
+                <a href="admin/login.html" style="color: rgba(255, 255, 255, 0.3); font-size: 0.7rem; text-decoration: none; margin-left: 1rem;">Admin</a>
             </div>
         </div>
     </footer>
@@ -487,6 +488,7 @@
                 <ul>
                     <li>Local storage to remember your theme preference (light/dark mode)</li>
                     <li>Local storage to remember your WIP disclaimer acceptance</li>
+                    <li>Firebase (Google) for content delivery and hosting</li>
                     <li>Third-party services (Static Forms) to process contact form submissions</li>
                 </ul>
                 <p>By continuing to use this site, you consent to our use of cookies and local storage. <a href="cookies.html">Learn more</a></p>
@@ -498,6 +500,14 @@
         </div>
     </div>
 
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+    
+    <script src="js/firebase-config.js"></script>
+    <script src="js/firebase-content-loader.js"></script>
     <script src="js/site.js"></script>
     <script>
         // WIP Disclaimer Modal
@@ -572,11 +582,26 @@
             const TRANSITION_DURATION = 800; // Transition animation duration
             const INITIAL_DELAY = 1500; // Show first slide for 1.5 seconds before starting
             
+            // Store slideshow instances to prevent duplicate initialization
+            const slideshowInstances = new WeakMap();
+            
             /**
              * Initialize slideshow for a single project
              * @param {HTMLElement} slideshow - The slideshow container element
              */
             function initSlideshow(slideshow) {
+                // Stop existing slideshow if already initialized
+                if (slideshowInstances.has(slideshow)) {
+                    const instance = slideshowInstances.get(slideshow);
+                    if (instance.stopSlideshow) {
+                        instance.stopSlideshow();
+                    }
+                    // Remove old event listeners by cloning (clean way to remove all listeners)
+                    const newSlideshow = slideshow.cloneNode(true);
+                    slideshow.parentNode.replaceChild(newSlideshow, slideshow);
+                    slideshow = newSlideshow;
+                }
+                
                 const slides = slideshow.querySelectorAll('.project-slide');
                 
                 // Skip if only one or no slides
@@ -585,6 +610,7 @@
                 let currentSlide = 0;
                 let slideInterval = null;
                 let isTransitioning = false;
+                let initialTimeout = null; // Track initial delay timeout
                 
                 /**
                  * Initialize slideshow state - show first slide
@@ -647,19 +673,27 @@
                 /**
                  * Start the slideshow
                  */
-                function startSlideshow() {
-                    initializeSlideshow();
-                    
-                    // Clear any existing interval
+                function startSlideshow(resetState = false) {
+                    // Clear any existing intervals and timeouts first
                     if (slideInterval) {
                         clearInterval(slideInterval);
+                        slideInterval = null;
+                    }
+                    if (initialTimeout) {
+                        clearTimeout(initialTimeout);
+                        initialTimeout = null;
+                    }
+                    
+                    // Reset state only on initial load, not on resume from hover
+                    if (resetState) {
+                        initializeSlideshow();
                     }
                     
                     // Start auto-rotation after initial delay, then continue at regular interval
-                    setTimeout(() => {
+                    initialTimeout = setTimeout(() => {
                         nextSlide(); // First transition
                         slideInterval = setInterval(nextSlide, SLIDE_INTERVAL);
-                    }, INITIAL_DELAY);
+                    }, resetState ? INITIAL_DELAY : 0); // No delay on resume from hover
                 }
                 
                 /**
@@ -670,28 +704,47 @@
                         clearInterval(slideInterval);
                         slideInterval = null;
                     }
+                    if (initialTimeout) {
+                        clearTimeout(initialTimeout);
+                        initialTimeout = null;
+                    }
                 }
                 
                 /**
                  * Pause slideshow on hover, resume on mouse leave
                  */
                 slideshow.addEventListener('mouseenter', stopSlideshow);
-                slideshow.addEventListener('mouseleave', startSlideshow);
+                slideshow.addEventListener('mouseleave', () => startSlideshow(false)); // Don't reset state on resume
                 
-                // Initialize slideshow
-                if (document.readyState === 'loading') {
-                    document.addEventListener('DOMContentLoaded', startSlideshow);
-                } else {
-                    startSlideshow();
-                }
+                // Store instance for cleanup (include all cleanup functions)
+                slideshowInstances.set(slideshow, { 
+                    stopSlideshow: stopSlideshow,
+                    slideInterval: () => slideInterval,
+                    initialTimeout: () => initialTimeout
+                });
+                
+                // Initialize slideshow (with state reset)
+                startSlideshow(true);
                 
                 // Cleanup on page unload
                 window.addEventListener('beforeunload', stopSlideshow);
             }
             
-            // Initialize all slideshows on the page
-            const slideshows = document.querySelectorAll('.project-slideshow');
-            slideshows.forEach(initSlideshow);
+            /**
+             * Initialize all slideshows on the page
+             * This function is made globally available so it can be called after Firebase loads content
+             */
+            window.initProjectSlideshows = function() {
+                const slideshows = document.querySelectorAll('.project-slideshow');
+                slideshows.forEach(initSlideshow);
+            };
+            
+            // Initialize slideshows on page load
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', window.initProjectSlideshows);
+            } else {
+                window.initProjectSlideshows();
+            }
         })();
     </script>
     <script>

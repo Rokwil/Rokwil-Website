@@ -2,12 +2,13 @@
 // Your Firebase project credentials
 
 const firebaseConfig = {
-    apiKey: "AIzaSyDOuXRhmeNHS65EIPLq7v4ad0L6cwKTQOk",
+    apiKey: "AIzaSyA54tuw-iRcuCquvkfuF5XlPSCFQJnUdsM",
     authDomain: "rokwil.firebaseapp.com",
     projectId: "rokwil",
     storageBucket: "rokwil.firebasestorage.app",
     messagingSenderId: "210198831386",
-    appId: "1:210198831386:web:46f7956931ff84dae54ca3"
+    appId: "1:210198831386:web:c18edaa2a18f3c8de54ca3",
+    measurementId: "G-WNF17ERJCZ"
 };
 
 // Initialize Firebase

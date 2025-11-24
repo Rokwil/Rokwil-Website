@@ -38,7 +38,11 @@
             document.getElementById('contact_hero_title').value = pageData.pageHero.title || '';
             document.getElementById('contact_hero_subtitle').value = pageData.pageHero.subtitle || '';
             if (pageData.pageHero.image) {
-                document.getElementById('contact_hero_image_preview').innerHTML = `<img src="${pageData.pageHero.image}" alt="Preview">`;
+                const normalizedPath = normalizeImagePath(pageData.pageHero.image);
+                if (document.getElementById('contact_hero_image_url')) {
+                    document.getElementById('contact_hero_image_url').value = pageData.pageHero.image;
+                }
+                document.getElementById('contact_hero_image_preview').innerHTML = `<img src="${normalizedPath}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
             }
         }
         
@@ -103,16 +107,19 @@
             showLoading();
             
             // Collect page hero
+            const heroImageUrl = document.getElementById('contact_hero_image_url')?.value.trim();
             const heroImage = document.getElementById('contact_hero_image').files[0];
-            let heroImageUrl = pageData.pageHero?.image || '';
-            if (heroImage) {
-                heroImageUrl = await handleImageUpload('contact_hero_image', 'contact_hero_image_preview', 'images/contact', null);
+            let finalHeroImageUrl = pageData.pageHero?.image || '';
+            if (heroImageUrl) {
+                finalHeroImageUrl = heroImageUrl;
+            } else if (heroImage) {
+                finalHeroImageUrl = await handleImageUpload('contact_hero_image', 'contact_hero_image_preview', 'images/contact', null);
             }
             
             pageData.pageHero = {
                 title: document.getElementById('contact_hero_title').value,
                 subtitle: document.getElementById('contact_hero_subtitle').value,
-                image: heroImageUrl
+                image: finalHeroImageUrl
             };
             
             // Collect contact form
@@ -156,6 +163,37 @@
     
     // Initialize image preview
     initImagePreview('contact_hero_image', 'contact_hero_image_preview');
+    
+    // Initialize folder selectors
+    if (window.initFolderSelectors) {
+        window.initFolderSelectors();
+    }
+    
+    // Initialize image picker for hero image
+    if (window.initImagePicker) {
+        const contactHeroImageUrl = document.getElementById('contact_hero_image_url');
+        if (contactHeroImageUrl) window.initImagePicker(contactHeroImageUrl);
+    }
+    
+    // Add input listener for hero image URL
+    if (document.getElementById('contact_hero_image_url')) {
+        document.getElementById('contact_hero_image_url').addEventListener('input', function() {
+            const url = this.value.trim();
+            if (url) {
+                const normalizedPath = normalizeImagePath(url);
+                document.getElementById('contact_hero_image_preview').innerHTML = `<img src="${normalizedPath}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
+            } else {
+                document.getElementById('contact_hero_image_preview').innerHTML = '<div class="image-preview-placeholder"><i class="bi bi-image"></i><p>No image selected</p></div>';
+            }
+        });
+    }
+    
+    // Setup upload button
+    if (document.getElementById('contact_hero_image_upload_btn')) {
+        document.getElementById('contact_hero_image_upload_btn').addEventListener('click', function() {
+            document.getElementById('contact_hero_image').click();
+        });
+    }
     
     // Utility function to remove undefined values from objects (Firestore doesn't allow them)
     function removeUndefinedValues(obj) {

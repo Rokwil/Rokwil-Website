@@ -74,13 +74,37 @@
                 
                 <div class="image-upload-container">
                     <label>Hero Background Image</label>
+                    <div class="admin-form-group">
+                        <label>Hero Image URL (or upload file below)</label>
+                        <div class="image-picker-dropdown" style="position: relative;">
+                            <input type="text" id="contact_hero_image_url" placeholder="images/contact/..." style="width: 100%;" readonly>
+                            <button type="button" class="image-picker-toggle" style="position: absolute; right: 0; top: 0; height: 100%; padding: 0 0.75rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-left: none; border-radius: 0 8px 8px 0; cursor: pointer; display: flex; align-items: center;">
+                                <i class="bi bi-chevron-down"></i>
+                            </button>
+                            <div class="image-picker-dropdown-menu" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--admin-bg-secondary); border: 1px solid var(--admin-border); border-radius: 8px; margin-top: 0.25rem; max-height: 400px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                                <div class="image-picker-search" style="padding: 0.75rem; border-bottom: 1px solid var(--admin-border);">
+                                    <input type="text" class="image-picker-search-input" placeholder="Search images..." style="width: 100%; padding: 0.5rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-radius: 4px; color: var(--admin-text-primary);">
+                                </div>
+                                <div class="image-picker-list" style="padding: 0.5rem;">
+                                    <!-- Images will be populated here -->
+                                </div>
+                                <div style="padding: 0.75rem; border-top: 1px solid var(--admin-border);">
+                                    <input type="text" class="image-picker-manual-input" placeholder="Or enter URL manually..." style="width: 100%; padding: 0.5rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-radius: 4px; color: var(--admin-text-primary);">
+                                    <button type="button" class="admin-btn admin-btn-primary" style="width: 100%; margin-top: 0.5rem; padding: 0.5rem;">Use Manual URL</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="image-preview" id="contact_hero_image_preview">
                         <div class="image-preview-placeholder">
                             <i class="bi bi-image"></i>
                             <p>No image selected</p>
                         </div>
                     </div>
-                    <input type="file" id="contact_hero_image" accept="image/*">
+                    <input type="file" id="contact_hero_image" accept="image/*" style="display: none;">
+                    <button type="button" class="admin-btn admin-btn-secondary" id="contact_hero_image_upload_btn" style="margin-top: 0.5rem;">
+                        <i class="bi bi-upload"></i> Upload Hero Image
+                    </button>
                 </div>
             </div>
 

@@ -43,11 +43,11 @@
             statsBanner: { items: [] },
             aboutStory: { title: '', content: '', paragraphs: [], image: '' },
             mission: { text: '' },
-            timeline: { title: '', subtitle: '', items: [] },
-            values: { title: '', items: [] },
+            timeline: { title: '', subtitle: '', hidden: false, items: [] },
+            values: { title: '', hidden: false, items: [] },
             leadership: { title: '', subtitle: '', name: '', titleRole: '', bio: '', initials: '', tags: [] },
-            csr: { title: '', subtitle: '', items: [] },
-            recognition: { title: '', subtitle: '', items: [] }
+            csr: { title: '', subtitle: '', hidden: false, items: [] },
+            recognition: { title: '', subtitle: '', hidden: false, items: [] }
         };
     }
     
@@ -125,7 +125,11 @@
             document.getElementById('page_hero_title').value = pageData.pageHero.title || '';
             document.getElementById('page_hero_subtitle').value = pageData.pageHero.subtitle || '';
             if (pageData.pageHero.image) {
-                document.getElementById('page_hero_image_preview').innerHTML = `<img src="${pageData.pageHero.image}" alt="Preview">`;
+                const normalizedPath = normalizeImagePath(pageData.pageHero.image);
+                if (document.getElementById('page_hero_image_url')) {
+                    document.getElementById('page_hero_image_url').value = pageData.pageHero.image;
+                }
+                document.getElementById('page_hero_image_preview').innerHTML = `<img src="${normalizedPath}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
             }
         }
         
@@ -167,7 +171,8 @@
             if (pageData.aboutStory.image) {
                 const previewEl = document.getElementById('about_story_image_preview');
                 if (previewEl) {
-                    previewEl.innerHTML = `<img src="${pageData.aboutStory.image}" alt="Preview">`;
+                    const normalizedPath = normalizeImagePath(pageData.aboutStory.image);
+                    previewEl.innerHTML = `<img src="${normalizedPath}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
                 }
             }
         } else {
@@ -192,6 +197,10 @@
         if (pageData.timeline) {
             document.getElementById('timeline_title').value = pageData.timeline.title || '';
             document.getElementById('timeline_subtitle').value = pageData.timeline.subtitle || '';
+            const timelineHiddenCheckbox = document.getElementById('timeline_hidden');
+            if (timelineHiddenCheckbox) {
+                timelineHiddenCheckbox.checked = pageData.timeline.hidden || false;
+            }
             if (pageData.timeline.items) {
                 pageData.timeline.items.forEach((item, index) => {
                     addTimelineItem(item, index);
@@ -201,6 +210,10 @@
         
         if (pageData.values) {
             document.getElementById('values_title').value = pageData.values.title || '';
+            const valuesHiddenCheckbox = document.getElementById('values_hidden');
+            if (valuesHiddenCheckbox) {
+                valuesHiddenCheckbox.checked = pageData.values.hidden || false;
+            }
             if (pageData.values.items) {
                 pageData.values.items.forEach((item, index) => {
                     addValue(item, index);
@@ -232,6 +245,10 @@
         } else {
             console.error('CSR subtitle element not found!');
         }
+        const csrHiddenCheckbox = document.getElementById('csr_hidden');
+        if (csrHiddenCheckbox) {
+            csrHiddenCheckbox.checked = pageData.csr?.hidden || false;
+        }
         if (pageData.csr?.items && pageData.csr.items.length > 0) {
             pageData.csr.items.forEach((item, index) => {
                 addCSRItem(item, index);
@@ -252,6 +269,10 @@
             console.log('Recognition subtitle set to:', recognitionSubtitleEl.value);
         } else {
             console.error('Recognition subtitle element not found!');
+        }
+        const recognitionHiddenCheckbox = document.getElementById('recognition_hidden');
+        if (recognitionHiddenCheckbox) {
+            recognitionHiddenCheckbox.checked = pageData.recognition?.hidden || false;
         }
         if (pageData.recognition?.items && pageData.recognition.items.length > 0) {
             pageData.recognition.items.forEach((item, index) => {
@@ -298,9 +319,15 @@
         item.innerHTML = `
             <div class="repeatable-item-header">
                 <span class="repeatable-item-title">Timeline Item ${id + 1}</span>
-                <button type="button" class="btn-remove-item" onclick="this.closest('.repeatable-item').remove()">
-                    <i class="bi bi-trash"></i>
-                </button>
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <label class="admin-toggle">
+                        <input type="checkbox" class="timeline-item-hidden" ${data?.hidden ? 'checked' : ''}>
+                        <span>Hide</span>
+                    </label>
+                    <button type="button" class="btn-remove-item" onclick="this.closest('.repeatable-item').remove()">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
             </div>
             <div class="admin-form-group">
                 <label>Year/Title</label>
@@ -324,9 +351,15 @@
         item.innerHTML = `
             <div class="repeatable-item-header">
                 <span class="repeatable-item-title">Value ${id + 1}</span>
-                <button type="button" class="btn-remove-item" onclick="this.closest('.repeatable-item').remove()">
-                    <i class="bi bi-trash"></i>
-                </button>
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <label class="admin-toggle">
+                        <input type="checkbox" class="value-item-hidden" ${data?.hidden ? 'checked' : ''}>
+                        <span>Hide</span>
+                    </label>
+                    <button type="button" class="btn-remove-item" onclick="this.closest('.repeatable-item').remove()">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
             </div>
             <div class="admin-form-group">
                 <label>Icon</label>
@@ -360,9 +393,15 @@
         item.innerHTML = `
             <div class="repeatable-item-header">
                 <span class="repeatable-item-title">CSR Item ${id + 1}</span>
-                <button type="button" class="btn-remove-item" onclick="this.closest('.repeatable-item').remove()">
-                    <i class="bi bi-trash"></i>
-                </button>
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <label class="admin-toggle">
+                        <input type="checkbox" class="csr-item-hidden" ${data?.hidden ? 'checked' : ''}>
+                        <span>Hide</span>
+                    </label>
+                    <button type="button" class="btn-remove-item" onclick="this.closest('.repeatable-item').remove()">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
             </div>
             <div class="admin-form-group">
                 <label>Icon</label>
@@ -397,9 +436,15 @@
         item.innerHTML = `
             <div class="repeatable-item-header">
                 <span class="repeatable-item-title">Recognition Item ${id + 1}</span>
-                <button type="button" class="btn-remove-item" onclick="this.closest('.repeatable-item').remove()">
-                    <i class="bi bi-trash"></i>
-                </button>
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <label class="admin-toggle">
+                        <input type="checkbox" class="recognition-item-hidden" ${data?.hidden ? 'checked' : ''}>
+                        <span>Hide</span>
+                    </label>
+                    <button type="button" class="btn-remove-item" onclick="this.closest('.repeatable-item').remove()">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
             </div>
             <div class="admin-form-group">
                 <label>Icon</label>
@@ -431,9 +476,12 @@
             showLoading();
             
             // Collect page hero
+            const pageHeroImageUrl = document.getElementById('page_hero_image_url')?.value.trim();
             const pageHeroImage = document.getElementById('page_hero_image').files[0];
             let heroImageUrl = pageData.pageHero?.image || '';
-            if (pageHeroImage) {
+            if (pageHeroImageUrl) {
+                heroImageUrl = pageHeroImageUrl;
+            } else if (pageHeroImage) {
                 heroImageUrl = await handleImageUpload('page_hero_image', 'page_hero_image_preview', 'images/about', null);
             }
             
@@ -477,31 +525,37 @@
             document.querySelectorAll('#timeline_container .repeatable-item').forEach(item => {
                 const title = item.querySelector('.timeline-title')?.value || '';
                 const description = item.querySelector('.timeline-description')?.value || '';
+                const hidden = item.querySelector('.timeline-item-hidden')?.checked || false;
                 // Only add if at least one field has content
                 if (title || description) {
                     timelineItems.push({
                         title: title,
-                        description: description
+                        description: description,
+                        hidden: hidden
                     });
                 }
             });
             pageData.timeline = {
                 title: document.getElementById('timeline_title').value,
                 subtitle: document.getElementById('timeline_subtitle').value,
+                hidden: document.getElementById('timeline_hidden')?.checked || false,
                 items: timelineItems
             };
             
             // Values
             const valuesItems = [];
             document.querySelectorAll('#values_container .repeatable-item').forEach(item => {
+                const hidden = item.querySelector('.value-item-hidden')?.checked || false;
                 valuesItems.push({
                     icon: item.querySelector('.value-icon').value,
                     title: item.querySelector('.value-title').value,
-                    description: item.querySelector('.value-description').value
+                    description: item.querySelector('.value-description').value,
+                    hidden: hidden
                 });
             });
             pageData.values = {
                 title: document.getElementById('values_title').value,
+                hidden: document.getElementById('values_hidden')?.checked || false,
                 items: valuesItems
             };
             
@@ -523,18 +577,21 @@
                 const icon = item.querySelector('.csr-icon')?.value || '';
                 const title = item.querySelector('.csr-title')?.value || '';
                 const description = item.querySelector('.csr-description')?.value || '';
+                const hidden = item.querySelector('.csr-item-hidden')?.checked || false;
                 // Only add if at least one field has content
                 if (icon || title || description) {
                     csrItems.push({
                         icon: icon,
                         title: title,
-                        description: description
+                        description: description,
+                        hidden: hidden
                     });
                 }
             });
             pageData.csr = {
                 title: csrTitleEl ? csrTitleEl.value : '',
                 subtitle: csrSubtitleEl ? csrSubtitleEl.value : '',
+                hidden: document.getElementById('csr_hidden')?.checked || false,
                 items: csrItems
             };
             
@@ -546,18 +603,21 @@
                 const icon = item.querySelector('.recognition-icon')?.value || '';
                 const title = item.querySelector('.recognition-title')?.value || '';
                 const description = item.querySelector('.recognition-description')?.value || '';
+                const hidden = item.querySelector('.recognition-item-hidden')?.checked || false;
                 // Only add if at least one field has content
                 if (icon || title || description) {
                     recognitionItems.push({
                         icon: icon,
                         title: title,
-                        description: description
+                        description: description,
+                        hidden: hidden
                     });
                 }
             });
             pageData.recognition = {
                 title: recognitionTitleEl ? recognitionTitleEl.value : '',
                 subtitle: recognitionSubtitleEl ? recognitionSubtitleEl.value : '',
+                hidden: document.getElementById('recognition_hidden')?.checked || false,
                 items: recognitionItems
             };
             
@@ -615,5 +675,41 @@
     // Initialize image previews
     initImagePreview('page_hero_image', 'page_hero_image_preview');
     initImagePreview('about_story_image', 'about_story_image_preview');
+    
+    // Initialize folder selectors
+    if (window.initFolderSelectors) {
+        window.initFolderSelectors();
+    }
+    
+    // Initialize image picker for hero image
+    if (window.initImagePicker) {
+        const pageHeroImageUrl = document.getElementById('page_hero_image_url');
+        if (pageHeroImageUrl) window.initImagePicker(pageHeroImageUrl);
+    }
+    
+    // Add input listener for hero image URL
+    if (document.getElementById('page_hero_image_url')) {
+        document.getElementById('page_hero_image_url').addEventListener('input', function() {
+            const url = this.value.trim();
+            if (url) {
+                const normalizedPath = normalizeImagePath(url);
+                document.getElementById('page_hero_image_preview').innerHTML = `<img src="${normalizedPath}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
+            } else {
+                document.getElementById('page_hero_image_preview').innerHTML = '<div class="image-preview-placeholder"><i class="bi bi-image"></i><p>No image selected</p></div>';
+            }
+        });
+    }
+    
+    // Setup upload buttons
+    if (document.getElementById('page_hero_image_upload_btn')) {
+        document.getElementById('page_hero_image_upload_btn').addEventListener('click', function() {
+            document.getElementById('page_hero_image').click();
+        });
+    }
+    if (document.getElementById('about_story_image_upload_btn')) {
+        document.getElementById('about_story_image_upload_btn').addEventListener('click', function() {
+            document.getElementById('about_story_image').click();
+        });
+    }
 })();
 

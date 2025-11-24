@@ -94,31 +94,78 @@
                 
                 <div class="image-upload-container">
                     <label>Hero Background Images (Upload files OR paste URLs)</label>
-                    <div class="admin-form-group">
-                        <label>Image 1 URL (or upload file below)</label>
-                        <input type="text" id="hero_image1_url" placeholder="https://... or images/Projects/Keystone/Keystone 2.webp">
-                    </div>
-                    <div class="image-preview" id="hero_image1_preview">
-                        <div class="image-preview-placeholder">
-                            <i class="bi bi-image"></i>
-                            <p>No image selected</p>
-                        </div>
-                    </div>
-                    <input type="file" id="hero_image1" accept="image/*">
-                    <small style="color: var(--admin-text-secondary); margin-top: 0.5rem; display: block;">OR upload a file above</small>
                     
-                    <div class="admin-form-group" style="margin-top: 1.5rem;">
-                        <label>Image 2 URL (or upload file below)</label>
-                        <input type="text" id="hero_image2_url" placeholder="https://... or images/Projects/Keystone/Pep MAIN.jpg">
-                    </div>
-                    <div class="image-preview" id="hero_image2_preview" style="margin-top: 1rem;">
-                        <div class="image-preview-placeholder">
-                            <i class="bi bi-image"></i>
-                            <p>No second image selected</p>
+                    <!-- Hero Image 1 -->
+                    <div class="hero-image-item" style="margin-bottom: 1.5rem;">
+                        <div class="admin-form-group">
+                            <label>Image 1 URL (or upload file below)</label>
+                            <div class="image-picker-dropdown" style="position: relative;">
+                                <input type="text" id="hero_image1_url" placeholder="images/Projects/..." style="width: 100%;" readonly>
+                                <button type="button" class="image-picker-toggle" style="position: absolute; right: 0; top: 0; height: 100%; padding: 0 0.75rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-left: none; border-radius: 0 8px 8px 0; cursor: pointer; display: flex; align-items: center;">
+                                    <i class="bi bi-chevron-down"></i>
+                                </button>
+                                <div class="image-picker-dropdown-menu" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--admin-bg-secondary); border: 1px solid var(--admin-border); border-radius: 8px; margin-top: 0.25rem; max-height: 400px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                                    <div class="image-picker-search" style="padding: 0.75rem; border-bottom: 1px solid var(--admin-border);">
+                                        <input type="text" class="image-picker-search-input" placeholder="Search images..." style="width: 100%; padding: 0.5rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-radius: 4px; color: var(--admin-text-primary);">
+                                    </div>
+                                    <div class="image-picker-list" style="padding: 0.5rem;">
+                                        <!-- Images will be populated here -->
+                                    </div>
+                                    <div style="padding: 0.75rem; border-top: 1px solid var(--admin-border);">
+                                        <input type="text" class="image-picker-manual-input" placeholder="Or enter URL manually..." style="width: 100%; padding: 0.5rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-radius: 4px; color: var(--admin-text-primary);">
+                                        <button type="button" class="admin-btn admin-btn-primary" style="width: 100%; margin-top: 0.5rem; padding: 0.5rem;">Use Manual URL</button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
+                        <div class="image-preview" id="hero_image1_preview">
+                            <div class="image-preview-placeholder">
+                                <i class="bi bi-image"></i>
+                                <p>No image selected</p>
+                            </div>
+                        </div>
+                        <input type="file" id="hero_image1" accept="image/*" style="display: none;">
+                        <button type="button" class="admin-btn admin-btn-secondary" id="hero_image1_upload_btn" style="margin-top: 0.5rem;">
+                            <i class="bi bi-upload"></i> Upload Image 1
+                        </button>
+                        <div id="hero_image1_folder_selector"></div>
                     </div>
-                    <input type="file" id="hero_image2" accept="image/*" style="margin-top: 1rem;">
-                    <small style="color: var(--admin-text-secondary); margin-top: 0.5rem; display: block;">OR upload a file above</small>
+                    
+                    <!-- Hero Image 2 -->
+                    <div class="hero-image-item">
+                        <div class="admin-form-group">
+                            <label>Image 2 URL (or upload file below)</label>
+                            <div class="image-picker-dropdown" style="position: relative;">
+                                <input type="text" id="hero_image2_url" placeholder="images/Projects/..." style="width: 100%;" readonly>
+                                <button type="button" class="image-picker-toggle" style="position: absolute; right: 0; top: 0; height: 100%; padding: 0 0.75rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-left: none; border-radius: 0 8px 8px 0; cursor: pointer; display: flex; align-items: center;">
+                                    <i class="bi bi-chevron-down"></i>
+                                </button>
+                                <div class="image-picker-dropdown-menu" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--admin-bg-secondary); border: 1px solid var(--admin-border); border-radius: 8px; margin-top: 0.25rem; max-height: 400px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                                    <div class="image-picker-search" style="padding: 0.75rem; border-bottom: 1px solid var(--admin-border);">
+                                        <input type="text" class="image-picker-search-input" placeholder="Search images..." style="width: 100%; padding: 0.5rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-radius: 4px; color: var(--admin-text-primary);">
+                                    </div>
+                                    <div class="image-picker-list" style="padding: 0.5rem;">
+                                        <!-- Images will be populated here -->
+                                    </div>
+                                    <div style="padding: 0.75rem; border-top: 1px solid var(--admin-border);">
+                                        <input type="text" class="image-picker-manual-input" placeholder="Or enter URL manually..." style="width: 100%; padding: 0.5rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-radius: 4px; color: var(--admin-text-primary);">
+                                        <button type="button" class="admin-btn admin-btn-primary" style="width: 100%; margin-top: 0.5rem; padding: 0.5rem;">Use Manual URL</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="image-preview" id="hero_image2_preview" style="margin-top: 1rem;">
+                            <div class="image-preview-placeholder">
+                                <i class="bi bi-image"></i>
+                                <p>No second image selected</p>
+                            </div>
+                        </div>
+                        <input type="file" id="hero_image2" accept="image/*" style="display: none;">
+                        <button type="button" class="admin-btn admin-btn-secondary" id="hero_image2_upload_btn" style="margin-top: 0.5rem;">
+                            <i class="bi bi-upload"></i> Upload Image 2
+                        </button>
+                        <div id="hero_image2_folder_selector"></div>
+                    </div>
                 </div>
             </div>
 
@@ -152,8 +199,10 @@
                             <p>No video selected</p>
                         </div>
                     </div>
-                    <input type="file" id="video_file" accept="video/*">
-                    <small style="color: var(--admin-text-secondary); margin-top: 0.5rem; display: block;">OR upload a file above (MP4 recommended)</small>
+                    <input type="file" id="video_file" accept="video/*" style="display: none;">
+                    <button type="button" class="admin-btn admin-btn-secondary" id="video_file_upload_btn" style="margin-top: 0.5rem;">
+                        <i class="bi bi-upload"></i> Upload Video
+                    </button>
                 </div>
                 
                 <div class="image-upload-container">
@@ -168,8 +217,10 @@
                             <p>No poster image selected</p>
                         </div>
                     </div>
-                    <input type="file" id="video_poster" accept="image/*">
-                    <small style="color: var(--admin-text-secondary); margin-top: 0.5rem; display: block;">OR upload a file above</small>
+                    <input type="file" id="video_poster" accept="image/*" style="display: none;">
+                    <button type="button" class="admin-btn admin-btn-secondary" id="video_poster_upload_btn" style="margin-top: 0.5rem;">
+                        <i class="bi bi-upload"></i> Upload Poster Image
+                    </button>
                 </div>
             </div>
 
@@ -180,8 +231,8 @@
                         <i class="bi bi-grid"></i> Features Section
                     </h2>
                     <label class="admin-toggle">
-                        <input type="checkbox" id="features_visible" checked>
-                        <span>Show Section</span>
+                        <input type="checkbox" id="features_hidden">
+                        <span>Hide Section</span>
                     </label>
                 </div>
                 
@@ -211,8 +262,8 @@
                         <i class="bi bi-star"></i> Featured Projects Section
                     </h2>
                     <label class="admin-toggle">
-                        <input type="checkbox" id="showcase_visible" checked>
-                        <span>Show Section</span>
+                        <input type="checkbox" id="showcase_hidden">
+                        <span>Hide Section</span>
                     </label>
                 </div>
                 
@@ -242,8 +293,8 @@
                         <i class="bi bi-chat-quote"></i> Testimonials Section
                     </h2>
                     <label class="admin-toggle">
-                        <input type="checkbox" id="testimonials_visible" checked>
-                        <span>Show Section</span>
+                        <input type="checkbox" id="testimonials_hidden">
+                        <span>Hide Section</span>
                     </label>
                 </div>
                 
@@ -273,8 +324,8 @@
                         <i class="bi bi-newspaper"></i> News Section
                     </h2>
                     <label class="admin-toggle">
-                        <input type="checkbox" id="news_visible" checked>
-                        <span>Show Section</span>
+                        <input type="checkbox" id="news_hidden">
+                        <span>Hide Section</span>
                     </label>
                 </div>
                 

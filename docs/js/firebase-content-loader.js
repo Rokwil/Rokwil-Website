@@ -12,6 +12,102 @@
     
     const db = firebase.firestore();
     
+    // Helper function to fix truncated image paths (e.g., "image (2" -> "image (2).jpg")
+    function fixTruncatedImagePath(path) {
+        if (!path) return path;
+        
+        // Check if path already has an extension
+        const hasExtension = /\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i.test(path);
+        if (hasExtension) return path;
+        
+        // Fix paths that end with " (number" or "  (number" (missing closing parenthesis and extension)
+        // e.g., "image (2" or "image  (2" -> "image (2).jpg"
+        // Use non-greedy match and trim to avoid capturing extra spaces
+        const matchOpenParen = path.match(/^(.+?)\s*\((\d+)$/);
+        if (matchOpenParen) {
+            const basePath = matchOpenParen[1].trim();
+            const number = matchOpenParen[2];
+            return `${basePath} (${number}).jpg`;
+        }
+        
+        // Fix paths that end with " (number " (has space after number, missing closing parenthesis)
+        // e.g., "image (2 " -> "image (2).jpg"
+        const matchSpaceAfterNumber = path.match(/^(.+?)\s*\((\d+)\s+$/);
+        if (matchSpaceAfterNumber) {
+            const basePath = matchSpaceAfterNumber[1].trim();
+            const number = matchSpaceAfterNumber[2];
+            return `${basePath} (${number}).jpg`;
+        }
+        
+        // Fix paths that end with " (number." (has closing paren but no extension)
+        // e.g., "image (2." -> "image (2).jpg"
+        const matchParenDot = path.match(/^(.+?)\s*\((\d+)\.$/);
+        if (matchParenDot) {
+            const basePath = matchParenDot[1].trim();
+            const number = matchParenDot[2];
+            return `${basePath} (${number}).jpg`;
+        }
+        
+        // Fix paths that end with " (number.jpg" (missing closing parenthesis)
+        // e.g., "image (2.jpg" -> "image (2).jpg"
+        const matchParenExt = path.match(/^(.+?)\s*\((\d+)\.(jpg|jpeg|png|gif|webp)$/i);
+        if (matchParenExt) {
+            const basePath = matchParenExt[1].trim();
+            const number = matchParenExt[2];
+            const ext = matchParenExt[3];
+            return `${basePath} (${number}).${ext}`;
+        }
+        
+        // Fix paths that end with " (number .jpg" (has space before extension, missing closing parenthesis)
+        // e.g., "image (2 .jpg" -> "image (2).jpg"
+        const matchParenSpaceExt = path.match(/^(.+?)\s*\((\d+)\s+\.(jpg|jpeg|png|gif|webp)$/i);
+        if (matchParenSpaceExt) {
+            const basePath = matchParenSpaceExt[1].trim();
+            const number = matchParenSpaceExt[2];
+            const ext = matchParenSpaceExt[3];
+            return `${basePath} (${number}).${ext}`;
+        }
+        
+        // If path ends with a number or special char, likely truncated - add .jpg
+        if (/[0-9\)]$/.test(path)) {
+            return path + '.jpg';
+        }
+        
+        // Default: add .jpg extension if no extension present
+        return path + '.jpg';
+    }
+    
+    // Helper function to normalize image paths (convert relative to absolute if needed)
+    function normalizeImagePath(path) {
+        if (!path) return path;
+        
+        // Remove any leading/trailing whitespace
+        path = path.trim();
+        
+        // First, try to fix truncated paths
+        path = fixTruncatedImagePath(path);
+        
+        // If path doesn't start with /, http://, or https://, make it absolute
+        if (!path.startsWith('/') && !path.startsWith('http://') && !path.startsWith('https://')) {
+            // If it starts with 'images/' or 'admin/images/', convert to '/images/'
+            if (path.startsWith('images/')) {
+                return '/' + path;
+            }
+            if (path.startsWith('admin/images/')) {
+                return '/' + path.replace('admin/', '');
+            }
+            // Otherwise, assume it's relative to root
+            return '/' + path;
+        }
+        
+        // If path starts with '/admin/images/', fix it to '/images/'
+        if (path.startsWith('/admin/images/')) {
+            return path.replace('/admin/images/', '/images/');
+        }
+        
+        return path;
+    }
+    
     // Load page content from Firebase
     async function loadPageContent(pageId) {
         try {
@@ -65,8 +161,9 @@
             if (data.hero.images && data.hero.images.length > 0) {
                 const heroSection = document.querySelector('.hero');
                 if (heroSection) {
-                    const imageUrls = data.hero.images.join(', ');
-                    heroSection.style.backgroundImage = `url('${data.hero.images[0]}')${data.hero.images[1] ? `, url('${data.hero.images[1]}')` : ''}`;
+                    const img1 = normalizeImagePath(data.hero.images[0]);
+                    const img2 = data.hero.images[1] ? normalizeImagePath(data.hero.images[1]) : null;
+                    heroSection.style.backgroundImage = `url('${img1}')${img2 ? `, url('${img2}')` : ''}`;
                 }
             }
         }
@@ -99,8 +196,11 @@
         console.log('Loading features section:', data.features);
         const featuresSection = document.querySelector('.features');
         if (data.features) {
-            // Check section visibility first
-            if (data.features.visible === false) {
+            // Check section visibility first (handle backward compatibility with visible property)
+            const isHidden = data.features.hidden !== undefined 
+                ? data.features.hidden 
+                : (data.features.visible === false);
+            if (isHidden) {
                 if (featuresSection) {
                     featuresSection.style.display = 'none';
                     console.log('Features section hidden');
@@ -114,7 +214,11 @@
                     console.log('Features grid found:', featuresGrid);
                     if (featuresGrid) {
                         featuresGrid.innerHTML = '';
-                        const visibleItems = data.features.items.filter(item => item.visible !== false);
+                        const visibleItems = data.features.items.filter(item => {
+                            // Handle backward compatibility with visible property
+                            if (item.hidden !== undefined) return !item.hidden;
+                            return item.visible !== false;
+                        });
                         console.log(`Filtered ${visibleItems.length} visible items from ${data.features.items.length} total`);
                         visibleItems.forEach(item => {
                             const featureCard = document.createElement('div');
@@ -157,8 +261,11 @@
         // Showcase section
         const showcaseSectionEl = document.querySelector('.showcase');
         if (data.showcase) {
-            // Check section visibility first
-            if (data.showcase.visible === false) {
+            // Check section visibility first (handle backward compatibility with visible property)
+            const isHidden = data.showcase.hidden !== undefined 
+                ? data.showcase.hidden 
+                : (data.showcase.visible === false);
+            if (isHidden) {
                 if (showcaseSectionEl) {
                     showcaseSectionEl.style.display = 'none';
                     console.log('Showcase section hidden');
@@ -171,14 +278,18 @@
                     const showcaseGrid = document.querySelector('.showcase-grid');
                     if (showcaseGrid) {
                         showcaseGrid.innerHTML = '';
-                        const visibleItems = data.showcase.items.filter(item => item.visible !== false);
+                        const visibleItems = data.showcase.items.filter(item => {
+                            // Handle backward compatibility with visible property
+                            if (item.hidden !== undefined) return !item.hidden;
+                            return item.visible !== false;
+                        });
                         visibleItems.forEach(item => {
                             const showcaseItem = document.createElement('div');
                             showcaseItem.className = 'showcase-item';
                             // Handle both old format (single image) and new format (images array)
                             const images = item.images || (item.image ? [item.image] : []);
                             const imageStyle = images.length > 0 
-                                ? images.map(img => `url('${img}')`).join(', ')
+                                ? images.map(img => `url('${normalizeImagePath(img)}')`).join(', ')
                                 : '';
                             showcaseItem.innerHTML = `
                                 <div class="showcase-image" style="background-image: ${imageStyle}; background-size: cover; background-position: center;">
@@ -211,8 +322,11 @@
         console.log('Loading testimonials section:', data.testimonials);
         const testimonialsSection = document.querySelector('.testimonials');
         if (data.testimonials) {
-            // Check section visibility first
-            if (data.testimonials.visible === false) {
+            // Check section visibility first (handle backward compatibility with visible property)
+            const isHidden = data.testimonials.hidden !== undefined 
+                ? data.testimonials.hidden 
+                : (data.testimonials.visible === false);
+            if (isHidden) {
                 if (testimonialsSection) {
                     testimonialsSection.style.display = 'none';
                     console.log('Testimonials section hidden');
@@ -226,7 +340,11 @@
                     console.log('Testimonials grid found:', testimonialsGrid);
                     if (testimonialsGrid) {
                         testimonialsGrid.innerHTML = '';
-                        const visibleItems = data.testimonials.items.filter(item => item.visible !== false);
+                        const visibleItems = data.testimonials.items.filter(item => {
+                            // Handle backward compatibility with visible property
+                            if (item.hidden !== undefined) return !item.hidden;
+                            return item.visible !== false;
+                        });
                         console.log(`Filtered ${visibleItems.length} visible items from ${data.testimonials.items.length} total`);
                         visibleItems.forEach(item => {
                             const testimonialCard = document.createElement('div');
@@ -277,8 +395,11 @@
         console.log('Loading news section:', data.news);
         const newsSection = document.querySelector('.news-section');
         if (data.news) {
-            // Check section visibility first
-            if (data.news.visible === false) {
+            // Check section visibility first (handle backward compatibility with visible property)
+            const isHidden = data.news.hidden !== undefined 
+                ? data.news.hidden 
+                : (data.news.visible === false);
+            if (isHidden) {
                 if (newsSection) {
                     newsSection.style.display = 'none';
                     console.log('News section hidden');
@@ -292,7 +413,11 @@
                     console.log('News grid found:', newsGrid);
                     if (newsGrid) {
                         newsGrid.innerHTML = '';
-                        const visibleItems = data.news.items.filter(item => item.visible !== false);
+                        const visibleItems = data.news.items.filter(item => {
+                            // Handle backward compatibility with visible property
+                            if (item.hidden !== undefined) return !item.hidden;
+                            return item.visible !== false;
+                        });
                         console.log(`Filtered ${visibleItems.length} visible items from ${data.news.items.length} total`);
                         visibleItems.forEach(item => {
                             const newsCard = document.createElement('div');
@@ -300,7 +425,7 @@
                             // Handle both old format (single image) and new format (images array)
                             const images = item.images || (item.image ? [item.image] : []);
                             const imageStyle = images.length > 0 
-                                ? images.map(img => `url('${img}')`).join(', ')
+                                ? images.map(img => `url('${normalizeImagePath(img)}')`).join(', ')
                                 : '';
                             newsCard.innerHTML = `
                                 <div class="news-image" style="background-image: ${imageStyle};">
@@ -380,7 +505,8 @@
                 if (h1 && data.pageHero.title) h1.textContent = data.pageHero.title;
                 if (p && data.pageHero.subtitle) p.textContent = data.pageHero.subtitle;
                 if (data.pageHero.image) {
-                    pageHero.style.backgroundImage = `url('${data.pageHero.image}')`;
+                    const normalizedImg = normalizeImagePath(data.pageHero.image);
+                    pageHero.style.backgroundImage = `url('${normalizedImg}')`;
                 }
             }
         }
@@ -537,7 +663,7 @@
                 if (data.aboutStory.image) {
                     const aboutImage = document.querySelector('.about-image img');
                     if (aboutImage) {
-                        aboutImage.src = data.aboutStory.image;
+                        aboutImage.src = normalizeImagePath(data.aboutStory.image);
                     }
                 }
         }
@@ -558,68 +684,87 @@
         
         // Timeline - find by section title
         if (data.timeline) {
-            const timelineTitleEl = Array.from(document.querySelectorAll('.section-title')).find(title => 
-                title.textContent?.trim().includes('Journey') || 
-                title.textContent?.trim().includes('Timeline') ||
-                title.textContent?.trim().includes('History')
-            );
-            const timelineSection = timelineTitleEl?.closest('div[style*="margin-top: 100px"]') ||
-                                   timelineTitleEl?.closest('div[style*="margin-bottom: 80px"]');
-            
-            if (timelineSection) {
-                // Update section header
-                const sectionHeader = timelineSection.querySelector('.section-header');
-                if (sectionHeader) {
-                    const title = sectionHeader.querySelector('.section-title');
-                    const subtitle = sectionHeader.querySelector('.section-subtitle');
-                    if (title && data.timeline.title) title.textContent = data.timeline.title;
-                    if (subtitle && data.timeline.subtitle) subtitle.textContent = data.timeline.subtitle;
+            // Check if entire section is hidden
+            if (data.timeline.hidden) {
+                const timelineTitleEl = Array.from(document.querySelectorAll('.section-title')).find(title => 
+                    title.textContent?.trim().includes('Journey') || 
+                    title.textContent?.trim().includes('Timeline') ||
+                    title.textContent?.trim().includes('History')
+                );
+                const timelineSection = timelineTitleEl?.closest('div[style*="margin-top: 100px"]') ||
+                                       timelineTitleEl?.closest('div[style*="margin-bottom: 80px"]');
+                if (timelineSection) {
+                    timelineSection.style.display = 'none';
                 }
+            } else {
+                const timelineTitleEl = Array.from(document.querySelectorAll('.section-title')).find(title => 
+                    title.textContent?.trim().includes('Journey') || 
+                    title.textContent?.trim().includes('Timeline') ||
+                    title.textContent?.trim().includes('History')
+                );
+                const timelineSection = timelineTitleEl?.closest('div[style*="margin-top: 100px"]') ||
+                                       timelineTitleEl?.closest('div[style*="margin-bottom: 80px"]');
                 
-                // Update timeline items - create new ones if needed
-                if (data.timeline.items && data.timeline.items.length > 0) {
-                    // Find the timeline container (the parent of timeline items)
-                    const existingTimelineItems = timelineSection.querySelectorAll('.timeline-item');
-                    const timelineContainer = existingTimelineItems.length > 0 
-                        ? existingTimelineItems[0].parentElement 
-                        : timelineSection.querySelector('.container') || timelineSection;
+                if (timelineSection) {
+                    // Ensure section is visible
+                    timelineSection.style.display = '';
                     
-                    // Filter out empty items
-                    const validItems = data.timeline.items.filter(item => item.title || item.description);
+                    // Update section header
+                    const sectionHeader = timelineSection.querySelector('.section-header');
+                    if (sectionHeader) {
+                        const title = sectionHeader.querySelector('.section-title');
+                        const subtitle = sectionHeader.querySelector('.section-subtitle');
+                        if (title && data.timeline.title) title.textContent = data.timeline.title;
+                        if (subtitle && data.timeline.subtitle) subtitle.textContent = data.timeline.subtitle;
+                    }
                     
-                    // Clear and recreate all timeline items
-                    existingTimelineItems.forEach(item => item.remove());
-                    
-                    validItems.forEach((timelineData, idx) => {
-                        const timelineItem = document.createElement('div');
-                        timelineItem.className = 'timeline-item reveal active';
-                        timelineItem.setAttribute('style', 'display: flex; gap: 2rem; margin-bottom: 3rem; position: relative;');
+                    // Update timeline items - create new ones if needed
+                    if (data.timeline.items && data.timeline.items.length > 0) {
+                        // Find the timeline container (the parent of timeline items)
+                        const existingTimelineItems = timelineSection.querySelectorAll('.timeline-item');
+                        const timelineContainer = existingTimelineItems.length > 0 
+                            ? existingTimelineItems[0].parentElement 
+                            : timelineSection.querySelector('.container') || timelineSection;
                         
-                        // Create the numbered circle
-                        const circle = document.createElement('div');
-                        circle.setAttribute('style', 'width: 60px; height: 60px; background: var(--gradient-2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text-light); font-size: 1.5rem; font-weight: 700; flex-shrink: 0; box-shadow: var(--shadow-md); z-index: 2; transition: all 0.3s ease;');
-                        circle.textContent = (idx + 1).toString();
+                        // Filter out empty items and hidden items
+                        const validItems = data.timeline.items.filter(item => 
+                            (item.title || item.description) && !item.hidden
+                        );
                         
-                        // Create the timeline card
-                        const timelineCard = document.createElement('div');
-                        timelineCard.className = 'timeline-card';
-                        timelineCard.setAttribute('style', 'flex: 1; padding: 2rem; border-radius: 8px; border-left: 3px solid var(--secondary-color);');
-                        timelineCard.innerHTML = `
-                            <h3 style="margin-bottom: 0.5rem; font-size: 1.4rem;">${timelineData.title || ''}</h3>
-                            <p style="margin: 0; line-height: 1.8;">${timelineData.description || ''}</p>
-                        `;
+                        // Clear and recreate all timeline items
+                        existingTimelineItems.forEach(item => item.remove());
                         
-                        timelineItem.appendChild(circle);
-                        timelineItem.appendChild(timelineCard);
-                        timelineContainer.appendChild(timelineItem);
-                    });
-                    console.log(`Created ${validItems.length} timeline items`);
-                    
-                    // Re-observe newly created elements for animations
-                    if (window.revealObserver) {
-                        timelineContainer.querySelectorAll('.reveal').forEach(el => {
-                            window.revealObserver.observe(el);
+                        validItems.forEach((timelineData, idx) => {
+                            const timelineItem = document.createElement('div');
+                            timelineItem.className = 'timeline-item reveal active';
+                            timelineItem.setAttribute('style', 'display: flex; gap: 2rem; margin-bottom: 3rem; position: relative;');
+                            
+                            // Create the numbered circle
+                            const circle = document.createElement('div');
+                            circle.setAttribute('style', 'width: 60px; height: 60px; background: var(--gradient-2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text-light); font-size: 1.5rem; font-weight: 700; flex-shrink: 0; box-shadow: var(--shadow-md); z-index: 2; transition: all 0.3s ease;');
+                            circle.textContent = (idx + 1).toString();
+                            
+                            // Create the timeline card
+                            const timelineCard = document.createElement('div');
+                            timelineCard.className = 'timeline-card';
+                            timelineCard.setAttribute('style', 'flex: 1; padding: 2rem; border-radius: 8px; border-left: 3px solid var(--secondary-color);');
+                            timelineCard.innerHTML = `
+                                <h3 style="margin-bottom: 0.5rem; font-size: 1.4rem;">${timelineData.title || ''}</h3>
+                                <p style="margin: 0; line-height: 1.8;">${timelineData.description || ''}</p>
+                            `;
+                            
+                            timelineItem.appendChild(circle);
+                            timelineItem.appendChild(timelineCard);
+                            timelineContainer.appendChild(timelineItem);
                         });
+                        console.log(`Created ${validItems.length} timeline items`);
+                        
+                        // Re-observe newly created elements for animations
+                        if (window.revealObserver) {
+                            timelineContainer.querySelectorAll('.reveal').forEach(el => {
+                                window.revealObserver.observe(el);
+                            });
+                        }
                     }
                 }
             }
@@ -627,41 +772,58 @@
         
         // Values
         console.log('Loading values section:', data.values);
-        if (data.values && data.values.items && data.values.items.length > 0) {
-            const valuesGrid = document.querySelector('.values-grid');
-            console.log('Values grid found:', valuesGrid);
-            if (valuesGrid) {
-                valuesGrid.innerHTML = '';
-                data.values.items.forEach(item => {
-                    const valueCard = document.createElement('div');
-                    valueCard.className = 'value-card reveal active';
-                    valueCard.innerHTML = `
-                        <div class="value-icon"><i class="bi ${item.icon || 'bi-star'}"></i></div>
-                        <h3>${item.title || ''}</h3>
-                        <p>${item.description || ''}</p>
-                    `;
-                    valuesGrid.appendChild(valueCard);
-                });
-                console.log(`Added ${data.values.items.length} value items`);
-                
-                // Re-observe newly created elements for animations
-                if (window.revealObserver) {
-                    valuesGrid.querySelectorAll('.reveal').forEach(el => {
-                        window.revealObserver.observe(el);
-                    });
+        if (data.values) {
+            // Check if entire section is hidden
+            if (data.values.hidden) {
+                const valuesSection = document.querySelector('.values-section');
+                if (valuesSection) {
+                    valuesSection.style.display = 'none';
                 }
             } else {
-                console.warn('Values grid not found in DOM');
+                const valuesSection = document.querySelector('.values-section');
+                if (valuesSection) {
+                    // Ensure section is visible
+                    valuesSection.style.display = '';
+                    
+                    // Update section title
+                    if (data.values.title) {
+                        const title = valuesSection.querySelector('.section-title');
+                        if (title) title.textContent = data.values.title;
+                    }
+                }
+                
+                if (data.values.items && data.values.items.length > 0) {
+                    const valuesGrid = document.querySelector('.values-grid');
+                    console.log('Values grid found:', valuesGrid);
+                    if (valuesGrid) {
+                        valuesGrid.innerHTML = '';
+                        // Filter out hidden items
+                        const visibleItems = data.values.items.filter(item => !item.hidden);
+                        visibleItems.forEach(item => {
+                            const valueCard = document.createElement('div');
+                            valueCard.className = 'value-card reveal active';
+                            valueCard.innerHTML = `
+                                <div class="value-icon"><i class="bi ${item.icon || 'bi-star'}"></i></div>
+                                <h3>${item.title || ''}</h3>
+                                <p>${item.description || ''}</p>
+                            `;
+                            valuesGrid.appendChild(valueCard);
+                        });
+                        console.log(`Added ${visibleItems.length} value items`);
+                        
+                        // Re-observe newly created elements for animations
+                        if (window.revealObserver) {
+                            valuesGrid.querySelectorAll('.reveal').forEach(el => {
+                                window.revealObserver.observe(el);
+                            });
+                        }
+                    } else {
+                        console.warn('Values grid not found in DOM');
+                    }
+                } else {
+                    console.warn('No values data found or empty items array');
+                }
             }
-            
-            // Update section title
-            const valuesSection = document.querySelector('.values-section');
-            if (valuesSection && data.values.title) {
-                const title = valuesSection.querySelector('.section-title');
-                if (title) title.textContent = data.values.title;
-            }
-        } else {
-            console.warn('No values data found or empty items array');
         }
         
         // Leadership
@@ -710,40 +872,50 @@
             }
             
             if (csrSection) {
-                // Update section header
-                const title = csrTitleEl;
-                const subtitle = csrSection.querySelector('.section-subtitle');
-                if (title && data.csr.title) title.textContent = data.csr.title;
-                if (subtitle && data.csr.subtitle) subtitle.textContent = data.csr.subtitle;
-                
-                // Update or create CSR cards
-                if (data.csr.items && data.csr.items.length > 0) {
-                    const csrContainer = csrSection.querySelector('div[style*="display: grid"]') ||
-                                        csrSection.querySelector('.container > div:last-child');
-                    if (csrContainer) {
-                        // Filter out empty items
-                        const validItems = data.csr.items.filter(item => item.title || item.description || item.icon);
-                        
-                        // Always clear and recreate to handle additions/removals properly
-                        csrContainer.innerHTML = '';
-                        validItems.forEach(item => {
-                            const card = document.createElement('div');
-                            card.className = 'csr-card reveal active';
-                            card.setAttribute('style', 'background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); padding: 2.5rem; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.2);');
-                            card.innerHTML = `
-                                <div style="font-size: 3rem; margin-bottom: 1rem;"><i class="bi ${item.icon || 'bi-heart'}"></i></div>
-                                <h4 style="color: var(--text-light); margin-bottom: 1rem; font-size: 1.3rem;">${item.title || ''}</h4>
-                                <p style="color: rgba(255, 255, 255, 0.9); margin: 0; line-height: 1.7;">${item.description || ''}</p>
-                            `;
-                            csrContainer.appendChild(card);
-                        });
-                        console.log(`Created ${validItems.length} CSR items`);
-                        
-                        // Re-observe newly created elements for animations
-                        if (window.revealObserver) {
-                            csrContainer.querySelectorAll('.reveal').forEach(el => {
-                                window.revealObserver.observe(el);
+                // Check if entire section is hidden
+                if (data.csr.hidden) {
+                    csrSection.style.display = 'none';
+                } else {
+                    // Ensure section is visible
+                    csrSection.style.display = '';
+                    
+                    // Update section header
+                    const title = csrTitleEl;
+                    const subtitle = csrSection.querySelector('.section-subtitle');
+                    if (title && data.csr.title) title.textContent = data.csr.title;
+                    if (subtitle && data.csr.subtitle) subtitle.textContent = data.csr.subtitle;
+                    
+                    // Update or create CSR cards
+                    if (data.csr.items && data.csr.items.length > 0) {
+                        const csrContainer = csrSection.querySelector('div[style*="display: grid"]') ||
+                                            csrSection.querySelector('.container > div:last-child');
+                        if (csrContainer) {
+                            // Filter out empty items and hidden items
+                            const validItems = data.csr.items.filter(item => 
+                                (item.title || item.description || item.icon) && !item.hidden
+                            );
+                            
+                            // Always clear and recreate to handle additions/removals properly
+                            csrContainer.innerHTML = '';
+                            validItems.forEach(item => {
+                                const card = document.createElement('div');
+                                card.className = 'csr-card reveal active';
+                                card.setAttribute('style', 'background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); padding: 2.5rem; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.2);');
+                                card.innerHTML = `
+                                    <div style="font-size: 3rem; margin-bottom: 1rem;"><i class="bi ${item.icon || 'bi-heart'}"></i></div>
+                                    <h4 style="color: var(--text-light); margin-bottom: 1rem; font-size: 1.3rem;">${item.title || ''}</h4>
+                                    <p style="color: rgba(255, 255, 255, 0.9); margin: 0; line-height: 1.7;">${item.description || ''}</p>
+                                `;
+                                csrContainer.appendChild(card);
                             });
+                            console.log(`Created ${validItems.length} CSR items`);
+                            
+                            // Re-observe newly created elements for animations
+                            if (window.revealObserver) {
+                                csrContainer.querySelectorAll('.reveal').forEach(el => {
+                                    window.revealObserver.observe(el);
+                                });
+                            }
                         }
                     }
                 }
@@ -772,22 +944,30 @@
             }
             
             if (recognitionSection) {
-                // Update section header
-                const title = recognitionTitleEl;
-                const subtitle = recognitionSection.querySelector('.section-subtitle');
-                if (title && data.recognition.title) title.textContent = data.recognition.title;
-                if (subtitle && data.recognition.subtitle) subtitle.textContent = data.recognition.subtitle;
-                
-                // Update or create recognition cards
-                if (data.recognition.items && data.recognition.items.length > 0) {
-                    const recognitionContainer = recognitionSection.querySelector('div[style*="display: grid"]') ||
-                                                 recognitionSection.querySelector('.container > div:last-child');
-                    if (recognitionContainer) {
-                        // Clear existing cards if we're replacing them
-                        const existingCards = recognitionContainer.querySelectorAll('.recognition-card');
-                        if (existingCards.length !== data.recognition.items.length) {
+                // Check if entire section is hidden
+                if (data.recognition.hidden) {
+                    recognitionSection.style.display = 'none';
+                } else {
+                    // Ensure section is visible
+                    recognitionSection.style.display = '';
+                    
+                    // Update section header
+                    const title = recognitionTitleEl;
+                    const subtitle = recognitionSection.querySelector('.section-subtitle');
+                    if (title && data.recognition.title) title.textContent = data.recognition.title;
+                    if (subtitle && data.recognition.subtitle) subtitle.textContent = data.recognition.subtitle;
+                    
+                    // Update or create recognition cards
+                    if (data.recognition.items && data.recognition.items.length > 0) {
+                        const recognitionContainer = recognitionSection.querySelector('div[style*="display: grid"]') ||
+                                                     recognitionSection.querySelector('.container > div:last-child');
+                        if (recognitionContainer) {
+                            // Filter out hidden items
+                            const visibleItems = data.recognition.items.filter(item => !item.hidden);
+                            
+                            // Always clear and recreate to handle additions/removals/hiding properly
                             recognitionContainer.innerHTML = '';
-                            data.recognition.items.forEach(item => {
+                            visibleItems.forEach(item => {
                                 const card = document.createElement('div');
                                 card.className = 'recognition-card reveal';
                                 card.setAttribute('style', 'padding: var(--spacing-lg); border-radius: 8px; text-align: center; border-top: 3px solid var(--secondary-color);');
@@ -798,19 +978,14 @@
                                 `;
                                 recognitionContainer.appendChild(card);
                             });
-                        } else {
-                            // Update existing cards
-                            existingCards.forEach((card, idx) => {
-                                if (idx < data.recognition.items.length) {
-                                    const item = data.recognition.items[idx];
-                                    const icon = card.querySelector('i');
-                                    const h4 = card.querySelector('h4');
-                                    const p = card.querySelector('p');
-                                    if (icon && item.icon) icon.className = `bi ${item.icon}`;
-                                    if (h4 && item.title) h4.textContent = item.title;
-                                    if (p && item.description) p.textContent = item.description;
-                                }
-                            });
+                            console.log(`Created ${visibleItems.length} recognition items`);
+                            
+                            // Re-observe newly created elements for animations
+                            if (window.revealObserver) {
+                                recognitionContainer.querySelectorAll('.reveal').forEach(el => {
+                                    window.revealObserver.observe(el);
+                                });
+                            }
                         }
                     }
                 }
@@ -832,7 +1007,8 @@
                 if (h1 && data.pageHero.title) h1.textContent = data.pageHero.title;
                 if (p && data.pageHero.subtitle) p.textContent = data.pageHero.subtitle;
                 if (data.pageHero.image) {
-                    pageHero.style.backgroundImage = `url('${data.pageHero.image}')`;
+                    const normalizedImg = normalizeImagePath(data.pageHero.image);
+                    pageHero.style.backgroundImage = `url('${normalizedImg}')`;
                 }
             }
         }
@@ -881,21 +1057,29 @@
                         if (slideshow) {
                             slideshow.innerHTML = '';
                             project.images.forEach((img, imgIdx) => {
+                                const normalizedImg = normalizeImagePath(img);
                                 const slide = document.createElement('div');
                                 slide.className = `project-slide ${imgIdx === 0 ? 'active' : ''}`;
-                                slide.style.backgroundImage = `url('${img}')`;
+                                slide.style.backgroundImage = `url('${normalizedImg}')`;
                                 slide.setAttribute('aria-hidden', imgIdx === 0 ? 'false' : 'true');
                                 slideshow.appendChild(slide);
                             });
+                            // Re-initialize slideshow after updating slides
+                            if (window.initProjectSlideshows && project.images.length > 1) {
+                                setTimeout(() => {
+                                    window.initProjectSlideshows();
+                                }, 100);
+                            }
                         } else {
                             const imageDiv = card.querySelector('.project-image');
                             if (imageDiv && project.images[0]) {
-                                imageDiv.style.backgroundImage = `url('${project.images[0]}')`;
+                                const normalizedImg = normalizeImagePath(project.images[0]);
+                                imageDiv.style.backgroundImage = `url('${normalizedImg}')`;
                             }
                         }
                     }
                     
-                    // Update meta items
+                    // Update meta items - support both old format (string) and new format (object with icon and text)
                     if (project.meta && project.meta.length > 0) {
                         const metaContainer = card.querySelector('.project-meta');
                         if (metaContainer) {
@@ -903,42 +1087,109 @@
                             project.meta.forEach(meta => {
                                 const metaItem = document.createElement('span');
                                 metaItem.className = 'meta-item';
-                                metaItem.innerHTML = `<i class="bi bi-geo-alt-fill me-1 text-primary"></i>${meta}`;
+                                // Handle both old format (string) and new format (object)
+                                const metaText = typeof meta === 'string' ? meta : (meta.text || '');
+                                const metaIcon = typeof meta === 'string' ? 'bi-geo-alt-fill' : (meta.icon || 'bi-geo-alt-fill');
+                                metaItem.innerHTML = `<i class="bi ${metaIcon} me-1 text-primary"></i>${metaText}`;
                                 metaContainer.appendChild(metaItem);
                             });
                         }
                     }
                     
-                    // Update sections
+                    // Update sections - create new ones if needed
                     if (project.sections && project.sections.length > 0) {
-                        // Find existing section headings and update them
-                        const sectionHeadings = card.querySelectorAll('.project-section-heading');
-                        sectionHeadings.forEach((heading, sIdx) => {
-                            if (sIdx < project.sections.length) {
-                                const section = project.sections[sIdx];
-                                heading.innerHTML = `<i class="bi bi-diagram-3-fill"></i>${section.title || ''}`;
+                        const projectDetails = card.querySelector('.project-details');
+                        if (projectDetails) {
+                            // Find existing section headings
+                            const sectionHeadings = projectDetails.querySelectorAll('.project-section-heading');
+                            const existingSections = Array.from(sectionHeadings);
+                            
+                            // Update existing sections
+                            existingSections.forEach((heading, sIdx) => {
+                                if (sIdx < project.sections.length) {
+                                    const section = project.sections[sIdx];
+                                    const sectionIcon = section.icon || 'bi-diagram-3-fill';
+                                    heading.innerHTML = `<i class="bi ${sectionIcon}"></i>${section.title || ''}`;
+                                    
+                                    // Update next element (could be ul or p)
+                                    const nextEl = heading.nextElementSibling;
+                                    if (nextEl) {
+                                        if (nextEl.tagName === 'UL' && Array.isArray(section.content)) {
+                                            nextEl.innerHTML = '';
+                                            section.content.forEach(content => {
+                                                const li = document.createElement('li');
+                                                li.innerHTML = content;
+                                                nextEl.appendChild(li);
+                                            });
+                                        } else if (nextEl.tagName === 'P') {
+                                            nextEl.textContent = Array.isArray(section.content) 
+                                                ? section.content.join('\n') 
+                                                : section.content;
+                                        }
+                                    }
+                                }
+                            });
+                            
+                            // Create new sections if there are more in Firebase than in HTML
+                            if (project.sections.length > existingSections.length) {
+                                // Find where to insert new sections (after last existing section or before features)
+                                let insertPoint = null;
+                                if (existingSections.length > 0) {
+                                    const lastSection = existingSections[existingSections.length - 1];
+                                    insertPoint = lastSection.nextElementSibling;
+                                    // Skip the content element (ul or p) after the heading
+                                    if (insertPoint && (insertPoint.tagName === 'UL' || insertPoint.tagName === 'P')) {
+                                        insertPoint = insertPoint.nextElementSibling;
+                                    }
+                                } else {
+                                    // No existing sections, find where to insert (before features or at end)
+                                    const featuresContainer = projectDetails.querySelector('.project-features');
+                                    insertPoint = featuresContainer || null;
+                                }
                                 
-                                // Update next element (could be ul or p)
-                                const nextEl = heading.nextElementSibling;
-                                if (nextEl) {
-                                    if (nextEl.tagName === 'UL' && Array.isArray(section.content)) {
-                                        nextEl.innerHTML = '';
-                                        section.content.forEach(content => {
+                                // Create new sections
+                                for (let sIdx = existingSections.length; sIdx < project.sections.length; sIdx++) {
+                                    const section = project.sections[sIdx];
+                                    if (!section.title && !section.content) continue;
+                                    
+                                    // Create section heading
+                                    const heading = document.createElement('h3');
+                                    heading.className = 'project-section-heading';
+                                    const sectionIcon = section.icon || 'bi-diagram-3-fill';
+                                    heading.innerHTML = `<i class="bi ${sectionIcon}"></i>${section.title || ''}`;
+                                    
+                                    // Create content element
+                                    const content = Array.isArray(section.content) ? section.content : [section.content];
+                                    let contentEl;
+                                    
+                                    // Determine if content should be a list (if it has multiple items) or paragraph
+                                    if (content.length > 1 || (content.length === 1 && content[0].includes('<li>') || content[0].includes('•'))) {
+                                        contentEl = document.createElement('ul');
+                                        contentEl.className = 'tenant-list';
+                                        content.forEach(contentItem => {
                                             const li = document.createElement('li');
-                                            li.innerHTML = content;
-                                            nextEl.appendChild(li);
+                                            li.innerHTML = contentItem;
+                                            contentEl.appendChild(li);
                                         });
-                                    } else if (nextEl.tagName === 'P') {
-                                        nextEl.textContent = Array.isArray(section.content) 
-                                            ? section.content.join('\n') 
-                                            : section.content;
+                                    } else {
+                                        contentEl = document.createElement('p');
+                                        contentEl.textContent = content[0] || '';
+                                    }
+                                    
+                                    // Insert into DOM
+                                    if (insertPoint) {
+                                        projectDetails.insertBefore(heading, insertPoint);
+                                        projectDetails.insertBefore(contentEl, insertPoint);
+                                    } else {
+                                        projectDetails.appendChild(heading);
+                                        projectDetails.appendChild(contentEl);
                                     }
                                 }
                             }
-                        });
+                        }
                     }
                     
-                    // Update features
+                    // Update features - support both old format (string) and new format (object with icon and text)
                     if (project.features && project.features.length > 0) {
                         const featuresContainer = card.querySelector('.project-features');
                         if (featuresContainer) {
@@ -946,7 +1197,10 @@
                             project.features.forEach(feature => {
                                 const tag = document.createElement('div');
                                 tag.className = 'feature-tag';
-                                tag.innerHTML = `<i class="bi bi-building me-1"></i>${feature}`;
+                                // Handle both old format (string) and new format (object)
+                                const featureText = typeof feature === 'string' ? feature : (feature.text || '');
+                                const featureIcon = typeof feature === 'string' ? 'bi-building' : (feature.icon || 'bi-building');
+                                tag.innerHTML = `<i class="bi ${featureIcon} me-1"></i>${featureText}`;
                                 featuresContainer.appendChild(tag);
                             });
                         }
@@ -962,6 +1216,33 @@
                             if (details) details.appendChild(progressEl);
                         }
                         progressEl.innerHTML = `<strong>Progress:</strong> ${project.progress}`;
+                    }
+                    
+                    // Update featured status
+                    if (project.featured) {
+                        // Add "featured" class to the card
+                        card.classList.add('featured');
+                        
+                        // Add or update the featured badge
+                        const projectImage = card.querySelector('.project-image');
+                        if (projectImage) {
+                            let badge = projectImage.querySelector('.project-badge');
+                            if (!badge) {
+                                badge = document.createElement('div');
+                                badge.className = 'project-badge';
+                                projectImage.appendChild(badge);
+                            }
+                            badge.innerHTML = '<i class="bi bi-star-fill me-1"></i>Featured';
+                        }
+                    } else {
+                        // Remove "featured" class if not featured
+                        card.classList.remove('featured');
+                        
+                        // Remove featured badge (but keep other badges like "Future Project")
+                        const badge = card.querySelector('.project-badge');
+                        if (badge && badge.textContent.includes('Featured')) {
+                            badge.remove();
+                        }
                     }
                 }
             });
@@ -982,7 +1263,8 @@
                 if (h1 && data.pageHero.title) h1.textContent = data.pageHero.title;
                 if (p && data.pageHero.subtitle) p.textContent = data.pageHero.subtitle;
                 if (data.pageHero.image) {
-                    pageHero.style.backgroundImage = `url('${data.pageHero.image}')`;
+                    const normalizedImg = normalizeImagePath(data.pageHero.image);
+                    pageHero.style.backgroundImage = `url('${normalizedImg}')`;
                 }
             }
         }

@@ -133,13 +133,15 @@
             document.getElementById('hero_button2_link').value = pageData.hero.button2?.link || '';
             
             if (pageData.hero.images && pageData.hero.images[0]) {
-                document.getElementById('hero_image1_preview').innerHTML = `<img src="${pageData.hero.images[0]}" alt="Hero Image 1">`;
+                const normalizedPath = normalizeImagePath(pageData.hero.images[0]);
+                document.getElementById('hero_image1_preview').innerHTML = `<img src="${normalizedPath}" alt="Hero Image 1" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
                 if (document.getElementById('hero_image1_url')) {
                     document.getElementById('hero_image1_url').value = pageData.hero.images[0];
                 }
             }
             if (pageData.hero.images && pageData.hero.images[1]) {
-                document.getElementById('hero_image2_preview').innerHTML = `<img src="${pageData.hero.images[1]}" alt="Hero Image 2">`;
+                const normalizedPath = normalizeImagePath(pageData.hero.images[1]);
+                document.getElementById('hero_image2_preview').innerHTML = `<img src="${normalizedPath}" alt="Hero Image 2" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
                 if (document.getElementById('hero_image2_url')) {
                     document.getElementById('hero_image2_url').value = pageData.hero.images[1];
                 }
@@ -151,13 +153,15 @@
             document.getElementById('video_title').value = pageData.video.title || '';
             document.getElementById('video_subtitle').value = pageData.video.subtitle || '';
             if (pageData.video.url) {
-                document.getElementById('video_preview').innerHTML = `<video controls><source src="${pageData.video.url}"></video>`;
+                const normalizedPath = normalizeVideoPath(pageData.video.url);
+                document.getElementById('video_preview').innerHTML = `<video controls><source src="${normalizedPath}"></video>`;
                 if (document.getElementById('video_file_url')) {
                     document.getElementById('video_file_url').value = pageData.video.url;
                 }
             }
             if (pageData.video.poster) {
-                document.getElementById('video_poster_preview').innerHTML = `<img src="${pageData.video.poster}" alt="Video Poster">`;
+                const normalizedPath = normalizeImagePath(pageData.video.poster);
+                document.getElementById('video_poster_preview').innerHTML = `<img src="${normalizedPath}" alt="Video Poster" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
                 if (document.getElementById('video_poster_url')) {
                     document.getElementById('video_poster_url').value = pageData.video.poster;
                 }
@@ -168,8 +172,12 @@
         if (pageData.features) {
             document.getElementById('features_title').value = pageData.features.title || '';
             document.getElementById('features_subtitle').value = pageData.features.subtitle || '';
-            const featuresVisible = document.getElementById('features_visible');
-            if (featuresVisible) featuresVisible.checked = pageData.features.visible !== false;
+            const featuresHidden = document.getElementById('features_hidden');
+            // Handle backward compatibility: convert visible to hidden
+            const isHidden = pageData.features.hidden !== undefined 
+                ? pageData.features.hidden 
+                : (pageData.features.visible === false);
+            if (featuresHidden) featuresHidden.checked = isHidden;
             if (pageData.features.items) {
                 pageData.features.items.forEach((item, index) => {
                     addFeature(item, index);
@@ -181,8 +189,12 @@
         if (pageData.showcase) {
             document.getElementById('showcase_title').value = pageData.showcase.title || '';
             document.getElementById('showcase_subtitle').value = pageData.showcase.subtitle || '';
-            const showcaseVisible = document.getElementById('showcase_visible');
-            if (showcaseVisible) showcaseVisible.checked = pageData.showcase.visible !== false;
+            const showcaseHidden = document.getElementById('showcase_hidden');
+            // Handle backward compatibility: convert visible to hidden
+            const isHidden = pageData.showcase.hidden !== undefined 
+                ? pageData.showcase.hidden 
+                : (pageData.showcase.visible === false);
+            if (showcaseHidden) showcaseHidden.checked = isHidden;
             if (pageData.showcase.items) {
                 pageData.showcase.items.forEach((item, index) => {
                     addShowcaseItem(item, index);
@@ -194,8 +206,12 @@
         if (pageData.testimonials) {
             document.getElementById('testimonials_title').value = pageData.testimonials.title || '';
             document.getElementById('testimonials_subtitle').value = pageData.testimonials.subtitle || '';
-            const testimonialsVisible = document.getElementById('testimonials_visible');
-            if (testimonialsVisible) testimonialsVisible.checked = pageData.testimonials.visible !== false;
+            const testimonialsHidden = document.getElementById('testimonials_hidden');
+            // Handle backward compatibility: convert visible to hidden
+            const isHidden = pageData.testimonials.hidden !== undefined 
+                ? pageData.testimonials.hidden 
+                : (pageData.testimonials.visible === false);
+            if (testimonialsHidden) testimonialsHidden.checked = isHidden;
             if (pageData.testimonials.items) {
                 pageData.testimonials.items.forEach((item, index) => {
                     addTestimonial(item, index);
@@ -207,8 +223,12 @@
         if (pageData.news) {
             document.getElementById('news_title').value = pageData.news.title || '';
             document.getElementById('news_subtitle').value = pageData.news.subtitle || '';
-            const newsVisible = document.getElementById('news_visible');
-            if (newsVisible) newsVisible.checked = pageData.news.visible !== false;
+            const newsHidden = document.getElementById('news_hidden');
+            // Handle backward compatibility: convert visible to hidden
+            const isHidden = pageData.news.hidden !== undefined 
+                ? pageData.news.hidden 
+                : (pageData.news.visible === false);
+            if (newsHidden) newsHidden.checked = isHidden;
             if (pageData.news.items) {
                 pageData.news.items.forEach((item, index) => {
                     addNewsItem(item, index);
@@ -242,8 +262,8 @@
                 </button>
             </div>
             <div class="item-visibility-toggle">
-                <input type="checkbox" class="feature-visible" ${data?.visible !== false ? 'checked' : ''}>
-                <label>Show this item</label>
+                <input type="checkbox" class="feature-hidden" ${(data?.hidden !== undefined ? data.hidden : (data?.visible === false)) ? 'checked' : ''}>
+                <label>Hide</label>
             </div>
             <div class="admin-form-group">
                 <label>Icon</label>
@@ -282,9 +302,12 @@
                     <input type="text" class="showcase-image-url" value="${img || ''}" placeholder="images/Projects/...">
                 </div>
                 <div class="image-preview showcase-image-preview" style="max-width: 300px; margin-bottom: 1rem;">
-                    ${img ? `<img src="${img}" alt="Preview">` : '<div class="image-preview-placeholder"><i class="bi bi-image"></i><p>No image</p></div>'}
+                    ${img ? `<img src="${normalizeImagePath(img)}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">` : '<div class="image-preview-placeholder"><i class="bi bi-image"></i><p>No image</p></div>'}
                 </div>
-                <input type="file" class="showcase-image-input" accept="image/*" style="margin-bottom: 1rem;">
+                <input type="file" class="showcase-image-input" accept="image/*" style="display: none;">
+                <button type="button" class="admin-btn admin-btn-secondary showcase-image-upload-btn" style="margin-bottom: 1rem;">
+                    <i class="bi bi-upload"></i> Upload Image
+                </button>
                 <button type="button" class="admin-btn admin-btn-secondary" onclick="this.closest('.showcase-image-item').remove()" style="margin-bottom: 1rem;">
                     <i class="bi bi-trash"></i> Remove Image
                 </button>
@@ -302,8 +325,8 @@
                 </button>
             </div>
             <div class="item-visibility-toggle">
-                <input type="checkbox" class="showcase-visible" ${data?.visible !== false ? 'checked' : ''}>
-                <label>Show this item</label>
+                <input type="checkbox" class="showcase-hidden" ${(data?.hidden !== undefined ? data.hidden : (data?.visible === false)) ? 'checked' : ''}>
+                <label>Hide</label>
             </div>
             <div class="admin-form-group">
                 <label>Title</label>
@@ -320,7 +343,7 @@
             <div class="image-upload-container">
                 <label>Images (Multiple images supported)</label>
                 <div class="showcase-images-container">
-                    ${imagesHtml || '<div class="showcase-image-item" data-index="0"><div class="admin-form-group"><label>Image 1 URL</label><input type="text" class="showcase-image-url" placeholder="images/Projects/..."></div><div class="image-preview showcase-image-preview" style="max-width: 300px; margin-bottom: 1rem;"><div class="image-preview-placeholder"><i class="bi bi-image"></i><p>No image</p></div></div><input type="file" class="showcase-image-input" accept="image/*" style="margin-bottom: 1rem;"><button type="button" class="admin-btn admin-btn-secondary" onclick="this.closest(\'.showcase-image-item\').remove()" style="margin-bottom: 1rem;"><i class="bi bi-trash"></i> Remove Image</button></div>'}
+                    ${imagesHtml || '<div class="showcase-image-item" data-index="0"><div class="admin-form-group"><label>Image 1 URL</label><input type="text" class="showcase-image-url" placeholder="images/Projects/..."></div><div class="image-preview showcase-image-preview" style="max-width: 300px; margin-bottom: 1rem;"><div class="image-preview-placeholder"><i class="bi bi-image"></i><p>No image</p></div></div><input type="file" class="showcase-image-input" accept="image/*" style="display: none;"><button type="button" class="admin-btn admin-btn-secondary showcase-image-upload-btn" style="margin-bottom: 1rem;"><i class="bi bi-upload"></i> Upload Image</button><button type="button" class="admin-btn admin-btn-secondary" onclick="this.closest(\'.showcase-image-item\').remove()" style="margin-bottom: 1rem;"><i class="bi bi-trash"></i> Remove Image</button></div>'}
                 </div>
                 <button type="button" class="admin-btn admin-btn-secondary btn-add-item" onclick="addShowcaseImage(this)" style="margin-top: 1rem;">
                     <i class="bi bi-plus-circle"></i> Add Another Image
@@ -328,9 +351,17 @@
             </div>
         `;
         
-        // Handle image previews and URL updates
+        // Handle image upload buttons and previews
         item.querySelectorAll('.showcase-image-input').forEach((imageInput, idx) => {
             const imagePreview = imageInput.previousElementSibling;
+            const uploadBtn = imageInput.nextElementSibling;
+            
+            if (uploadBtn && uploadBtn.classList.contains('showcase-image-upload-btn')) {
+                uploadBtn.addEventListener('click', function() {
+                    imageInput.click();
+                });
+            }
+            
             imageInput.addEventListener('change', function(e) {
                 const file = e.target.files[0];
                 if (file) {
@@ -347,7 +378,8 @@
             urlInput.addEventListener('input', function() {
                 const preview = this.closest('.showcase-image-item').querySelector('.showcase-image-preview');
                 if (this.value.trim()) {
-                    preview.innerHTML = `<img src="${this.value}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
+                    const normalizedPath = normalizeImagePath(this.value.trim());
+                    preview.innerHTML = `<img src="${normalizedPath}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
                 }
             });
         });
@@ -370,11 +402,32 @@
             <div class="image-preview showcase-image-preview" style="max-width: 300px; margin-bottom: 1rem;">
                 <div class="image-preview-placeholder"><i class="bi bi-image"></i><p>No image</p></div>
             </div>
-            <input type="file" class="showcase-image-input" accept="image/*" style="margin-bottom: 1rem;">
+            <input type="file" class="showcase-image-input" accept="image/*" style="display: none;">
+            <button type="button" class="admin-btn admin-btn-secondary showcase-image-upload-btn" style="margin-bottom: 1rem;">
+                <i class="bi bi-upload"></i> Upload Image
+            </button>
             <button type="button" class="admin-btn admin-btn-secondary" onclick="this.closest('.showcase-image-item').remove()" style="margin-bottom: 1rem;">
                 <i class="bi bi-trash"></i> Remove Image
             </button>
         `;
+        
+        // Create a temporary container for folder selector
+        const tempContainer = document.createElement('div');
+        tempContainer.className = 'image-upload-container';
+        tempContainer.id = `showcase-folder-${Date.now()}-${newIndex}`;
+        tempContainer.appendChild(newItem);
+        
+        // Add folder selector
+        if (window.createFolderSelector) {
+            const folderSelector = window.createFolderSelector(tempContainer.id, 'images/showcase', function(selectedFolder) {
+                if (folderSelector) {
+                    folderSelector.dataset.selectedFolder = selectedFolder;
+                }
+            });
+            if (folderSelector) {
+                tempContainer.appendChild(folderSelector);
+            }
+        }
         
         const imageInput = newItem.querySelector('.showcase-image-input');
         const imagePreview = newItem.querySelector('.showcase-image-preview');
@@ -396,7 +449,12 @@
             }
         });
         
+        // Extract newItem from tempContainer and add to actual container
         container.appendChild(newItem);
+        if (tempContainer.querySelector('.folder-selector-container')) {
+            const folderSelector = tempContainer.querySelector('.folder-selector-container');
+            newItem.appendChild(folderSelector);
+        }
     };
     
     // Add testimonial
@@ -415,8 +473,8 @@
                 </button>
             </div>
             <div class="item-visibility-toggle">
-                <input type="checkbox" class="testimonial-visible" ${data?.visible !== false ? 'checked' : ''}>
-                <label>Show this item</label>
+                <input type="checkbox" class="testimonial-hidden" ${(data?.hidden !== undefined ? data.hidden : (data?.visible === false)) ? 'checked' : ''}>
+                <label>Hide</label>
             </div>
             <div class="admin-form-group">
                 <label>Rating (1-5 stars)</label>
@@ -457,9 +515,12 @@
                     <input type="text" class="news-image-url" value="${img || ''}" placeholder="images/Projects/...">
                 </div>
                 <div class="image-preview news-image-preview" style="max-width: 300px; margin-bottom: 1rem;">
-                    ${img ? `<img src="${img}" alt="Preview">` : '<div class="image-preview-placeholder"><i class="bi bi-image"></i><p>No image</p></div>'}
+                    ${img ? `<img src="${normalizeImagePath(img)}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">` : '<div class="image-preview-placeholder"><i class="bi bi-image"></i><p>No image</p></div>'}
                 </div>
-                <input type="file" class="news-image-input" accept="image/*" style="margin-bottom: 1rem;">
+                <input type="file" class="news-image-input" accept="image/*" style="display: none;">
+                <button type="button" class="admin-btn admin-btn-secondary news-image-upload-btn" style="margin-bottom: 1rem;">
+                    <i class="bi bi-upload"></i> Upload Image
+                </button>
                 <button type="button" class="admin-btn admin-btn-secondary" onclick="this.closest('.news-image-item').remove()" style="margin-bottom: 1rem;">
                     <i class="bi bi-trash"></i> Remove Image
                 </button>
@@ -477,8 +538,8 @@
                 </button>
             </div>
             <div class="item-visibility-toggle">
-                <input type="checkbox" class="news-visible" ${data?.visible !== false ? 'checked' : ''}>
-                <label>Show this item</label>
+                <input type="checkbox" class="news-hidden" ${(data?.hidden !== undefined ? data.hidden : (data?.visible === false)) ? 'checked' : ''}>
+                <label>Hide</label>
             </div>
             <div class="admin-form-group">
                 <label>Category</label>
@@ -503,7 +564,7 @@
             <div class="image-upload-container">
                 <label>Images (Multiple images supported)</label>
                 <div class="news-images-container">
-                    ${imagesHtml || '<div class="news-image-item" data-index="0"><div class="admin-form-group"><label>Image 1 URL</label><input type="text" class="news-image-url" placeholder="images/Projects/..."></div><div class="image-preview news-image-preview" style="max-width: 300px; margin-bottom: 1rem;"><div class="image-preview-placeholder"><i class="bi bi-image"></i><p>No image</p></div></div><input type="file" class="news-image-input" accept="image/*" style="margin-bottom: 1rem;"><button type="button" class="admin-btn admin-btn-secondary" onclick="this.closest(\'.news-image-item\').remove()" style="margin-bottom: 1rem;"><i class="bi bi-trash"></i> Remove Image</button></div>'}
+                    ${imagesHtml || '<div class="news-image-item" data-index="0"><div class="admin-form-group"><label>Image 1 URL</label><input type="text" class="news-image-url" placeholder="images/Projects/..."></div><div class="image-preview news-image-preview" style="max-width: 300px; margin-bottom: 1rem;"><div class="image-preview-placeholder"><i class="bi bi-image"></i><p>No image</p></div></div><input type="file" class="news-image-input" accept="image/*" style="display: none;"><button type="button" class="admin-btn admin-btn-secondary news-image-upload-btn" style="margin-bottom: 1rem;"><i class="bi bi-upload"></i> Upload Image</button><button type="button" class="admin-btn admin-btn-secondary" onclick="this.closest(\'.news-image-item\').remove()" style="margin-bottom: 1rem;"><i class="bi bi-trash"></i> Remove Image</button></div>'}
                 </div>
                 <button type="button" class="admin-btn admin-btn-secondary btn-add-item" onclick="addNewsImage(this)" style="margin-top: 1rem;">
                     <i class="bi bi-plus-circle"></i> Add Another Image
@@ -511,9 +572,17 @@
             </div>
         `;
         
-        // Handle image previews and URL updates
+        // Handle image upload buttons and previews
         item.querySelectorAll('.news-image-input').forEach((imageInput) => {
             const imagePreview = imageInput.previousElementSibling;
+            const uploadBtn = imageInput.nextElementSibling;
+            
+            if (uploadBtn && uploadBtn.classList.contains('news-image-upload-btn')) {
+                uploadBtn.addEventListener('click', function() {
+                    imageInput.click();
+                });
+            }
+            
             imageInput.addEventListener('change', function(e) {
                 const file = e.target.files[0];
                 if (file) {
@@ -530,7 +599,8 @@
             urlInput.addEventListener('input', function() {
                 const preview = this.closest('.news-image-item').querySelector('.news-image-preview');
                 if (this.value.trim()) {
-                    preview.innerHTML = `<img src="${this.value}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
+                    const normalizedPath = normalizeImagePath(this.value.trim());
+                    preview.innerHTML = `<img src="${normalizedPath}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
                 }
             });
         });
@@ -553,7 +623,10 @@
             <div class="image-preview news-image-preview" style="max-width: 300px; margin-bottom: 1rem;">
                 <div class="image-preview-placeholder"><i class="bi bi-image"></i><p>No image</p></div>
             </div>
-            <input type="file" class="news-image-input" accept="image/*" style="margin-bottom: 1rem;">
+            <input type="file" class="news-image-input" accept="image/*" style="display: none;">
+            <button type="button" class="admin-btn admin-btn-secondary news-image-upload-btn" style="margin-bottom: 1rem;">
+                <i class="bi bi-upload"></i> Upload Image
+            </button>
             <button type="button" class="admin-btn admin-btn-secondary" onclick="this.closest('.news-image-item').remove()" style="margin-bottom: 1rem;">
                 <i class="bi bi-trash"></i> Remove Image
             </button>
@@ -561,6 +634,14 @@
         
         const imageInput = newItem.querySelector('.news-image-input');
         const imagePreview = newItem.querySelector('.news-image-preview');
+        const uploadBtn = newItem.querySelector('.news-image-upload-btn');
+        
+        if (uploadBtn) {
+            uploadBtn.addEventListener('click', function() {
+                imageInput.click();
+            });
+        }
+        
         imageInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
@@ -580,6 +661,21 @@
         });
         
         container.appendChild(newItem);
+        
+        // Add folder selector after item is added
+        const tempContainer = document.createElement('div');
+        tempContainer.className = 'image-upload-container';
+        tempContainer.id = `news-folder-${Date.now()}-${newIndex}`;
+        if (window.createFolderSelector) {
+            const folderSelector = window.createFolderSelector(tempContainer.id, 'images/news', function(selectedFolder) {
+                if (folderSelector) {
+                    folderSelector.dataset.selectedFolder = selectedFolder;
+                }
+            });
+            if (folderSelector) {
+                newItem.appendChild(folderSelector);
+            }
+        }
     };
     
     // Add stat
@@ -693,14 +789,14 @@
                     icon: item.querySelector('.feature-icon').value,
                     title: item.querySelector('.feature-title').value,
                     description: item.querySelector('.feature-description').value,
-                    visible: item.querySelector('.feature-visible')?.checked !== false
+                    hidden: item.querySelector('.feature-hidden')?.checked || false
                 });
             });
             
             pageData.features = {
                 title: document.getElementById('features_title').value,
                 subtitle: document.getElementById('features_subtitle').value,
-                visible: document.getElementById('features_visible')?.checked !== false,
+                hidden: document.getElementById('features_hidden')?.checked || false,
                 items: features
             };
             
@@ -723,7 +819,8 @@
                         const file = imageInput.files[0];
                         const timestamp = Date.now();
                         const fileName = `${timestamp}_${file.name}`;
-                        imageUrl = await uploadImage(file, `images/showcase/${fileName}`);
+                        const selectedFolder = window.getSelectedFolder(imageInput, 'images/showcase');
+                        imageUrl = await uploadImage(file, `${selectedFolder}/${fileName}`);
                     } else {
                         // Try to get from preview
                         const previewImg = imageItem.querySelector('.showcase-image-preview img');
@@ -742,14 +839,14 @@
                     description: item.querySelector('.showcase-description').value,
                     link: item.querySelector('.showcase-link').value,
                     images: images,
-                    visible: item.querySelector('.showcase-visible')?.checked !== false
+                    hidden: item.querySelector('.showcase-hidden')?.checked || false
                 });
             }
             
             pageData.showcase = {
                 title: document.getElementById('showcase_title').value,
                 subtitle: document.getElementById('showcase_subtitle').value,
-                visible: document.getElementById('showcase_visible')?.checked !== false,
+                hidden: document.getElementById('showcase_hidden')?.checked || false,
                 items: showcaseItems
             };
             
@@ -762,14 +859,14 @@
                     authorName: item.querySelector('.testimonial-author-name').value,
                     authorTitle: item.querySelector('.testimonial-author-title').value,
                     avatar: item.querySelector('.testimonial-avatar').value,
-                    visible: item.querySelector('.testimonial-visible')?.checked !== false
+                    hidden: item.querySelector('.testimonial-hidden')?.checked || false
                 });
             });
             
             pageData.testimonials = {
                 title: document.getElementById('testimonials_title').value,
                 subtitle: document.getElementById('testimonials_subtitle').value,
-                visible: document.getElementById('testimonials_visible')?.checked !== false,
+                hidden: document.getElementById('testimonials_hidden')?.checked || false,
                 items: testimonials
             };
             
@@ -792,7 +889,8 @@
                         const file = imageInput.files[0];
                         const timestamp = Date.now();
                         const fileName = `${timestamp}_${file.name}`;
-                        imageUrl = await uploadImage(file, `images/news/${fileName}`);
+                        const selectedFolder = window.getSelectedFolder(imageInput, 'images/news');
+                        imageUrl = await uploadImage(file, `${selectedFolder}/${fileName}`);
                     } else {
                         // Try to get from preview
                         const previewImg = imageItem.querySelector('.news-image-preview img');
@@ -813,14 +911,14 @@
                     date: item.querySelector('.news-date').value,
                     link: item.querySelector('.news-link').value,
                     images: images,
-                    visible: item.querySelector('.news-visible')?.checked !== false
+                    hidden: item.querySelector('.news-hidden')?.checked || false
                 });
             }
             
             pageData.news = {
                 title: document.getElementById('news_title').value,
                 subtitle: document.getElementById('news_subtitle').value,
-                visible: document.getElementById('news_visible')?.checked !== false,
+                hidden: document.getElementById('news_hidden')?.checked || false,
                 items: newsItems
             };
             
@@ -858,12 +956,63 @@
     initImagePreview('video_poster', 'video_poster_preview');
     initVideoPreview('video_file', 'video_preview');
     
+    // Initialize folder selectors
+    if (window.initFolderSelectors) {
+        window.initFolderSelectors();
+    }
+    
+    // Add folder selectors for hero images (they're in separate containers)
+    if (window.createFolderSelector) {
+        const heroImage1Selector = window.createFolderSelector('hero_image1_folder_selector', 'images/hero', function(selectedFolder) {
+            if (heroImage1Selector) {
+                heroImage1Selector.dataset.selectedFolder = selectedFolder;
+            }
+        });
+        
+        const heroImage2Selector = window.createFolderSelector('hero_image2_folder_selector', 'images/hero', function(selectedFolder) {
+            if (heroImage2Selector) {
+                heroImage2Selector.dataset.selectedFolder = selectedFolder;
+            }
+        });
+    }
+    
+    // Initialize image pickers for hero images
+    if (window.initImagePicker) {
+        const heroImage1Url = document.getElementById('hero_image1_url');
+        const heroImage2Url = document.getElementById('hero_image2_url');
+        if (heroImage1Url) window.initImagePicker(heroImage1Url);
+        if (heroImage2Url) window.initImagePicker(heroImage2Url);
+    }
+    
+    // Setup upload buttons
+    if (document.getElementById('hero_image1_upload_btn')) {
+        document.getElementById('hero_image1_upload_btn').addEventListener('click', function() {
+            document.getElementById('hero_image1').click();
+        });
+    }
+    if (document.getElementById('hero_image2_upload_btn')) {
+        document.getElementById('hero_image2_upload_btn').addEventListener('click', function() {
+            document.getElementById('hero_image2').click();
+        });
+    }
+    if (document.getElementById('video_file_upload_btn')) {
+        document.getElementById('video_file_upload_btn').addEventListener('click', function() {
+            document.getElementById('video_file').click();
+        });
+    }
+    if (document.getElementById('video_poster_upload_btn')) {
+        document.getElementById('video_poster_upload_btn').addEventListener('click', function() {
+            document.getElementById('video_poster').click();
+        });
+    }
+    
     // Handle URL inputs for preview
     if (document.getElementById('hero_image1_url')) {
         document.getElementById('hero_image1_url').addEventListener('input', function(e) {
             const url = e.target.value.trim();
             if (url) {
-                document.getElementById('hero_image1_preview').innerHTML = `<img src="${url}" alt="Preview">`;
+                const normalizedPath = normalizeImagePath(url);
+                document.getElementById('hero_image1_preview').innerHTML = `<img src="${normalizedPath}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
             }
         });
     }
@@ -871,7 +1020,8 @@
         document.getElementById('hero_image2_url').addEventListener('input', function(e) {
             const url = e.target.value.trim();
             if (url) {
-                document.getElementById('hero_image2_preview').innerHTML = `<img src="${url}" alt="Preview">`;
+                const normalizedPath = normalizeImagePath(url);
+                document.getElementById('hero_image2_preview').innerHTML = `<img src="${normalizedPath}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
             }
         });
     }
@@ -879,7 +1029,8 @@
         document.getElementById('video_file_url').addEventListener('input', function(e) {
             const url = e.target.value.trim();
             if (url) {
-                document.getElementById('video_preview').innerHTML = `<video controls><source src="${url}"></video>`;
+                const normalizedPath = normalizeVideoPath(url);
+                document.getElementById('video_preview').innerHTML = `<video controls><source src="${normalizedPath}"></video>`;
             }
         });
     }
@@ -887,7 +1038,8 @@
         document.getElementById('video_poster_url').addEventListener('input', function(e) {
             const url = e.target.value.trim();
             if (url) {
-                document.getElementById('video_poster_preview').innerHTML = `<img src="${url}" alt="Preview">`;
+                const normalizedPath = normalizeImagePath(url);
+                document.getElementById('video_poster_preview').innerHTML = `<img src="${normalizedPath}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
             }
         });
     }

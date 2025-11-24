@@ -33,11 +33,165 @@
         if (container) {
             container.insertBefore(alert, container.firstChild);
             
+            // Scroll to top to show alert
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
             // Auto remove after 5 seconds
             setTimeout(() => {
                 alert.remove();
             }, 5000);
         }
+    };
+    
+    // Track unsaved changes
+    let hasUnsavedChanges = false;
+    let formChangeListeners = [];
+    
+    // Initialize unsaved changes tracking
+    window.initUnsavedChangesTracking = function(formId) {
+        const form = document.getElementById(formId);
+        if (!form) return;
+        
+        // Track all form changes
+        const trackChange = () => {
+            hasUnsavedChanges = true;
+            updateSaveButtonState();
+        };
+        
+        // Add listeners to all form inputs
+        form.addEventListener('input', trackChange);
+        form.addEventListener('change', trackChange);
+        
+        // Track form submission
+        form.addEventListener('submit', () => {
+            hasUnsavedChanges = false;
+            updateSaveButtonState();
+        });
+        
+        // Warn before leaving page
+        window.addEventListener('beforeunload', (e) => {
+            if (hasUnsavedChanges) {
+                e.preventDefault();
+                e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+                return e.returnValue;
+            }
+        });
+    };
+    
+    // Update save button state
+    window.updateSaveButtonState = function(state = 'idle') {
+        const saveButtons = document.querySelectorAll('button[type="submit"].admin-btn-primary');
+        saveButtons.forEach(btn => {
+            const icon = btn.querySelector('i');
+            const text = btn.querySelector('span') || btn.childNodes[btn.childNodes.length - 1];
+            
+            if (state === 'saving') {
+                btn.disabled = true;
+                if (icon) icon.className = 'bi bi-hourglass-split';
+                if (text && text.nodeType === 3) {
+                    const span = document.createElement('span');
+                    span.textContent = ' Saving...';
+                    btn.appendChild(span);
+                } else if (text) {
+                    text.textContent = ' Saving...';
+                }
+            } else if (state === 'success') {
+                btn.disabled = false;
+                if (icon) icon.className = 'bi bi-check-circle';
+                if (text && text.nodeType === 3) {
+                    const span = document.createElement('span');
+                    span.textContent = ' Saved!';
+                    btn.appendChild(span);
+                } else if (text) {
+                    text.textContent = ' Saved!';
+                }
+                setTimeout(() => {
+                    if (icon) icon.className = 'bi bi-save';
+                    if (text && text.nodeType === 3) {
+                        const span = btn.querySelector('span');
+                        if (span) span.textContent = ' Save All Changes';
+                    } else if (text) {
+                        text.textContent = ' Save All Changes';
+                    }
+                }, 2000);
+            } else {
+                btn.disabled = false;
+                if (icon) icon.className = 'bi bi-save';
+                if (text && text.nodeType === 3) {
+                    const span = btn.querySelector('span');
+                    if (span) span.textContent = ' Save All Changes';
+                } else if (text) {
+                    text.textContent = ' Save All Changes';
+                }
+            }
+        });
+    };
+    
+    // Confirm dialog helper
+    window.showConfirmDialog = function(message, title = 'Confirm') {
+        return new Promise((resolve) => {
+            const overlay = document.createElement('div');
+            overlay.className = 'confirm-dialog-overlay';
+            overlay.innerHTML = `
+                <div class="confirm-dialog">
+                    <div class="confirm-dialog-header">
+                        <h3>${title}</h3>
+                        <button type="button" class="confirm-dialog-close" onclick="this.closest('.confirm-dialog-overlay').remove(); resolve(false);">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
+                    <div class="confirm-dialog-body">
+                        <p>${message}</p>
+                    </div>
+                    <div class="confirm-dialog-footer">
+                        <button type="button" class="admin-btn admin-btn-secondary" onclick="this.closest('.confirm-dialog-overlay').remove(); resolve(false);">
+                            Cancel
+                        </button>
+                        <button type="button" class="admin-btn admin-btn-primary" onclick="this.closest('.confirm-dialog-overlay').remove(); resolve(true);">
+                            Confirm
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(overlay);
+            
+            // Close on overlay click
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    overlay.remove();
+                    resolve(false);
+                }
+            });
+            
+            // Focus confirm button
+            overlay.querySelector('.admin-btn-primary').focus();
+        });
+    };
+    
+    // Initialize keyboard shortcuts
+    window.initKeyboardShortcuts = function(formId) {
+        document.addEventListener('keydown', (e) => {
+            // Ctrl+S or Cmd+S to save
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                const form = document.getElementById(formId);
+                if (form) {
+                    form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                }
+            }
+            
+            // Escape to cancel/closes modals
+            if (e.key === 'Escape') {
+                const modals = document.querySelectorAll('.icon-picker-overlay, .confirm-dialog-overlay, .image-picker-dropdown-menu');
+                modals.forEach(modal => {
+                    if (modal.style.display !== 'none') {
+                        modal.style.display = 'none';
+                        modal.closest('.image-picker-dropdown')?.classList.remove('active');
+                    }
+                });
+            }
+        });
     };
     
     // For GitHub Pages: Images must be manually added to the repo
@@ -59,13 +213,17 @@
     // Save data to Firestore
     window.saveToFirestore = async function(collection, docId, data) {
         try {
+            updateSaveButtonState('saving');
             showLoading();
             await db.collection(collection).doc(docId).set(data, { merge: true });
             hideLoading();
+            updateSaveButtonState('success');
+            hasUnsavedChanges = false;
             showAlert('Changes saved successfully!', 'success');
             return true;
         } catch (error) {
             hideLoading();
+            updateSaveButtonState('idle');
             console.error('Save error:', error);
             showAlert('Error saving changes: ' + error.message, 'error');
             return false;

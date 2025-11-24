@@ -133,17 +133,21 @@
             document.getElementById('hero_button2_link').value = pageData.hero.button2?.link || '';
             
             if (pageData.hero.images && pageData.hero.images[0]) {
-                const normalizedPath = normalizeImagePath(pageData.hero.images[0]);
-                document.getElementById('hero_image1_preview').innerHTML = `<img src="${normalizedPath}" alt="Hero Image 1" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
+                let originalPath = pageData.hero.images[0];
+                const normalizedPath = window.normalizeImagePath ? window.normalizeImagePath(originalPath) : originalPath;
+                console.log('Hero Image 1 - Original:', originalPath, 'Normalized:', normalizedPath);
+                document.getElementById('hero_image1_preview').innerHTML = `<img src="${normalizedPath}" alt="Hero Image 1" onerror="console.error('Failed to load:', '${normalizedPath}'); this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found: ${normalizedPath}</p></div>'">`;
                 if (document.getElementById('hero_image1_url')) {
-                    document.getElementById('hero_image1_url').value = pageData.hero.images[0];
+                    document.getElementById('hero_image1_url').value = originalPath;
                 }
             }
             if (pageData.hero.images && pageData.hero.images[1]) {
-                const normalizedPath = normalizeImagePath(pageData.hero.images[1]);
-                document.getElementById('hero_image2_preview').innerHTML = `<img src="${normalizedPath}" alt="Hero Image 2" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
+                let originalPath = pageData.hero.images[1];
+                const normalizedPath = window.normalizeImagePath ? window.normalizeImagePath(originalPath) : originalPath;
+                console.log('Hero Image 2 - Original:', originalPath, 'Normalized:', normalizedPath);
+                document.getElementById('hero_image2_preview').innerHTML = `<img src="${normalizedPath}" alt="Hero Image 2" onerror="console.error('Failed to load:', '${normalizedPath}'); this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found: ${normalizedPath}</p></div>'">`;
                 if (document.getElementById('hero_image2_url')) {
-                    document.getElementById('hero_image2_url').value = pageData.hero.images[1];
+                    document.getElementById('hero_image2_url').value = originalPath;
                 }
             }
         }
@@ -153,14 +157,14 @@
             document.getElementById('video_title').value = pageData.video.title || '';
             document.getElementById('video_subtitle').value = pageData.video.subtitle || '';
             if (pageData.video.url) {
-                const normalizedPath = normalizeVideoPath(pageData.video.url);
+                const normalizedPath = window.normalizeVideoPath ? window.normalizeVideoPath(pageData.video.url) : pageData.video.url;
                 document.getElementById('video_preview').innerHTML = `<video controls><source src="${normalizedPath}"></video>`;
                 if (document.getElementById('video_file_url')) {
                     document.getElementById('video_file_url').value = pageData.video.url;
                 }
             }
             if (pageData.video.poster) {
-                const normalizedPath = normalizeImagePath(pageData.video.poster);
+                const normalizedPath = window.normalizeImagePath ? window.normalizeImagePath(pageData.video.poster) : pageData.video.poster;
                 document.getElementById('video_poster_preview').innerHTML = `<img src="${normalizedPath}" alt="Video Poster" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
                 if (document.getElementById('video_poster_url')) {
                     document.getElementById('video_poster_url').value = pageData.video.poster;
@@ -257,8 +261,11 @@
         item.innerHTML = `
             <div class="repeatable-item-header">
                 <span class="repeatable-item-title">Feature ${id + 1}</span>
-                <button type="button" class="btn-remove-item" onclick="this.closest('.repeatable-item').remove()">
+                <button type="button" class="btn-remove-item" onclick="removeFeatureItem(this)">
                     <i class="bi bi-trash"></i>
+                </button>
+                <button type="button" class="btn-duplicate" onclick="duplicateFeatureItem(this)" title="Duplicate this item">
+                    <i class="bi bi-files"></i>
                 </button>
             </div>
             <div class="item-visibility-toggle">
@@ -302,7 +309,7 @@
                     <input type="text" class="showcase-image-url" value="${img || ''}" placeholder="images/Projects/...">
                 </div>
                 <div class="image-preview showcase-image-preview" style="max-width: 300px; margin-bottom: 1rem;">
-                    ${img ? `<img src="${normalizeImagePath(img)}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">` : '<div class="image-preview-placeholder"><i class="bi bi-image"></i><p>No image</p></div>'}
+                    ${img ? `<img src="${window.normalizeImagePath ? window.normalizeImagePath(img) : img}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">` : '<div class="image-preview-placeholder"><i class="bi bi-image"></i><p>No image</p></div>'}
                 </div>
                 <input type="file" class="showcase-image-input" accept="image/*" style="display: none;">
                 <button type="button" class="admin-btn admin-btn-secondary showcase-image-upload-btn" style="margin-bottom: 1rem;">
@@ -320,8 +327,11 @@
         item.innerHTML = `
             <div class="repeatable-item-header">
                 <span class="repeatable-item-title">Showcase Item ${id + 1}</span>
-                <button type="button" class="btn-remove-item" onclick="this.closest('.repeatable-item').remove()">
+                <button type="button" class="btn-remove-item" onclick="removeShowcaseItem(this)">
                     <i class="bi bi-trash"></i>
+                </button>
+                <button type="button" class="btn-duplicate" onclick="duplicateShowcaseItem(this)" title="Duplicate this item">
+                    <i class="bi bi-files"></i>
                 </button>
             </div>
             <div class="item-visibility-toggle">
@@ -378,7 +388,7 @@
             urlInput.addEventListener('input', function() {
                 const preview = this.closest('.showcase-image-item').querySelector('.showcase-image-preview');
                 if (this.value.trim()) {
-                    const normalizedPath = normalizeImagePath(this.value.trim());
+                    const normalizedPath = window.normalizeImagePath ? window.normalizeImagePath(this.value.trim()) : this.value.trim();
                     preview.innerHTML = `<img src="${normalizedPath}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
                 }
             });
@@ -468,8 +478,11 @@
         item.innerHTML = `
             <div class="repeatable-item-header">
                 <span class="repeatable-item-title">Testimonial ${id + 1}</span>
-                <button type="button" class="btn-remove-item" onclick="this.closest('.repeatable-item').remove()">
+                <button type="button" class="btn-remove-item" onclick="removeTestimonialItem(this)">
                     <i class="bi bi-trash"></i>
+                </button>
+                <button type="button" class="btn-duplicate" onclick="duplicateTestimonialItem(this)" title="Duplicate this item">
+                    <i class="bi bi-files"></i>
                 </button>
             </div>
             <div class="item-visibility-toggle">
@@ -515,7 +528,7 @@
                     <input type="text" class="news-image-url" value="${img || ''}" placeholder="images/Projects/...">
                 </div>
                 <div class="image-preview news-image-preview" style="max-width: 300px; margin-bottom: 1rem;">
-                    ${img ? `<img src="${normalizeImagePath(img)}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">` : '<div class="image-preview-placeholder"><i class="bi bi-image"></i><p>No image</p></div>'}
+                    ${img ? `<img src="${window.normalizeImagePath ? window.normalizeImagePath(img) : img}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">` : '<div class="image-preview-placeholder"><i class="bi bi-image"></i><p>No image</p></div>'}
                 </div>
                 <input type="file" class="news-image-input" accept="image/*" style="display: none;">
                 <button type="button" class="admin-btn admin-btn-secondary news-image-upload-btn" style="margin-bottom: 1rem;">
@@ -533,8 +546,11 @@
         item.innerHTML = `
             <div class="repeatable-item-header">
                 <span class="repeatable-item-title">News Item ${id + 1}</span>
-                <button type="button" class="btn-remove-item" onclick="this.closest('.repeatable-item').remove()">
+                <button type="button" class="btn-remove-item" onclick="removeNewsItem(this)">
                     <i class="bi bi-trash"></i>
+                </button>
+                <button type="button" class="btn-duplicate" onclick="duplicateNewsItem(this)" title="Duplicate this item">
+                    <i class="bi bi-files"></i>
                 </button>
             </div>
             <div class="item-visibility-toggle">
@@ -599,7 +615,7 @@
             urlInput.addEventListener('input', function() {
                 const preview = this.closest('.news-image-item').querySelector('.news-image-preview');
                 if (this.value.trim()) {
-                    const normalizedPath = normalizeImagePath(this.value.trim());
+                    const normalizedPath = window.normalizeImagePath ? window.normalizeImagePath(this.value.trim()) : this.value.trim();
                     preview.innerHTML = `<img src="${normalizedPath}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
                 }
             });
@@ -689,8 +705,11 @@
         item.innerHTML = `
             <div class="repeatable-item-header">
                 <span class="repeatable-item-title">Statistic ${id + 1}</span>
-                <button type="button" class="btn-remove-item" onclick="this.closest('.repeatable-item').remove()">
+                <button type="button" class="btn-remove-item" onclick="removeStatItem(this)">
                     <i class="bi bi-trash"></i>
+                </button>
+                <button type="button" class="btn-duplicate" onclick="duplicateStatItem(this)" title="Duplicate this item">
+                    <i class="bi bi-files"></i>
                 </button>
             </div>
             <div class="admin-form-group">
@@ -1011,7 +1030,7 @@
         document.getElementById('hero_image1_url').addEventListener('input', function(e) {
             const url = e.target.value.trim();
             if (url) {
-                const normalizedPath = normalizeImagePath(url);
+                const normalizedPath = window.normalizeImagePath ? window.normalizeImagePath(url) : url;
                 document.getElementById('hero_image1_preview').innerHTML = `<img src="${normalizedPath}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
             }
         });
@@ -1020,7 +1039,7 @@
         document.getElementById('hero_image2_url').addEventListener('input', function(e) {
             const url = e.target.value.trim();
             if (url) {
-                const normalizedPath = normalizeImagePath(url);
+                const normalizedPath = window.normalizeImagePath ? window.normalizeImagePath(url) : url;
                 document.getElementById('hero_image2_preview').innerHTML = `<img src="${normalizedPath}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
             }
         });
@@ -1029,7 +1048,7 @@
         document.getElementById('video_file_url').addEventListener('input', function(e) {
             const url = e.target.value.trim();
             if (url) {
-                const normalizedPath = normalizeVideoPath(url);
+                const normalizedPath = window.normalizeVideoPath ? window.normalizeVideoPath(url) : url;
                 document.getElementById('video_preview').innerHTML = `<video controls><source src="${normalizedPath}"></video>`;
             }
         });
@@ -1038,10 +1057,145 @@
         document.getElementById('video_poster_url').addEventListener('input', function(e) {
             const url = e.target.value.trim();
             if (url) {
-                const normalizedPath = normalizeImagePath(url);
+                const normalizedPath = window.normalizeImagePath ? window.normalizeImagePath(url) : url;
                 document.getElementById('video_poster_preview').innerHTML = `<img src="${normalizedPath}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
             }
         });
     }
+    
+    // Remove feature item with confirmation
+    window.removeFeatureItem = async function(btn) {
+        const confirmed = await showConfirmDialog('Are you sure you want to delete this feature?', 'Delete Feature');
+        if (confirmed) {
+            btn.closest('.repeatable-item').remove();
+        }
+    };
+    
+    // Duplicate feature item
+    window.duplicateFeatureItem = function(btn) {
+        const item = btn.closest('.repeatable-item');
+        const icon = item.querySelector('.feature-icon')?.value || '';
+        const title = item.querySelector('.feature-title')?.value || '';
+        const description = item.querySelector('.feature-description')?.value || '';
+        const hidden = item.querySelector('.feature-hidden')?.checked || false;
+        addFeature({ icon, title, description, hidden });
+    };
+    
+    // Remove showcase item with confirmation
+    window.removeShowcaseItem = async function(btn) {
+        const confirmed = await showConfirmDialog('Are you sure you want to delete this featured project?', 'Delete Featured Project');
+        if (confirmed) {
+            btn.closest('.repeatable-item').remove();
+        }
+    };
+    
+    // Duplicate showcase item
+    window.duplicateShowcaseItem = function(btn) {
+        const item = btn.closest('.repeatable-item');
+        const title = item.querySelector('.showcase-title')?.value || '';
+        const description = item.querySelector('.showcase-description')?.value || '';
+        const link = item.querySelector('.showcase-link')?.value || '';
+        const images = Array.from(item.querySelectorAll('.showcase-image-url')).map(input => input.value).filter(Boolean);
+        const hidden = item.querySelector('.showcase-hidden')?.checked || false;
+        addShowcaseItem({ title, description, link, images, hidden });
+    };
+    
+    // Remove testimonial with confirmation
+    window.removeTestimonialItem = async function(btn) {
+        const confirmed = await showConfirmDialog('Are you sure you want to delete this testimonial?', 'Delete Testimonial');
+        if (confirmed) {
+            btn.closest('.repeatable-item').remove();
+        }
+    };
+    
+    // Duplicate testimonial
+    window.duplicateTestimonialItem = function(btn) {
+        const item = btn.closest('.repeatable-item');
+        const name = item.querySelector('.testimonial-name')?.value || '';
+        const role = item.querySelector('.testimonial-role')?.value || '';
+        const text = item.querySelector('.testimonial-text')?.value || '';
+        const hidden = item.querySelector('.testimonial-hidden')?.checked || false;
+        addTestimonial({ name, role, text, hidden });
+    };
+    
+    // Remove news item with confirmation
+    window.removeNewsItem = async function(btn) {
+        const confirmed = await showConfirmDialog('Are you sure you want to delete this news item?', 'Delete News Item');
+        if (confirmed) {
+            btn.closest('.repeatable-item').remove();
+        }
+    };
+    
+    // Duplicate news item
+    window.duplicateNewsItem = function(btn) {
+        const item = btn.closest('.repeatable-item');
+        const category = item.querySelector('.news-category')?.value || '';
+        const title = item.querySelector('.news-title')?.value || '';
+        const description = item.querySelector('.news-description')?.value || '';
+        const date = item.querySelector('.news-date')?.value || '';
+        const link = item.querySelector('.news-link')?.value || '';
+        const images = Array.from(item.querySelectorAll('.news-image-url')).map(input => input.value).filter(Boolean);
+        const hidden = item.querySelector('.news-hidden')?.checked || false;
+        addNewsItem({ category, title, description, date, link, images, hidden });
+    };
+    
+    // Remove stat with confirmation
+    window.removeStatItem = async function(btn) {
+        const confirmed = await showConfirmDialog('Are you sure you want to delete this statistic?', 'Delete Statistic');
+        if (confirmed) {
+            btn.closest('.repeatable-item').remove();
+        }
+    };
+    
+    // Duplicate stat
+    window.duplicateStatItem = function(btn) {
+        const item = btn.closest('.repeatable-item');
+        const number = item.querySelector('.stat-number')?.value || '';
+        const label = item.querySelector('.stat-label')?.value || '';
+        addStat({ number, label });
+    };
+    
+    // Initialize quality of life features
+    if (typeof initUnsavedChangesTracking === 'function') {
+        initUnsavedChangesTracking('homePageForm');
+    }
+    
+    if (typeof initKeyboardShortcuts === 'function') {
+        initKeyboardShortcuts('homePageForm');
+    }
+    
+    // Make sections collapsible
+    setTimeout(() => {
+        document.querySelectorAll('.admin-section').forEach(section => {
+            const header = section.querySelector('.admin-section-header');
+            if (!header || header.querySelector('.section-toggle')) return;
+            
+            // Add toggle icon
+            const toggle = document.createElement('i');
+            toggle.className = 'bi bi-chevron-down section-toggle';
+            header.appendChild(toggle);
+            
+            // Get all content after header
+            const contentElements = Array.from(section.children).filter(child => child !== header);
+            
+            // Toggle on click
+            header.addEventListener('click', (e) => {
+                // Don't toggle if clicking on checkbox, button, or link
+                if (e.target.closest('input[type="checkbox"]') || e.target.closest('button') || e.target.closest('a')) return;
+                
+                const isCollapsed = section.classList.toggle('section-collapsed');
+                toggle.classList.toggle('collapsed', isCollapsed);
+                
+                // Toggle visibility of content
+                contentElements.forEach(el => {
+                    if (isCollapsed) {
+                        el.style.display = 'none';
+                    } else {
+                        el.style.display = '';
+                    }
+                });
+            });
+        });
+    }, 100);
 })();
 

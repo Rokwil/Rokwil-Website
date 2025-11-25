@@ -2427,6 +2427,8 @@ body.dark-mode .wip-disclaimer-content li {
     visibility: hidden;
     transition: opacity 0.3s ease, visibility 0.3s ease;
     pointer-events: auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .cookie-consent-overlay.show {
@@ -2440,12 +2442,16 @@ body.dark-mode .wip-disclaimer-content li {
     padding: var(--spacing-lg);
     max-width: 600px;
     width: 100%;
+    max-height: calc(100vh - 2rem);
     box-shadow: var(--shadow-xl);
     border: 1px solid var(--border-color);
     transform: scale(0.95) translateY(20px);
     transition: transform 0.3s ease, opacity 0.3s ease;
     position: relative;
     opacity: 0;
+    display: flex;
+    flex-direction: column;
+    margin: auto;
 }
 
 .cookie-consent-overlay.show .cookie-consent-modal {
@@ -2456,6 +2462,7 @@ body.dark-mode .wip-disclaimer-content li {
 .cookie-consent-header {
     text-align: center;
     margin-bottom: var(--spacing-md);
+    flex-shrink: 0;
 }
 
 .cookie-consent-header h2 {
@@ -2482,6 +2489,10 @@ body.dark-mode .wip-disclaimer-content li {
 
 .cookie-consent-content {
     margin-bottom: var(--spacing-md);
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+    -webkit-overflow-scrolling: touch;
 }
 
 .cookie-consent-content p {
@@ -2538,6 +2549,7 @@ body.dark-mode .wip-disclaimer-content li {
     gap: var(--spacing-sm);
     justify-content: center;
     margin-top: var(--spacing-md);
+    flex-shrink: 0;
 }
 
 .cookie-consent-btn {
@@ -2599,11 +2611,16 @@ body.dark-mode .wip-disclaimer-content li {
 @media (max-width: 768px) {
     .cookie-consent-overlay {
         padding: var(--spacing-sm);
+        align-items: flex-start;
+        padding-top: var(--spacing-md);
     }
     
     .cookie-consent-modal {
         padding: var(--spacing-md);
         max-width: 100%;
+        max-height: calc(100vh - 1rem);
+        margin-top: 0;
+        margin-bottom: var(--spacing-md);
     }
     
     .cookie-consent-header h2 {
@@ -2620,5 +2637,9 @@ body.dark-mode .wip-disclaimer-content li {
     
     .cookie-consent-btn {
         width: 100%;
+    }
+    
+    .cookie-consent-content {
+        max-height: calc(100vh - 300px);
     }
 }

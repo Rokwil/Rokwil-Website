@@ -306,17 +306,36 @@
             <div class="showcase-image-item" data-index="${idx}">
                 <div class="admin-form-group">
                     <label>Image ${idx + 1} URL</label>
-                    <input type="text" class="showcase-image-url" value="${img || ''}" placeholder="images/Projects/...">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <div class="image-picker-dropdown" style="flex: 1; position: relative;">
+                            <input type="text" class="showcase-image-url" value="${img || ''}" placeholder="images/Projects/..." style="width: 100%;" readonly>
+                            <button type="button" class="image-picker-toggle" style="position: absolute; right: 0; top: 0; height: 100%; padding: 0 0.75rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-left: none; border-radius: 0 8px 8px 0; cursor: pointer; display: flex; align-items: center;">
+                                <i class="bi bi-chevron-down"></i>
+                            </button>
+                            <div class="image-picker-dropdown-menu" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--admin-bg-secondary); border: 1px solid var(--admin-border); border-radius: 8px; margin-top: 0.25rem; max-height: 400px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                                <div class="image-picker-search" style="padding: 0.75rem; border-bottom: 1px solid var(--admin-border);">
+                                    <input type="text" class="image-picker-search-input" placeholder="Search images..." style="width: 100%; padding: 0.5rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-radius: 4px; color: var(--admin-text-primary);">
+                                </div>
+                                <div class="image-picker-list" style="padding: 0.5rem;">
+                                    <!-- Images will be populated here -->
+                                </div>
+                                <div style="padding: 0.75rem; border-top: 1px solid var(--admin-border);">
+                                    <input type="text" class="image-picker-manual-input" placeholder="Or enter URL manually..." style="width: 100%; padding: 0.5rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-radius: 4px; color: var(--admin-text-primary);">
+                                    <button type="button" class="admin-btn admin-btn-primary" style="width: 100%; margin-top: 0.5rem; padding: 0.5rem;">Use Manual URL</button>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="admin-btn admin-btn-secondary" onclick="this.closest('.showcase-image-item').remove()" style="flex-shrink: 0;">
+                            <i class="bi bi-trash"></i> Remove
+                        </button>
+                    </div>
                 </div>
                 <div class="image-preview showcase-image-preview" style="max-width: 300px; margin-bottom: 1rem;">
-                    ${img ? `<img src="${window.normalizeImagePath ? window.normalizeImagePath(img) : img}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">` : '<div class="image-preview-placeholder"><i class="bi bi-image"></i><p>No image</p></div>'}
+                    ${img ? `<img src="${window.normalizeImagePath ? window.normalizeImagePath(img) : img}" alt="Preview" style="max-width: 100%;" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">` : '<div class="image-preview-placeholder"><i class="bi bi-image"></i><p>No image</p></div>'}
                 </div>
                 <input type="file" class="showcase-image-input" accept="image/*" style="display: none;">
                 <button type="button" class="admin-btn admin-btn-secondary showcase-image-upload-btn" style="margin-bottom: 1rem;">
                     <i class="bi bi-upload"></i> Upload Image
-                </button>
-                <button type="button" class="admin-btn admin-btn-secondary" onclick="this.closest('.showcase-image-item').remove()" style="margin-bottom: 1rem;">
-                    <i class="bi bi-trash"></i> Remove Image
                 </button>
             </div>
         `).join('');
@@ -353,7 +372,7 @@
             <div class="image-upload-container">
                 <label>Images (Multiple images supported)</label>
                 <div class="showcase-images-container">
-                    ${imagesHtml || '<div class="showcase-image-item" data-index="0"><div class="admin-form-group"><label>Image 1 URL</label><input type="text" class="showcase-image-url" placeholder="images/Projects/..."></div><div class="image-preview showcase-image-preview" style="max-width: 300px; margin-bottom: 1rem;"><div class="image-preview-placeholder"><i class="bi bi-image"></i><p>No image</p></div></div><input type="file" class="showcase-image-input" accept="image/*" style="display: none;"><button type="button" class="admin-btn admin-btn-secondary showcase-image-upload-btn" style="margin-bottom: 1rem;"><i class="bi bi-upload"></i> Upload Image</button><button type="button" class="admin-btn admin-btn-secondary" onclick="this.closest(\'.showcase-image-item\').remove()" style="margin-bottom: 1rem;"><i class="bi bi-trash"></i> Remove Image</button></div>'}
+                    ${imagesHtml || '<div class="showcase-image-item" data-index="0"><div class="admin-form-group"><label>Image 1 URL</label><div style="display: flex; align-items: center; gap: 0.5rem;"><div class="image-picker-dropdown" style="flex: 1; position: relative;"><input type="text" class="showcase-image-url" placeholder="images/Projects/..." style="width: 100%;" readonly><button type="button" class="image-picker-toggle" style="position: absolute; right: 0; top: 0; height: 100%; padding: 0 0.75rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-left: none; border-radius: 0 8px 8px 0; cursor: pointer; display: flex; align-items: center;"><i class="bi bi-chevron-down"></i></button><div class="image-picker-dropdown-menu" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--admin-bg-secondary); border: 1px solid var(--admin-border); border-radius: 8px; margin-top: 0.25rem; max-height: 400px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.3);"><div class="image-picker-search" style="padding: 0.75rem; border-bottom: 1px solid var(--admin-border);"><input type="text" class="image-picker-search-input" placeholder="Search images..." style="width: 100%; padding: 0.5rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-radius: 4px; color: var(--admin-text-primary);"></div><div class="image-picker-list" style="padding: 0.5rem;"></div><div style="padding: 0.75rem; border-top: 1px solid var(--admin-border);"><input type="text" class="image-picker-manual-input" placeholder="Or enter URL manually..." style="width: 100%; padding: 0.5rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-radius: 4px; color: var(--admin-text-primary);"><button type="button" class="admin-btn admin-btn-primary" style="width: 100%; margin-top: 0.5rem; padding: 0.5rem;">Use Manual URL</button></div></div></div><button type="button" class="admin-btn admin-btn-secondary" onclick="this.closest(\'.showcase-image-item\').remove()" style="flex-shrink: 0;"><i class="bi bi-trash"></i> Remove</button></div></div><div class="image-preview showcase-image-preview" style="max-width: 300px; margin-bottom: 1rem;"><div class="image-preview-placeholder"><i class="bi bi-image"></i><p>No image</p></div></div><input type="file" class="showcase-image-input" accept="image/*" style="display: none;"><button type="button" class="admin-btn admin-btn-secondary showcase-image-upload-btn" style="margin-bottom: 1rem;"><i class="bi bi-upload"></i> Upload Image</button></div>'}
                 </div>
                 <button type="button" class="admin-btn admin-btn-secondary btn-add-item" onclick="addShowcaseImage(this)" style="margin-top: 1rem;">
                     <i class="bi bi-plus-circle"></i> Add Another Image
@@ -392,6 +411,11 @@
                     preview.innerHTML = `<img src="${normalizedPath}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
                 }
             });
+            
+            // Initialize image picker
+            if (window.initImagePicker) {
+                window.initImagePicker(urlInput);
+            }
         });
         
         container.appendChild(item);
@@ -407,7 +431,29 @@
         newItem.innerHTML = `
             <div class="admin-form-group">
                 <label>Image ${newIndex + 1} URL</label>
-                <input type="text" class="showcase-image-url" placeholder="images/Projects/...">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <div class="image-picker-dropdown" style="flex: 1; position: relative;">
+                        <input type="text" class="showcase-image-url" placeholder="images/Projects/..." style="width: 100%;" readonly>
+                        <button type="button" class="image-picker-toggle" style="position: absolute; right: 0; top: 0; height: 100%; padding: 0 0.75rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-left: none; border-radius: 0 8px 8px 0; cursor: pointer; display: flex; align-items: center;">
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                        <div class="image-picker-dropdown-menu" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--admin-bg-secondary); border: 1px solid var(--admin-border); border-radius: 8px; margin-top: 0.25rem; max-height: 400px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                            <div class="image-picker-search" style="padding: 0.75rem; border-bottom: 1px solid var(--admin-border);">
+                                <input type="text" class="image-picker-search-input" placeholder="Search images..." style="width: 100%; padding: 0.5rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-radius: 4px; color: var(--admin-text-primary);">
+                            </div>
+                            <div class="image-picker-list" style="padding: 0.5rem;">
+                                <!-- Images will be populated here -->
+                            </div>
+                            <div style="padding: 0.75rem; border-top: 1px solid var(--admin-border);">
+                                <input type="text" class="image-picker-manual-input" placeholder="Or enter URL manually..." style="width: 100%; padding: 0.5rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-radius: 4px; color: var(--admin-text-primary);">
+                                <button type="button" class="admin-btn admin-btn-primary" style="width: 100%; margin-top: 0.5rem; padding: 0.5rem;">Use Manual URL</button>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="admin-btn admin-btn-secondary" onclick="this.closest('.showcase-image-item').remove()" style="flex-shrink: 0;">
+                        <i class="bi bi-trash"></i> Remove
+                    </button>
+                </div>
             </div>
             <div class="image-preview showcase-image-preview" style="max-width: 300px; margin-bottom: 1rem;">
                 <div class="image-preview-placeholder"><i class="bi bi-image"></i><p>No image</p></div>
@@ -415,9 +461,6 @@
             <input type="file" class="showcase-image-input" accept="image/*" style="display: none;">
             <button type="button" class="admin-btn admin-btn-secondary showcase-image-upload-btn" style="margin-bottom: 1rem;">
                 <i class="bi bi-upload"></i> Upload Image
-            </button>
-            <button type="button" class="admin-btn admin-btn-secondary" onclick="this.closest('.showcase-image-item').remove()" style="margin-bottom: 1rem;">
-                <i class="bi bi-trash"></i> Remove Image
             </button>
         `;
         
@@ -455,9 +498,15 @@
         const urlInput = newItem.querySelector('.showcase-image-url');
         urlInput.addEventListener('input', function() {
             if (this.value.trim()) {
-                imagePreview.innerHTML = `<img src="${this.value}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
+                const normalizedPath = window.normalizeImagePath ? window.normalizeImagePath(this.value.trim()) : this.value.trim();
+                imagePreview.innerHTML = `<img src="${normalizedPath}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
             }
         });
+        
+        // Initialize image picker
+        if (window.initImagePicker) {
+            window.initImagePicker(urlInput);
+        }
         
         // Extract newItem from tempContainer and add to actual container
         container.appendChild(newItem);
@@ -525,17 +574,36 @@
             <div class="news-image-item" data-index="${idx}">
                 <div class="admin-form-group">
                     <label>Image ${idx + 1} URL</label>
-                    <input type="text" class="news-image-url" value="${img || ''}" placeholder="images/Projects/...">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <div class="image-picker-dropdown" style="flex: 1; position: relative;">
+                            <input type="text" class="news-image-url" value="${img || ''}" placeholder="images/Projects/..." style="width: 100%;" readonly>
+                            <button type="button" class="image-picker-toggle" style="position: absolute; right: 0; top: 0; height: 100%; padding: 0 0.75rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-left: none; border-radius: 0 8px 8px 0; cursor: pointer; display: flex; align-items: center;">
+                                <i class="bi bi-chevron-down"></i>
+                            </button>
+                            <div class="image-picker-dropdown-menu" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--admin-bg-secondary); border: 1px solid var(--admin-border); border-radius: 8px; margin-top: 0.25rem; max-height: 400px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                                <div class="image-picker-search" style="padding: 0.75rem; border-bottom: 1px solid var(--admin-border);">
+                                    <input type="text" class="image-picker-search-input" placeholder="Search images..." style="width: 100%; padding: 0.5rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-radius: 4px; color: var(--admin-text-primary);">
+                                </div>
+                                <div class="image-picker-list" style="padding: 0.5rem;">
+                                    <!-- Images will be populated here -->
+                                </div>
+                                <div style="padding: 0.75rem; border-top: 1px solid var(--admin-border);">
+                                    <input type="text" class="image-picker-manual-input" placeholder="Or enter URL manually..." style="width: 100%; padding: 0.5rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-radius: 4px; color: var(--admin-text-primary);">
+                                    <button type="button" class="admin-btn admin-btn-primary" style="width: 100%; margin-top: 0.5rem; padding: 0.5rem;">Use Manual URL</button>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="admin-btn admin-btn-secondary" onclick="this.closest('.news-image-item').remove()" style="flex-shrink: 0;">
+                            <i class="bi bi-trash"></i> Remove
+                        </button>
+                    </div>
                 </div>
                 <div class="image-preview news-image-preview" style="max-width: 300px; margin-bottom: 1rem;">
-                    ${img ? `<img src="${window.normalizeImagePath ? window.normalizeImagePath(img) : img}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">` : '<div class="image-preview-placeholder"><i class="bi bi-image"></i><p>No image</p></div>'}
+                    ${img ? `<img src="${window.normalizeImagePath ? window.normalizeImagePath(img) : img}" alt="Preview" style="max-width: 100%;" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">` : '<div class="image-preview-placeholder"><i class="bi bi-image"></i><p>No image</p></div>'}
                 </div>
                 <input type="file" class="news-image-input" accept="image/*" style="display: none;">
                 <button type="button" class="admin-btn admin-btn-secondary news-image-upload-btn" style="margin-bottom: 1rem;">
                     <i class="bi bi-upload"></i> Upload Image
-                </button>
-                <button type="button" class="admin-btn admin-btn-secondary" onclick="this.closest('.news-image-item').remove()" style="margin-bottom: 1rem;">
-                    <i class="bi bi-trash"></i> Remove Image
                 </button>
             </div>
         `).join('');
@@ -580,7 +648,7 @@
             <div class="image-upload-container">
                 <label>Images (Multiple images supported)</label>
                 <div class="news-images-container">
-                    ${imagesHtml || '<div class="news-image-item" data-index="0"><div class="admin-form-group"><label>Image 1 URL</label><input type="text" class="news-image-url" placeholder="images/Projects/..."></div><div class="image-preview news-image-preview" style="max-width: 300px; margin-bottom: 1rem;"><div class="image-preview-placeholder"><i class="bi bi-image"></i><p>No image</p></div></div><input type="file" class="news-image-input" accept="image/*" style="display: none;"><button type="button" class="admin-btn admin-btn-secondary news-image-upload-btn" style="margin-bottom: 1rem;"><i class="bi bi-upload"></i> Upload Image</button><button type="button" class="admin-btn admin-btn-secondary" onclick="this.closest(\'.news-image-item\').remove()" style="margin-bottom: 1rem;"><i class="bi bi-trash"></i> Remove Image</button></div>'}
+                    ${imagesHtml || '<div class="news-image-item" data-index="0"><div class="admin-form-group"><label>Image 1 URL</label><div style="display: flex; align-items: center; gap: 0.5rem;"><div class="image-picker-dropdown" style="flex: 1; position: relative;"><input type="text" class="news-image-url" placeholder="images/Projects/..." style="width: 100%;" readonly><button type="button" class="image-picker-toggle" style="position: absolute; right: 0; top: 0; height: 100%; padding: 0 0.75rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-left: none; border-radius: 0 8px 8px 0; cursor: pointer; display: flex; align-items: center;"><i class="bi bi-chevron-down"></i></button><div class="image-picker-dropdown-menu" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--admin-bg-secondary); border: 1px solid var(--admin-border); border-radius: 8px; margin-top: 0.25rem; max-height: 400px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.3);"><div class="image-picker-search" style="padding: 0.75rem; border-bottom: 1px solid var(--admin-border);"><input type="text" class="image-picker-search-input" placeholder="Search images..." style="width: 100%; padding: 0.5rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-radius: 4px; color: var(--admin-text-primary);"></div><div class="image-picker-list" style="padding: 0.5rem;"></div><div style="padding: 0.75rem; border-top: 1px solid var(--admin-border);"><input type="text" class="image-picker-manual-input" placeholder="Or enter URL manually..." style="width: 100%; padding: 0.5rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-radius: 4px; color: var(--admin-text-primary);"><button type="button" class="admin-btn admin-btn-primary" style="width: 100%; margin-top: 0.5rem; padding: 0.5rem;">Use Manual URL</button></div></div></div><button type="button" class="admin-btn admin-btn-secondary" onclick="this.closest(\'.news-image-item\').remove()" style="flex-shrink: 0;"><i class="bi bi-trash"></i> Remove</button></div></div><div class="image-preview news-image-preview" style="max-width: 300px; margin-bottom: 1rem;"><div class="image-preview-placeholder"><i class="bi bi-image"></i><p>No image</p></div></div><input type="file" class="news-image-input" accept="image/*" style="display: none;"><button type="button" class="admin-btn admin-btn-secondary news-image-upload-btn" style="margin-bottom: 1rem;"><i class="bi bi-upload"></i> Upload Image</button></div>'}
                 </div>
                 <button type="button" class="admin-btn admin-btn-secondary btn-add-item" onclick="addNewsImage(this)" style="margin-top: 1rem;">
                     <i class="bi bi-plus-circle"></i> Add Another Image
@@ -619,6 +687,11 @@
                     preview.innerHTML = `<img src="${normalizedPath}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
                 }
             });
+            
+            // Initialize image picker
+            if (window.initImagePicker) {
+                window.initImagePicker(urlInput);
+            }
         });
         
         container.appendChild(item);
@@ -634,7 +707,29 @@
         newItem.innerHTML = `
             <div class="admin-form-group">
                 <label>Image ${newIndex + 1} URL</label>
-                <input type="text" class="news-image-url" placeholder="images/Projects/...">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <div class="image-picker-dropdown" style="flex: 1; position: relative;">
+                        <input type="text" class="news-image-url" placeholder="images/Projects/..." style="width: 100%;" readonly>
+                        <button type="button" class="image-picker-toggle" style="position: absolute; right: 0; top: 0; height: 100%; padding: 0 0.75rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-left: none; border-radius: 0 8px 8px 0; cursor: pointer; display: flex; align-items: center;">
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                        <div class="image-picker-dropdown-menu" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--admin-bg-secondary); border: 1px solid var(--admin-border); border-radius: 8px; margin-top: 0.25rem; max-height: 400px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                            <div class="image-picker-search" style="padding: 0.75rem; border-bottom: 1px solid var(--admin-border);">
+                                <input type="text" class="image-picker-search-input" placeholder="Search images..." style="width: 100%; padding: 0.5rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-radius: 4px; color: var(--admin-text-primary);">
+                            </div>
+                            <div class="image-picker-list" style="padding: 0.5rem;">
+                                <!-- Images will be populated here -->
+                            </div>
+                            <div style="padding: 0.75rem; border-top: 1px solid var(--admin-border);">
+                                <input type="text" class="image-picker-manual-input" placeholder="Or enter URL manually..." style="width: 100%; padding: 0.5rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-radius: 4px; color: var(--admin-text-primary);">
+                                <button type="button" class="admin-btn admin-btn-primary" style="width: 100%; margin-top: 0.5rem; padding: 0.5rem;">Use Manual URL</button>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="admin-btn admin-btn-secondary" onclick="this.closest('.news-image-item').remove()" style="flex-shrink: 0;">
+                        <i class="bi bi-trash"></i> Remove
+                    </button>
+                </div>
             </div>
             <div class="image-preview news-image-preview" style="max-width: 300px; margin-bottom: 1rem;">
                 <div class="image-preview-placeholder"><i class="bi bi-image"></i><p>No image</p></div>
@@ -642,9 +737,6 @@
             <input type="file" class="news-image-input" accept="image/*" style="display: none;">
             <button type="button" class="admin-btn admin-btn-secondary news-image-upload-btn" style="margin-bottom: 1rem;">
                 <i class="bi bi-upload"></i> Upload Image
-            </button>
-            <button type="button" class="admin-btn admin-btn-secondary" onclick="this.closest('.news-image-item').remove()" style="margin-bottom: 1rem;">
-                <i class="bi bi-trash"></i> Remove Image
             </button>
         `;
         
@@ -672,9 +764,15 @@
         const urlInput = newItem.querySelector('.news-image-url');
         urlInput.addEventListener('input', function() {
             if (this.value.trim()) {
-                imagePreview.innerHTML = `<img src="${this.value}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
+                const normalizedPath = window.normalizeImagePath ? window.normalizeImagePath(this.value.trim()) : this.value.trim();
+                imagePreview.innerHTML = `<img src="${normalizedPath}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
             }
         });
+        
+        // Initialize image picker
+        if (window.initImagePicker) {
+            window.initImagePicker(urlInput);
+        }
         
         container.appendChild(newItem);
         
@@ -995,12 +1093,14 @@
         });
     }
     
-    // Initialize image pickers for hero images
+    // Initialize image pickers for hero images and video poster
     if (window.initImagePicker) {
         const heroImage1Url = document.getElementById('hero_image1_url');
         const heroImage2Url = document.getElementById('hero_image2_url');
+        const videoPosterUrl = document.getElementById('video_poster_url');
         if (heroImage1Url) window.initImagePicker(heroImage1Url);
         if (heroImage2Url) window.initImagePicker(heroImage2Url);
+        if (videoPosterUrl) window.initImagePicker(videoPosterUrl);
     }
     
     // Setup upload buttons

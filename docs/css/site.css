@@ -1008,6 +1008,128 @@ section {
     margin-bottom: var(--spacing-md);
 }
 
+/* Ensure colored text from Quill editor is visible and stands out */
+.project-details p [style*="color"],
+.project-details p span[style*="color"] {
+    /* Inline color styles should work - they have highest specificity */
+    /* Ensure good contrast on light backgrounds */
+    font-weight: 500;
+}
+
+/* Brand colors should stand out well on light backgrounds */
+.project-details p [style*="color: #2d2d2d"],
+.project-details p [style*="color: #1e3a5f"],
+.project-details p [style*="color: #2c4a6b"] {
+    /* These dark colors are already visible on light backgrounds */
+    /* Add slight weight increase for better visibility */
+    font-weight: 500;
+}
+
+/* In dark mode, ensure colored text still stands out */
+body.dark-mode .project-details p [style*="color"],
+body.dark-mode .project-details p span[style*="color"] {
+    /* Colored text should still be visible in dark mode */
+    /* The brand colors (dark blues) might need adjustment, but inline styles will work */
+    font-weight: 500;
+}
+
+/* For dark mode, lighter colors might be needed, but dark brand colors should still work */
+body.dark-mode .project-details p [style*="color: #2d2d2d"] {
+    /* Charcoal might be too dark in dark mode - consider lighter alternative */
+    opacity: 0.9;
+}
+
+body.dark-mode .project-details p [style*="color: #1e3a5f"],
+body.dark-mode .project-details p [style*="color: #2c4a6b"] {
+    /* Dark blues should still be visible in dark mode */
+    /* May need slight brightness adjustment */
+    filter: brightness(1.2);
+}
+
+/* White text - needs special handling for light mode visibility */
+.project-details p [style*="color: #ffffff"],
+.project-details p [style*="color: #fff"],
+.project-details p [style*="color: white"] {
+    /* In light mode, white text needs a dark shadow to be visible */
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8), 0 2px 6px rgba(0, 0, 0, 0.6);
+    font-weight: 600;
+}
+
+/* In dark mode, white text works well without shadow */
+body.dark-mode .project-details p [style*="color: #ffffff"],
+body.dark-mode .project-details p [style*="color: #fff"],
+body.dark-mode .project-details p [style*="color: white"] {
+    text-shadow: none;
+    font-weight: 500;
+}
+
+.project-details p a {
+    color: var(--secondary-color);
+    text-decoration: underline;
+    transition: color var(--transition-fast);
+}
+
+/* Allow colored links to show their custom color */
+.project-details p a[style*="color"],
+.project-details p a span[style*="color"] {
+    /* Inline color styles should work for links too */
+    font-weight: 500;
+}
+
+/* White text in links - needs special handling for light mode */
+.project-details p a[style*="color: #ffffff"],
+.project-details p a[style*="color: #fff"],
+.project-details p a[style*="color: white"],
+.project-details p a span[style*="color: #ffffff"],
+.project-details p a span[style*="color: #fff"],
+.project-details p a span[style*="color: white"] {
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8), 0 2px 6px rgba(0, 0, 0, 0.6);
+    font-weight: 600;
+}
+
+body.dark-mode .project-details p a[style*="color: #ffffff"],
+body.dark-mode .project-details p a[style*="color: #fff"],
+body.dark-mode .project-details p a[style*="color: white"],
+body.dark-mode .project-details p a span[style*="color: #ffffff"],
+body.dark-mode .project-details p a span[style*="color: #fff"],
+body.dark-mode .project-details p a span[style*="color: white"] {
+    text-shadow: none;
+    font-weight: 500;
+}
+
+.project-details p a:hover {
+    color: var(--accent-color);
+    text-decoration: underline;
+}
+
+/* Keep brand color for bold links (unless they have custom color) */
+.project-details p a strong:not([style*="color"]),
+.project-details p strong a:not([style*="color"]) {
+    color: var(--secondary-color) !important;
+    font-weight: 600;
+}
+
+.project-details p a strong:hover:not([style*="color"]),
+.project-details p strong a:hover:not([style*="color"]) {
+    color: var(--accent-color) !important;
+}
+
+/* Allow colored bold links to show their custom color */
+.project-details p a strong[style*="color"],
+.project-details p strong a[style*="color"],
+.project-details p a strong span[style*="color"],
+.project-details p strong a span[style*="color"] {
+    /* Inline color styles should work */
+    font-weight: 600;
+}
+
+/* External links are handled by JavaScript in firebase-content-loader.js */
+
+.project-details p strong {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
 .project-features {
     display: flex;
     flex-wrap: wrap;
@@ -1058,6 +1180,111 @@ section {
 
 .project-section-heading i {
     color: var(--secondary-color);
+}
+
+/* Section content - support HTML formatting from Quill editor */
+.project-details .project-section-heading + p [style*="color"],
+.project-details .project-section-heading + p span[style*="color"],
+.tenant-list li [style*="color"],
+.tenant-list li span[style*="color"] {
+    font-weight: 500;
+}
+
+/* Brand colors in section content */
+.project-details .project-section-heading + p [style*="color: #2d2d2d"],
+.project-details .project-section-heading + p [style*="color: #1e3a5f"],
+.project-details .project-section-heading + p [style*="color: #2c4a6b"],
+.tenant-list li [style*="color: #2d2d2d"],
+.tenant-list li [style*="color: #1e3a5f"],
+.tenant-list li [style*="color: #2c4a6b"] {
+    font-weight: 500;
+}
+
+body.dark-mode .project-details .project-section-heading + p [style*="color: #2d2d2d"],
+body.dark-mode .tenant-list li [style*="color: #2d2d2d"] {
+    color: rgba(255, 255, 255, 0.9) !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .project-details .project-section-heading + p [style*="color: #1e3a5f"],
+body.dark-mode .project-details .project-section-heading + p [style*="color: #2c4a6b"],
+body.dark-mode .tenant-list li [style*="color: #1e3a5f"],
+body.dark-mode .tenant-list li [style*="color: #2c4a6b"] {
+    filter: brightness(1.2);
+}
+
+/* White text in section content */
+.project-details .project-section-heading + p [style*="color: #ffffff"],
+.project-details .project-section-heading + p [style*="color: #fff"],
+.project-details .project-section-heading + p [style*="color: white"],
+.tenant-list li [style*="color: #ffffff"],
+.tenant-list li [style*="color: #fff"],
+.tenant-list li [style*="color: white"] {
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8), 0 2px 6px rgba(0, 0, 0, 0.6);
+    font-weight: 600;
+}
+
+body.dark-mode .project-details .project-section-heading + p [style*="color: #ffffff"],
+body.dark-mode .project-details .project-section-heading + p [style*="color: #fff"],
+body.dark-mode .project-details .project-section-heading + p [style*="color: white"],
+body.dark-mode .tenant-list li [style*="color: #ffffff"],
+body.dark-mode .tenant-list li [style*="color: #fff"],
+body.dark-mode .tenant-list li [style*="color: white"] {
+    text-shadow: none;
+    font-weight: 500;
+}
+
+/* Links in section content */
+.project-details .project-section-heading + p a,
+.tenant-list li a {
+    color: var(--secondary-color);
+    text-decoration: underline;
+    transition: color var(--transition-fast);
+}
+
+.project-details .project-section-heading + p a:hover,
+.tenant-list li a:hover {
+    color: var(--accent-color);
+}
+
+.project-details .project-section-heading + p a[style*="color"],
+.project-details .project-section-heading + p a span[style*="color"],
+.tenant-list li a[style*="color"],
+.tenant-list li a span[style*="color"] {
+    font-weight: 500;
+}
+
+/* White links in section content */
+.project-details .project-section-heading + p a[style*="color: #ffffff"],
+.project-details .project-section-heading + p a[style*="color: #fff"],
+.project-details .project-section-heading + p a[style*="color: white"],
+.project-details .project-section-heading + p a span[style*="color: #ffffff"],
+.project-details .project-section-heading + p a span[style*="color: #fff"],
+.project-details .project-section-heading + p a span[style*="color: white"],
+.tenant-list li a[style*="color: #ffffff"],
+.tenant-list li a[style*="color: #fff"],
+.tenant-list li a[style*="color: white"],
+.tenant-list li a span[style*="color: #ffffff"],
+.tenant-list li a span[style*="color: #fff"],
+.tenant-list li a span[style*="color: white"] {
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8), 0 2px 6px rgba(0, 0, 0, 0.6);
+    font-weight: 600;
+}
+
+body.dark-mode .project-details .project-section-heading + p a[style*="color: #ffffff"],
+body.dark-mode .project-details .project-section-heading + p a[style*="color: #fff"],
+body.dark-mode .project-details .project-section-heading + p a[style*="color: white"],
+body.dark-mode .project-details .project-section-heading + p a span[style*="color: #ffffff"],
+body.dark-mode .project-details .project-section-heading + p a span[style*="color: #fff"],
+body.dark-mode .project-details .project-section-heading + p a span[style*="color: white"],
+body.dark-mode .tenant-list li a[style*="color: #ffffff"],
+body.dark-mode .tenant-list li a[style*="color: #fff"],
+body.dark-mode .tenant-list li a[style*="color: white"],
+body.dark-mode .tenant-list li a span[style*="color: #ffffff"],
+body.dark-mode .tenant-list li a span[style*="color: #fff"],
+body.dark-mode .tenant-list li a span[style*="color: white"] {
+    text-shadow: none;
+    font-weight: 500;
 }
 
 /* Project Info Box */
@@ -2284,6 +2511,9 @@ body.dark-mode .stats {
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s ease, visibility 0.3s ease;
+    pointer-events: auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .wip-disclaimer-overlay.show {
@@ -2297,11 +2527,15 @@ body.dark-mode .stats {
     padding: var(--spacing-lg);
     max-width: 600px;
     width: 100%;
+    max-height: calc(100vh - 2rem);
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     border: 2px solid var(--secondary-color);
     transform: scale(0.9);
     transition: transform 0.3s ease;
     position: relative;
+    display: flex;
+    flex-direction: column;
+    margin: auto;
 }
 
 .wip-disclaimer-overlay.show .wip-disclaimer-modal {
@@ -2311,6 +2545,7 @@ body.dark-mode .stats {
 .wip-disclaimer-header {
     text-align: center;
     margin-bottom: var(--spacing-md);
+    flex-shrink: 0;
 }
 
 .wip-disclaimer-header h2 {
@@ -2335,6 +2570,28 @@ body.dark-mode .stats {
 
 .wip-disclaimer-content {
     margin-bottom: var(--spacing-md);
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+    -webkit-overflow-scrolling: touch;
+    padding-right: 0.5rem;
+}
+
+.wip-disclaimer-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.wip-disclaimer-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.wip-disclaimer-content::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 3px;
+}
+
+.wip-disclaimer-content::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
 }
 
 .wip-disclaimer-content p {
@@ -2372,6 +2629,7 @@ body.dark-mode .stats {
     gap: var(--spacing-sm);
     justify-content: center;
     margin-top: var(--spacing-md);
+    flex-shrink: 0;
 }
 
 .wip-disclaimer-btn {
@@ -2404,6 +2662,70 @@ body.dark-mode .wip-disclaimer-modal {
 body.dark-mode .wip-disclaimer-content p,
 body.dark-mode .wip-disclaimer-content li {
     color: var(--text-primary);
+}
+
+@media (max-width: 768px) {
+    .wip-disclaimer-overlay {
+        padding: var(--spacing-sm);
+        align-items: flex-start;
+        padding-top: var(--spacing-md);
+    }
+    
+    .wip-disclaimer-modal {
+        padding: var(--spacing-md);
+        max-width: 100%;
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+    
+    .wip-disclaimer-header {
+        flex-shrink: 0;
+    }
+    
+    .wip-disclaimer-header h2 {
+        font-size: 1.5rem;
+    }
+    
+    .wip-disclaimer-icon {
+        font-size: 2.5rem;
+    }
+    
+    .wip-disclaimer-content {
+        flex: 1;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        margin-bottom: var(--spacing-sm);
+        padding-right: 0.5rem;
+    }
+    
+    .wip-disclaimer-content::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .wip-disclaimer-content::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    
+    .wip-disclaimer-content::-webkit-scrollbar-thumb {
+        background: var(--border-color);
+        border-radius: 3px;
+    }
+    
+    .wip-disclaimer-content::-webkit-scrollbar-thumb:hover {
+        background: var(--text-secondary);
+    }
+    
+    .wip-disclaimer-actions {
+        flex-shrink: 0;
+        flex-direction: column;
+        margin-top: var(--spacing-sm);
+    }
+    
+    .wip-disclaimer-btn {
+        width: 100%;
+    }
 }
 
 /* ============================================

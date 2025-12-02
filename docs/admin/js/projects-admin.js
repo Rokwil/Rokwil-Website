@@ -273,10 +273,19 @@
         const container = document.getElementById('projects_container');
         const id = index !== null ? index : projectCounter++;
         
-        // Handle description - can be array of paragraphs or string
-        const descriptionText = Array.isArray(data?.description) 
-            ? data.description.join('\n\n') 
-            : (data?.description || '');
+        // Handle description - can be HTML, array of paragraphs, or string
+        let descriptionHTML = '';
+        if (data?.description) {
+            if (Array.isArray(data.description)) {
+                descriptionHTML = data.description.map(p => `<p>${p}</p>`).join('');
+            } else if (data.description.includes('<') || data.description.includes('&lt;')) {
+                // Already HTML
+                descriptionHTML = data.description;
+            } else {
+                // Plain text - convert to HTML
+                descriptionHTML = data.description.split(/\n\s*\n/).map(p => `<p>${p.trim()}</p>`).join('');
+            }
+        }
         
         // Handle images - support URL inputs with image picker dropdown
         const imagesHtml = (data?.images || []).map((img, idx) => `
@@ -387,7 +396,9 @@
                 </div>
                 <div class="admin-form-group">
                     <label>Section Content</label>
-                    <textarea class="section-content" rows="3">${Array.isArray(section.content) ? section.content.join('\n') : (section.content || '')}</textarea>
+                    <div class="section-content-editor" id="section-content-editor-${id}-${idx}"></div>
+                    <input type="hidden" class="section-content" value="${(Array.isArray(section.content) ? section.content.join('<br>') : (section.content || '')).replace(/"/g, '&quot;')}">
+                    <small>Use the toolbar to format text, make it bold, and insert links</small>
                 </div>
                 <button type="button" class="admin-btn admin-btn-secondary" onclick="this.closest('.project-section-item').remove()">
                     <i class="bi bi-trash"></i> Remove Section
@@ -453,8 +464,9 @@
             </div>
             <div class="admin-form-group">
                 <label>Description (Multiple paragraphs supported)</label>
-                <textarea class="project-description" rows="8" placeholder="Project description...">${descriptionText}</textarea>
-                <small>Separate paragraphs with blank lines</small>
+                <div class="project-description-editor" id="project-description-editor-${id}"></div>
+                <input type="hidden" class="project-description" value="${descriptionHTML.replace(/"/g, '&quot;')}">
+                <small>Use the toolbar to format text, make it bold, and insert links</small>
             </div>
             <div class="admin-form-group">
                 <label>Project Sections (Headings with content)</label>
@@ -524,6 +536,700 @@
                     preview.innerHTML = '<div class="image-preview-placeholder"><i class="bi bi-image"></i><p>No image</p></div>';
                 }
             });
+        });
+        
+        // Initialize Quill editor for description
+        const editorDiv = item.querySelector(`#project-description-editor-${id}`);
+        const hiddenInput = item.querySelector('.project-description');
+        if (editorDiv && typeof Quill !== 'undefined') {
+            const quill = new Quill(editorDiv, {
+                theme: 'snow',
+                modules: {
+                    toolbar: {
+                        container: [
+                            ['bold', 'italic', 'underline'],
+                            [{ 'color': [] }],
+                            ['link'],
+                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                            ['clean']
+                        ],
+                        handlers: {
+                            'link': function(value) {
+                                if (value) {
+                                    // Check if there's selected text
+                                    const selection = this.quill.getSelection(true);
+                                    const text = this.quill.getText(selection.index, selection.length);
+                                    
+                                    let href = prompt('Enter the URL:', '');
+                                    if (href) {
+                                        // Ensure URL is absolute (has protocol)
+                                        if (!href.match(/^https?:\/\//i)) {
+                                            href = 'https://' + href;
+                                        }
+                                        
+                                        // If no text is selected, insert the URL as the link text
+                                        if (!text || text.trim() === '') {
+                                            this.quill.insertText(selection.index, href, 'link', href, 'user');
+                                        } else {
+                                            // Format the selected text as a link
+                                            this.quill.format('link', href);
+                                        }
+                                    }
+                                } else {
+                                    this.quill.format('link', false);
+                                }
+                            },
+                            'color': function(value) {
+                                // Handle reset (empty value removes color)
+                                if (value === '') {
+                                    this.quill.format('color', false);
+                                } else {
+                                    this.quill.format('color', value);
+                                }
+                            }
+                        }
+                    }
+                },
+                placeholder: 'Project description...'
+            });
+            
+            // Force toolbar icons to be white (after Quill initializes)
+            setTimeout(() => {
+                const toolbar = editorDiv.parentElement.querySelector('.ql-toolbar');
+                if (toolbar) {
+                    // Force all SVG strokes and fills to be white
+                    const allSvgs = toolbar.querySelectorAll('svg');
+                    allSvgs.forEach(svg => {
+                        svg.style.color = '#ffffff';
+                        const strokes = svg.querySelectorAll('.ql-stroke, .ql-stroke-miter, .ql-stroke.ql-thin');
+                        strokes.forEach(stroke => {
+                            stroke.style.stroke = '#ffffff';
+                            stroke.setAttribute('stroke', '#ffffff');
+                        });
+                        const fills = svg.querySelectorAll('.ql-fill');
+                        fills.forEach(fill => {
+                            fill.style.fill = '#ffffff';
+                            fill.setAttribute('fill', '#ffffff');
+                        });
+                    });
+                    
+                    // Force all buttons to have white text/icons
+                    const buttons = toolbar.querySelectorAll('button');
+                    buttons.forEach(button => {
+                        button.style.color = '#ffffff';
+                    });
+                }
+                
+                const colorPicker = toolbar ? toolbar.querySelector('.ql-color') : null;
+                if (colorPicker) {
+                    // Brand colors: primary (#2d2d2d), secondary (#1e3a5f), accent (#2c4a6b)
+                    const brandColors = [
+                        { label: 'Reset', value: '' },
+                        { label: 'Charcoal', value: '#2d2d2d' },
+                        { label: 'Dark Blue', value: '#1e3a5f' },
+                        { label: 'Accent Blue', value: '#2c4a6b' },
+                        { label: 'White', value: '#ffffff' }
+                    ];
+                    
+                    // Function to apply dark theme styles to color picker
+                    const applyDarkTheme = () => {
+                        const colorPickerOptions = colorPicker.querySelector('.ql-picker-options');
+                        if (colorPickerOptions) {
+                            // Hide when not expanded
+                            if (!colorPicker.classList.contains('ql-expanded')) {
+                                colorPickerOptions.style.display = 'none';
+                                colorPickerOptions.style.visibility = 'hidden';
+                                colorPickerOptions.style.opacity = '0';
+                                return;
+                            }
+                            
+                            // Show and style when expanded
+                            colorPickerOptions.style.display = 'flex';
+                            colorPickerOptions.style.visibility = 'visible';
+                            colorPickerOptions.style.opacity = '1';
+                            colorPickerOptions.style.backgroundColor = '#1a1f26';
+                            colorPickerOptions.style.background = '#1a1f26';
+                            colorPickerOptions.style.border = '1px solid #2d3748';
+                            colorPickerOptions.style.borderRadius = '8px';
+                            colorPickerOptions.style.padding = '0.75rem';
+                            colorPickerOptions.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3)';
+                            
+                            // Style all picker items
+                            const items = colorPickerOptions.querySelectorAll('.ql-picker-item');
+                            items.forEach(item => {
+                                if (item.getAttribute('data-value') === '') {
+                                    // Reset button styling
+                                    item.style.backgroundColor = '#252b33';
+                                    item.style.background = '#252b33';
+                                    item.style.color = '#f5f5f5';
+                                    item.style.border = '2px solid #2d3748';
+                                    item.style.width = '100%';
+                                    item.style.height = '32px';
+                                    item.style.padding = '6px 12px';
+                                    item.style.marginBottom = '0.25rem';
+                                } else {
+                                    // Color swatch styling
+                                    item.style.width = '32px';
+                                    item.style.height = '32px';
+                                    item.style.borderRadius = '6px';
+                                    item.style.border = '2px solid #2d3748';
+                                    item.style.margin = '0';
+                                }
+                            });
+                        }
+                    };
+                    
+                    // Remove default color options and add brand colors
+                    const colorPickerOptions = colorPicker.querySelector('.ql-picker-options');
+                    if (colorPickerOptions) {
+                        colorPickerOptions.innerHTML = '';
+                        brandColors.forEach(color => {
+                            const option = document.createElement('span');
+                            option.classList.add('ql-picker-item');
+                            option.setAttribute('data-value', color.value);
+                            if (color.value) {
+                                option.style.backgroundColor = color.value;
+                            } else {
+                                option.textContent = 'Reset';
+                            }
+                            option.setAttribute('title', color.label);
+                            
+                            // Add click handler to apply color
+                            option.addEventListener('click', (e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                
+                                // Get current selection
+                                let selection = quill.getSelection();
+                                if (!selection) {
+                                    // If no selection, try to get the last known selection
+                                    selection = quill.getSelection(true);
+                                }
+                                
+                                // Apply color
+                                if (color.value === '') {
+                                    // Reset color
+                                    if (selection && selection.length > 0) {
+                                        quill.formatText(selection.index, selection.length, 'color', false);
+                                    } else {
+                                        quill.format('color', false);
+                                    }
+                                } else {
+                                    // Apply color
+                                    if (selection && selection.length > 0) {
+                                        // Use formatText to apply color to selection
+                                        quill.formatText(selection.index, selection.length, 'color', color.value);
+                                        // Verify it was applied
+                                        setTimeout(() => {
+                                            const appliedFormats = quill.getFormat(selection.index, selection.length);
+                                            console.log('Applied formats:', appliedFormats);
+                                        }, 50);
+                                    } else {
+                                        quill.format('color', color.value);
+                                    }
+                                }
+                                
+                                // Close picker
+                                setTimeout(() => {
+                                    if (colorPicker.classList.contains('ql-expanded')) {
+                                        const pickerLabel = colorPicker.querySelector('.ql-picker-label');
+                                        if (pickerLabel) {
+                                            pickerLabel.click();
+                                        }
+                                    }
+                                }, 100);
+                                
+                                return false;
+                            });
+                            
+                            colorPickerOptions.appendChild(option);
+                        });
+                        
+                        // Apply dark theme immediately
+                        applyDarkTheme();
+                        
+                        // Watch for when picker opens and reapply styles
+                        const pickerLabel = colorPicker.querySelector('.ql-picker-label');
+                        if (pickerLabel) {
+                            pickerLabel.addEventListener('click', () => {
+                                setTimeout(applyDarkTheme, 50);
+                            });
+                        }
+                        
+                        // Use MutationObserver to watch for class changes (when picker opens/closes)
+                        const observer = new MutationObserver(() => {
+                            setTimeout(applyDarkTheme, 10);
+                        });
+                        observer.observe(colorPicker, { attributes: true, attributeFilter: ['class'] });
+                        
+                        // Also watch for clicks outside to close
+                        document.addEventListener('click', (e) => {
+                            if (!colorPicker.contains(e.target)) {
+                                setTimeout(applyDarkTheme, 10);
+                            }
+                        });
+                    }
+                }
+            }, 100);
+            
+            // Set initial content from hidden input after Quill is ready
+            const initialContent = hiddenInput.value || '';
+            console.log('Loading Quill content:', { 
+                hasContent: !!initialContent.trim(), 
+                contentLength: initialContent.length,
+                preview: initialContent.substring(0, 200) 
+            });
+            
+            if (initialContent.trim()) {
+                // Fix relative URLs only - don't modify HTML structure
+                let fixedContent = initialContent
+                    // Fix empty links - if link has no text, use the URL as text
+                    .replace(/<a\s+href=["']([^"']+)["']([^>]*)><\/a>/gi, function(match, url, attrs) {
+                        return `<a href="${url}"${attrs}>${url}</a>`;
+                    })
+                    // Fix relative URLs (but preserve everything inside the link tag)
+                    .replace(/<a\s+href=["']([^"']+)["']([^>]*)>/gi, function(match, url, attrs) {
+                        if (url && !url.match(/^https?:\/\//i) && !url.startsWith('#') && !url.startsWith('/') && !url.startsWith('mailto:') && !url.startsWith('tel:')) {
+                            return match.replace(url, 'https://' + url);
+                        }
+                        return match;
+                    });
+                
+                // Wait for Quill to be fully ready, then set content
+                // Use a longer delay to ensure Quill is completely initialized
+                setTimeout(() => {
+                    // Double-check Quill is ready
+                    if (!quill || !quill.root) {
+                        console.error('Quill not ready');
+                        return;
+                    }
+                    // Clean the HTML before setting it - remove any stray characters
+                    // Remove any standalone ">" or ">" that aren't part of HTML tags
+                    // REMOVED: This regex was corrupting HTML
+                    // REMOVED: This regex was corrupting HTML
+                        // REMOVED: This regex was corrupting HTML by removing ">" from tags like <strong>
+                    // REMOVED: This regex was corrupting HTML
+                        // REMOVED: This regex was corrupting HTML
+                    
+                    // Set content directly - use innerHTML which is most reliable
+                    console.log('Setting Quill content:', { 
+                        fixedContentLength: fixedContent.length,
+                        preview: fixedContent.substring(0, 200) 
+                    });
+                    quill.root.innerHTML = fixedContent;
+                    
+                    // Immediately check if it was set
+                    const immediateCheck = quill.root.innerHTML;
+                    console.log('Immediate check after setting:', { 
+                        hasContent: !!immediateCheck.trim(),
+                        contentLength: immediateCheck.length 
+                    });
+                    
+                    // Verify and ensure content persists after Quill processes it
+                    setTimeout(() => {
+                        const currentHTML = quill.root.innerHTML;
+                        const currentText = quill.root.textContent;
+                        
+                        console.log('Delayed check:', { 
+                            hasHTML: !!currentHTML.trim(),
+                            hasText: !!currentText.trim(),
+                            htmlLength: currentHTML.length,
+                            textLength: currentText.length
+                        });
+                        
+                        // If content disappeared, set it again
+                        if ((!currentText.trim() || !currentHTML.trim()) && fixedContent.trim()) {
+                            console.warn('Content missing, restoring...');
+                            quill.root.innerHTML = fixedContent;
+                        }
+                        
+                        // Update hidden input with current content
+                        hiddenInput.value = quill.root.innerHTML;
+                    }, 200);
+                    
+                    // Clean up ONLY stray text nodes that are clearly artifacts (not part of content)
+                    // Be very careful not to remove valid content
+                    setTimeout(() => {
+                        const walker = document.createTreeWalker(
+                            quill.root,
+                            NodeFilter.SHOW_TEXT,
+                            null
+                        );
+                        const nodesToRemove = [];
+                        let node;
+                        while (node = walker.nextNode()) {
+                            const text = node.textContent.trim();
+                            // Only remove text nodes that are ONLY ">", "">", or " with no other content
+                            // Don't remove if there's any other text
+                            if (text === '">' || text === '>' || text === '"') {
+                                nodesToRemove.push(node);
+                            }
+                        }
+                        nodesToRemove.forEach(n => n.remove());
+                    }, 50);
+                    
+                    // Check if links lost their text content and fix them
+                    setTimeout(() => {
+                        const links = quill.root.querySelectorAll('a[href]');
+                        links.forEach(link => {
+                            // If link has no text content, try to restore it from the original HTML
+                            if (!link.textContent.trim() && !link.innerHTML.trim()) {
+                                const href = link.getAttribute('href');
+                                // Try to extract the full link HTML from original content (including nested tags)
+                                const linkRegex = new RegExp(`<a[^>]*href=["']${href.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}["'][^>]*>(.*?)</a>`, 'is');
+                                const originalLinkMatch = initialContent.match(linkRegex);
+                                if (originalLinkMatch && originalLinkMatch[1]) {
+                                    // Restore the inner HTML (including nested formatting like <strong>)
+                                    link.innerHTML = originalLinkMatch[1];
+                                } else {
+                                    // Fallback: use the URL as text
+                                    link.textContent = href;
+                                }
+                            }
+                        });
+                        
+                        // Final cleanup pass - remove any remaining stray characters
+                        const finalWalker = document.createTreeWalker(
+                            quill.root,
+                            NodeFilter.SHOW_TEXT,
+                            null
+                        );
+                        const finalNodesToRemove = [];
+                        let finalNode;
+                        while (finalNode = finalWalker.nextNode()) {
+                            const text = finalNode.textContent.trim();
+                            if (text === '">' || text === '>' || /^[>"]+$/.test(text)) {
+                                finalNodesToRemove.push(finalNode);
+                            }
+                        }
+                        finalNodesToRemove.forEach(n => n.remove());
+                        
+                        // One more pass to ensure no ">" characters remain as separate text nodes
+                        // Check both direct children and nested nodes
+                        const allTextNodes = [];
+                        const nodeWalker = document.createTreeWalker(
+                            quill.root,
+                            NodeFilter.SHOW_TEXT,
+                            null
+                        );
+                        let textNode;
+                        while (textNode = nodeWalker.nextNode()) {
+                            if (textNode.textContent.trim() === '">' || textNode.textContent.trim() === '>' || textNode.textContent.trim() === '"') {
+                                allTextNodes.push(textNode);
+                            }
+                        }
+                        allTextNodes.forEach(n => n.remove());
+                        
+                        // Also check direct children
+                        Array.from(quill.root.childNodes).forEach(child => {
+                            if (child.nodeType === Node.TEXT_NODE && (child.textContent.trim() === '">' || child.textContent.trim() === '>')) {
+                                child.remove();
+                            }
+                        });
+                        
+                        // Final check - ensure no content leaked outside the editor
+                        // Remove any text nodes that are siblings of the editor (shouldn't happen, but just in case)
+                        const editorParent = editorDiv.parentElement;
+                        if (editorParent) {
+                            Array.from(editorParent.childNodes).forEach(child => {
+                                if (child !== editorDiv && child.nodeType === Node.TEXT_NODE) {
+                                    const text = child.textContent.trim();
+                                    if (text === 'Test' || text === '">' || text === '>') {
+                                        child.remove();
+                                    }
+                                }
+                            });
+                        }
+                        
+                        // Final check - remove any content that leaked outside the editor div
+                        const adminFormGroup = editorDiv.closest('.admin-form-group');
+                        if (adminFormGroup) {
+                            // Remove any text nodes or elements that are siblings of the editor
+                            Array.from(adminFormGroup.childNodes).forEach(child => {
+                                if (child !== editorDiv && child !== hiddenInput && child.nodeName !== 'LABEL' && child.nodeName !== 'SMALL') {
+                                    if (child.nodeType === Node.TEXT_NODE) {
+                                        const text = child.textContent.trim();
+                                        if (text === 'Test' || text === '">' || text === '>') {
+                                            child.remove();
+                                        }
+                                    } else if (child.nodeType === Node.ELEMENT_NODE && child.textContent.trim() === 'Test') {
+                                        child.remove();
+                                    }
+                                }
+                            });
+                        }
+                        
+                        // Update hidden input with the fixed HTML
+                        hiddenInput.value = quill.root.innerHTML;
+                    }, 150);
+                }, 200);
+            }
+            
+            // Update hidden input when content changes
+            quill.on('text-change', function() {
+                let html = quill.root.innerHTML;
+                // Fix empty links - ensure all links have text content
+                html = html.replace(/<a\s+href=["']([^"']+)["']([^>]*)><\/a>/gi, function(match, url, attrs) {
+                    return `<a href="${url}"${attrs}>${url}</a>`;
+                });
+                // Fix any relative URLs before saving
+                html = html.replace(/<a\s+href=["']([^"']+)["']/gi, function(match, url) {
+                    // If URL doesn't start with http:// or https://, add https://
+                    if (url && !url.match(/^https?:\/\//i) && !url.startsWith('#') && !url.startsWith('/') && !url.startsWith('mailto:') && !url.startsWith('tel:')) {
+                        return match.replace(url, 'https://' + url);
+                    }
+                    return match;
+                });
+                hiddenInput.value = html;
+            });
+            
+            // Store Quill instance on the item for later access
+            item._quillInstance = quill;
+        }
+        
+        // Initialize Quill editors for section content
+        item.querySelectorAll('.section-content-editor').forEach((editorDiv) => {
+            const sectionItem = editorDiv.closest('.project-section-item');
+            const hiddenInput = sectionItem.querySelector('.section-content');
+            if (editorDiv && hiddenInput && typeof Quill !== 'undefined') {
+                const quill = new Quill(editorDiv, {
+                    theme: 'snow',
+                    modules: {
+                        toolbar: {
+                            container: [
+                                ['bold', 'italic', 'underline'],
+                                [{ 'color': [] }],
+                                ['link'],
+                                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                                ['clean']
+                            ],
+                            handlers: {
+                                'link': function(value) {
+                                    if (value) {
+                                        const selection = this.quill.getSelection(true);
+                                        const text = this.quill.getText(selection.index, selection.length);
+                                        let href = prompt('Enter the URL:', '');
+                                        if (href) {
+                                            if (!href.match(/^https?:\/\//i)) {
+                                                href = 'https://' + href;
+                                            }
+                                            if (!text || text.trim() === '') {
+                                                this.quill.insertText(selection.index, href, 'link', href, 'user');
+                                            } else {
+                                                this.quill.format('link', href);
+                                            }
+                                        }
+                                    } else {
+                                        this.quill.format('link', false);
+                                    }
+                                },
+                                'color': function(value) {
+                                    const selection = this.quill.getSelection();
+                                    if (selection && selection.length > 0) {
+                                        this.quill.formatText(selection.index, selection.length, 'color', value === '' ? false : value);
+                                    } else {
+                                        this.quill.format('color', value === '' ? false : value);
+                                    }
+                                    setTimeout(() => {
+                                        const colorPicker = this.quill.getModule('toolbar').container.querySelector('.ql-color');
+                                        if (colorPicker && colorPicker.classList.contains('ql-expanded')) {
+                                            const pickerLabel = colorPicker.querySelector('.ql-picker-label');
+                                            if (pickerLabel) {
+                                                pickerLabel.click();
+                                            }
+                                        }
+                                    }, 100);
+                                }
+                            }
+                        }
+                    },
+                    placeholder: 'Section content...'
+                });
+                
+                // Force toolbar icons to be white
+                setTimeout(() => {
+                    const toolbar = editorDiv.parentElement.querySelector('.ql-toolbar');
+                    if (toolbar) {
+                        const allSvgs = toolbar.querySelectorAll('svg');
+                        allSvgs.forEach(svg => {
+                            svg.style.color = '#ffffff';
+                            const strokes = svg.querySelectorAll('.ql-stroke, .ql-stroke-miter, .ql-stroke.ql-thin');
+                            strokes.forEach(stroke => {
+                                stroke.style.stroke = '#ffffff';
+                                stroke.setAttribute('stroke', '#ffffff');
+                            });
+                            const fills = svg.querySelectorAll('.ql-fill');
+                            fills.forEach(fill => {
+                                fill.style.fill = '#ffffff';
+                                fill.setAttribute('fill', '#ffffff');
+                            });
+                        });
+                        const buttons = toolbar.querySelectorAll('button');
+                        buttons.forEach(button => {
+                            button.style.color = '#ffffff';
+                        });
+                    }
+                    
+                    // Customize color picker
+                    const colorPicker = toolbar ? toolbar.querySelector('.ql-color') : null;
+                    if (colorPicker) {
+                        const brandColors = [
+                            { label: 'Reset', value: '' },
+                            { label: 'Charcoal', value: '#2d2d2d' },
+                            { label: 'Dark Blue', value: '#1e3a5f' },
+                            { label: 'Accent Blue', value: '#2c4a6b' },
+                            { label: 'White', value: '#ffffff' }
+                        ];
+                        
+                        const applyDarkTheme = () => {
+                            const colorPickerOptions = colorPicker.querySelector('.ql-picker-options');
+                            if (colorPickerOptions) {
+                                if (!colorPicker.classList.contains('ql-expanded')) {
+                                    colorPickerOptions.style.display = 'none';
+                                    colorPickerOptions.style.visibility = 'hidden';
+                                    colorPickerOptions.style.opacity = '0';
+                                    return;
+                                }
+                                colorPickerOptions.style.display = 'flex';
+                                colorPickerOptions.style.visibility = 'visible';
+                                colorPickerOptions.style.opacity = '1';
+                                colorPickerOptions.style.backgroundColor = '#1a1f26';
+                                colorPickerOptions.style.background = '#1a1f26';
+                                colorPickerOptions.style.border = '1px solid #2d3748';
+                                colorPickerOptions.style.borderRadius = '8px';
+                                colorPickerOptions.style.padding = '0.75rem';
+                                colorPickerOptions.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3)';
+                                
+                                const items = colorPickerOptions.querySelectorAll('.ql-picker-item');
+                                items.forEach(item => {
+                                    if (item.getAttribute('data-value') === '') {
+                                        item.style.backgroundColor = '#252b33';
+                                        item.style.background = '#252b33';
+                                        item.style.color = '#f5f5f5';
+                                        item.style.border = '2px solid #2d3748';
+                                        item.style.width = '100%';
+                                        item.style.height = '32px';
+                                        item.style.padding = '6px 12px';
+                                        item.style.marginBottom = '0.25rem';
+                                    } else {
+                                        item.style.width = '32px';
+                                        item.style.height = '32px';
+                                        item.style.borderRadius = '6px';
+                                        item.style.border = '2px solid #2d3748';
+                                        item.style.margin = '0';
+                                    }
+                                });
+                            }
+                        };
+                        
+                        const colorPickerOptions = colorPicker.querySelector('.ql-picker-options');
+                        if (colorPickerOptions) {
+                            colorPickerOptions.innerHTML = '';
+                            brandColors.forEach(color => {
+                                const option = document.createElement('span');
+                                option.classList.add('ql-picker-item');
+                                option.setAttribute('data-value', color.value);
+                                if (color.value) {
+                                    option.style.backgroundColor = color.value;
+                                } else {
+                                    option.textContent = 'Reset';
+                                }
+                                option.setAttribute('title', color.label);
+                                
+                                option.addEventListener('click', (e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    let selection = quill.getSelection();
+                                    if (!selection) {
+                                        selection = quill.getSelection(true);
+                                    }
+                                    if (color.value === '') {
+                                        if (selection && selection.length > 0) {
+                                            quill.formatText(selection.index, selection.length, 'color', false);
+                                        } else {
+                                            quill.format('color', false);
+                                        }
+                                    } else {
+                                        if (selection && selection.length > 0) {
+                                            quill.formatText(selection.index, selection.length, 'color', color.value);
+                                        } else {
+                                            quill.format('color', color.value);
+                                        }
+                                    }
+                                    setTimeout(() => {
+                                        if (colorPicker.classList.contains('ql-expanded')) {
+                                            const pickerLabel = colorPicker.querySelector('.ql-picker-label');
+                                            if (pickerLabel) {
+                                                pickerLabel.click();
+                                            }
+                                        }
+                                    }, 100);
+                                    return false;
+                                });
+                                
+                                colorPickerOptions.appendChild(option);
+                            });
+                            
+                            applyDarkTheme();
+                            const pickerLabel = colorPicker.querySelector('.ql-picker-label');
+                            if (pickerLabel) {
+                                pickerLabel.addEventListener('click', () => {
+                                    setTimeout(applyDarkTheme, 50);
+                                });
+                            }
+                            const observer = new MutationObserver(() => {
+                                setTimeout(applyDarkTheme, 10);
+                            });
+                            observer.observe(colorPicker, { attributes: true, attributeFilter: ['class'] });
+                            document.addEventListener('click', (e) => {
+                                if (!colorPicker.contains(e.target)) {
+                                    setTimeout(applyDarkTheme, 10);
+                                }
+                            });
+                        }
+                    }
+                }, 100);
+                
+                // Load initial content
+                const initialContent = hiddenInput.value || '';
+                if (initialContent.trim()) {
+                    let fixedContent = initialContent
+                        .replace(/<a\s+href=["']([^"']+)["']([^>]*)><\/a>/gi, function(match, url, attrs) {
+                            return `<a href="${url}"${attrs}>${url}</a>`;
+                        })
+                        .replace(/<a\s+href=["']([^"']+)["']([^>]*)>/gi, function(match, url, attrs) {
+                            if (url && !url.match(/^https?:\/\//i) && !url.startsWith('#') && !url.startsWith('/') && !url.startsWith('mailto:') && !url.startsWith('tel:')) {
+                                return match.replace(url, 'https://' + url);
+                            }
+                            return match;
+                        });
+                    
+                    setTimeout(() => {
+                        if (quill && quill.root) {
+                            quill.root.innerHTML = fixedContent;
+                            hiddenInput.value = quill.root.innerHTML;
+                        }
+                    }, 200);
+                }
+                
+                // Update hidden input when content changes
+                quill.on('text-change', function() {
+                    let html = quill.root.innerHTML;
+                    html = html.replace(/<a\s+href=["']([^"']+)["']([^>]*)><\/a>/gi, function(match, url, attrs) {
+                        return `<a href="${url}"${attrs}>${url}</a>`;
+                    });
+                    html = html.replace(/<a\s+href=["']([^"']+)["']/gi, function(match, url) {
+                        if (url && !url.match(/^https?:\/\//i) && !url.startsWith('#') && !url.startsWith('/') && !url.startsWith('mailto:') && !url.startsWith('tel:')) {
+                            return match.replace(url, 'https://' + url);
+                        }
+                        return match;
+                    });
+                    hiddenInput.value = html;
+                });
+                
+                // Store Quill instance on the section item
+                sectionItem._quillInstance = quill;
+            }
         });
         
         // Initialize icon pickers for section items
@@ -701,7 +1407,9 @@
             </div>
             <div class="admin-form-group">
                 <label>Section Content</label>
-                <textarea class="section-content" rows="3" placeholder="Section content..."></textarea>
+                <div class="section-content-editor" id="section-content-editor-new-${Date.now()}"></div>
+                <input type="hidden" class="section-content" value="">
+                <small>Use the toolbar to format text, make it bold, and insert links</small>
             </div>
             <button type="button" class="admin-btn admin-btn-secondary" onclick="this.closest('.project-section-item').remove()">
                 <i class="bi bi-trash"></i> Remove Section
@@ -741,6 +1449,227 @@
             // Update icon display when icon changes
             iconInput.addEventListener('input', updateIconDisplay);
             iconInput.addEventListener('change', updateIconDisplay);
+        }
+        
+        // Initialize Quill editor for the new section content
+        const editorDiv = newItem.querySelector('.section-content-editor');
+        const hiddenInput = newItem.querySelector('.section-content');
+        if (editorDiv && hiddenInput && typeof Quill !== 'undefined') {
+            const quill = new Quill(editorDiv, {
+                theme: 'snow',
+                modules: {
+                    toolbar: {
+                        container: [
+                            ['bold', 'italic', 'underline'],
+                            [{ 'color': [] }],
+                            ['link'],
+                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                            ['clean']
+                        ],
+                        handlers: {
+                            'link': function(value) {
+                                if (value) {
+                                    const selection = this.quill.getSelection(true);
+                                    const text = this.quill.getText(selection.index, selection.length);
+                                    let href = prompt('Enter the URL:', '');
+                                    if (href) {
+                                        if (!href.match(/^https?:\/\//i)) {
+                                            href = 'https://' + href;
+                                        }
+                                        if (!text || text.trim() === '') {
+                                            this.quill.insertText(selection.index, href, 'link', href, 'user');
+                                        } else {
+                                            this.quill.format('link', href);
+                                        }
+                                    }
+                                } else {
+                                    this.quill.format('link', false);
+                                }
+                            },
+                            'color': function(value) {
+                                const selection = this.quill.getSelection();
+                                if (selection && selection.length > 0) {
+                                    this.quill.formatText(selection.index, selection.length, 'color', value === '' ? false : value);
+                                } else {
+                                    this.quill.format('color', value === '' ? false : value);
+                                }
+                                setTimeout(() => {
+                                    const colorPicker = this.quill.getModule('toolbar').container.querySelector('.ql-color');
+                                    if (colorPicker && colorPicker.classList.contains('ql-expanded')) {
+                                        const pickerLabel = colorPicker.querySelector('.ql-picker-label');
+                                        if (pickerLabel) {
+                                            pickerLabel.click();
+                                        }
+                                    }
+                                }, 100);
+                            }
+                        }
+                    }
+                },
+                placeholder: 'Section content...'
+            });
+            
+            // Force toolbar icons to be white
+            setTimeout(() => {
+                const toolbar = editorDiv.parentElement.querySelector('.ql-toolbar');
+                if (toolbar) {
+                    const allSvgs = toolbar.querySelectorAll('svg');
+                    allSvgs.forEach(svg => {
+                        svg.style.color = '#ffffff';
+                        const strokes = svg.querySelectorAll('.ql-stroke, .ql-stroke-miter, .ql-stroke.ql-thin');
+                        strokes.forEach(stroke => {
+                            stroke.style.stroke = '#ffffff';
+                            stroke.setAttribute('stroke', '#ffffff');
+                        });
+                        const fills = svg.querySelectorAll('.ql-fill');
+                        fills.forEach(fill => {
+                            fill.style.fill = '#ffffff';
+                            fill.setAttribute('fill', '#ffffff');
+                        });
+                    });
+                    const buttons = toolbar.querySelectorAll('button');
+                    buttons.forEach(button => {
+                        button.style.color = '#ffffff';
+                    });
+                }
+                
+                // Customize color picker
+                const colorPicker = toolbar ? toolbar.querySelector('.ql-color') : null;
+                if (colorPicker) {
+                    const brandColors = [
+                        { label: 'Reset', value: '' },
+                        { label: 'Charcoal', value: '#2d2d2d' },
+                        { label: 'Dark Blue', value: '#1e3a5f' },
+                        { label: 'Accent Blue', value: '#2c4a6b' },
+                        { label: 'White', value: '#ffffff' }
+                    ];
+                    
+                    const applyDarkTheme = () => {
+                        const colorPickerOptions = colorPicker.querySelector('.ql-picker-options');
+                        if (colorPickerOptions) {
+                            if (!colorPicker.classList.contains('ql-expanded')) {
+                                colorPickerOptions.style.display = 'none';
+                                colorPickerOptions.style.visibility = 'hidden';
+                                colorPickerOptions.style.opacity = '0';
+                                return;
+                            }
+                            colorPickerOptions.style.display = 'flex';
+                            colorPickerOptions.style.visibility = 'visible';
+                            colorPickerOptions.style.opacity = '1';
+                            colorPickerOptions.style.backgroundColor = '#1a1f26';
+                            colorPickerOptions.style.background = '#1a1f26';
+                            colorPickerOptions.style.border = '1px solid #2d3748';
+                            colorPickerOptions.style.borderRadius = '8px';
+                            colorPickerOptions.style.padding = '0.75rem';
+                            colorPickerOptions.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3)';
+                            
+                            const items = colorPickerOptions.querySelectorAll('.ql-picker-item');
+                            items.forEach(item => {
+                                if (item.getAttribute('data-value') === '') {
+                                    item.style.backgroundColor = '#252b33';
+                                    item.style.background = '#252b33';
+                                    item.style.color = '#f5f5f5';
+                                    item.style.border = '2px solid #2d3748';
+                                    item.style.width = '100%';
+                                    item.style.height = '32px';
+                                    item.style.padding = '6px 12px';
+                                    item.style.marginBottom = '0.25rem';
+                                } else {
+                                    item.style.width = '32px';
+                                    item.style.height = '32px';
+                                    item.style.borderRadius = '6px';
+                                    item.style.border = '2px solid #2d3748';
+                                    item.style.margin = '0';
+                                }
+                            });
+                        }
+                    };
+                    
+                    const colorPickerOptions = colorPicker.querySelector('.ql-picker-options');
+                    if (colorPickerOptions) {
+                        colorPickerOptions.innerHTML = '';
+                        brandColors.forEach(color => {
+                            const option = document.createElement('span');
+                            option.classList.add('ql-picker-item');
+                            option.setAttribute('data-value', color.value);
+                            if (color.value) {
+                                option.style.backgroundColor = color.value;
+                            } else {
+                                option.textContent = 'Reset';
+                            }
+                            option.setAttribute('title', color.label);
+                            
+                            option.addEventListener('click', (e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                let selection = quill.getSelection();
+                                if (!selection) {
+                                    selection = quill.getSelection(true);
+                                }
+                                if (color.value === '') {
+                                    if (selection && selection.length > 0) {
+                                        quill.formatText(selection.index, selection.length, 'color', false);
+                                    } else {
+                                        quill.format('color', false);
+                                    }
+                                } else {
+                                    if (selection && selection.length > 0) {
+                                        quill.formatText(selection.index, selection.length, 'color', color.value);
+                                    } else {
+                                        quill.format('color', color.value);
+                                    }
+                                }
+                                setTimeout(() => {
+                                    if (colorPicker.classList.contains('ql-expanded')) {
+                                        const pickerLabel = colorPicker.querySelector('.ql-picker-label');
+                                        if (pickerLabel) {
+                                            pickerLabel.click();
+                                        }
+                                    }
+                                }, 100);
+                                return false;
+                            });
+                            
+                            colorPickerOptions.appendChild(option);
+                        });
+                        
+                        applyDarkTheme();
+                        const pickerLabel = colorPicker.querySelector('.ql-picker-label');
+                        if (pickerLabel) {
+                            pickerLabel.addEventListener('click', () => {
+                                setTimeout(applyDarkTheme, 50);
+                            });
+                        }
+                        const observer = new MutationObserver(() => {
+                            setTimeout(applyDarkTheme, 10);
+                        });
+                        observer.observe(colorPicker, { attributes: true, attributeFilter: ['class'] });
+                        document.addEventListener('click', (e) => {
+                            if (!colorPicker.contains(e.target)) {
+                                setTimeout(applyDarkTheme, 10);
+                            }
+                        });
+                    }
+                }
+            }, 100);
+            
+            // Update hidden input when content changes
+            quill.on('text-change', function() {
+                let html = quill.root.innerHTML;
+                html = html.replace(/<a\s+href=["']([^"']+)["']([^>]*)><\/a>/gi, function(match, url, attrs) {
+                    return `<a href="${url}"${attrs}>${url}</a>`;
+                });
+                html = html.replace(/<a\s+href=["']([^"']+)["']/gi, function(match, url) {
+                    if (url && !url.match(/^https?:\/\//i) && !url.startsWith('#') && !url.startsWith('/') && !url.startsWith('mailto:') && !url.startsWith('tel:')) {
+                        return match.replace(url, 'https://' + url);
+                    }
+                    return match;
+                });
+                hiddenInput.value = html;
+            });
+            
+            // Store Quill instance on the section item
+            newItem._quillInstance = quill;
         }
     };
     
@@ -901,9 +1830,15 @@
                 project.name = item.querySelector('.project-name').value || '';
                 project.featured = item.querySelector('.project-featured')?.checked || false;
                 
-                // Description - split by blank lines into array
-                const descriptionText = item.querySelector('.project-description').value || '';
-                project.description = descriptionText.split(/\n\s*\n/).filter(p => p.trim());
+                // Description - get HTML from Quill editor or hidden input
+                let descriptionHTML = '';
+                if (item._quillInstance) {
+                    descriptionHTML = item._quillInstance.root.innerHTML;
+                } else {
+                    descriptionHTML = item.querySelector('.project-description').value || '';
+                }
+                // Store as HTML string (can be converted to array if needed for backward compatibility)
+                project.description = descriptionHTML;
                 
                 // Meta items - now supports icon and text
                 const metaItemElements = item.querySelectorAll('.project-meta-item');
@@ -916,18 +1851,24 @@
                     }
                 });
                 
-                // Sections - now supports icon
+                // Sections - now supports icon and HTML content
                 const sectionItems = item.querySelectorAll('.project-section-item');
                 project.sections = [];
                 sectionItems.forEach(sectionItem => {
                     const icon = sectionItem.querySelector('.section-icon')?.value.trim() || 'bi-diagram-3-fill';
                     const title = sectionItem.querySelector('.section-title')?.value || '';
-                    const content = sectionItem.querySelector('.section-content')?.value || '';
+                    // Get HTML from Quill editor if available, otherwise from hidden input
+                    let content = '';
+                    if (sectionItem._quillInstance) {
+                        content = sectionItem._quillInstance.root.innerHTML;
+                    } else {
+                        content = sectionItem.querySelector('.section-content')?.value || '';
+                    }
                     if (title || content) {
                         project.sections.push({
                             icon: icon,
                             title: title,
-                            content: content.split('\n').filter(c => c.trim())
+                            content: content // Store as HTML string instead of array
                         });
                     }
                 });

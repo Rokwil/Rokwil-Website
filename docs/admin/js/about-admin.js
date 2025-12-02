@@ -10,6 +10,7 @@
         csr: 0,
         recognition: 0
     };
+    let storyQuill = null;
     
     // Check authentication
     checkAdminAuth().then((user) => {
@@ -164,15 +165,63 @@
                     }).join('\n\n');
                     console.log('Using paragraphs array (fallback), joined content length:', contentValue.length);
                 }
+                
+                // Set in hidden input
                 contentEl.value = contentValue;
+                
+                // If Quill is initialized, set content in Quill
+                if (storyQuill && storyQuill.root) {
+                    // Check if content is HTML (contains tags) or plain text
+                    const isHTML = typeof contentValue === 'string' && (contentValue.includes('<') || contentValue.includes('&lt;'));
+                    if (isHTML) {
+                        // Fix relative URLs
+                        let fixedContent = contentValue
+                            .replace(/<a\s+href=["']([^"']+)["']([^>]*)><\/a>/gi, function(match, url, attrs) {
+                                return `<a href="${url}"${attrs}>${url}</a>`;
+                            })
+                            .replace(/<a\s+href=["']([^"']+)["']([^>]*)>/gi, function(match, url, attrs) {
+                                if (url && !url.match(/^https?:\/\//i) && !url.startsWith('#') && !url.startsWith('/') && !url.startsWith('mailto:') && !url.startsWith('tel:')) {
+                                    return match.replace(url, 'https://' + url);
+                                }
+                                return match;
+                            });
+                        
+                        setTimeout(() => {
+                            if (storyQuill && storyQuill.root) {
+                                storyQuill.clipboard.dangerouslyPasteHTML(0, fixedContent);
+                                const hiddenInput = document.getElementById('about_story_content');
+                                if (hiddenInput) {
+                                    hiddenInput.value = storyQuill.root.innerHTML;
+                                }
+                            }
+                        }, 200);
+                    } else {
+                        // Plain text - convert newlines to HTML
+                        const htmlContent = contentValue.split('\n\n').map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
+                        setTimeout(() => {
+                            if (storyQuill && storyQuill.root) {
+                                storyQuill.clipboard.dangerouslyPasteHTML(0, htmlContent);
+                                const hiddenInput = document.getElementById('about_story_content');
+                                if (hiddenInput) {
+                                    hiddenInput.value = storyQuill.root.innerHTML;
+                                }
+                            }
+                        }, 200);
+                    }
+                }
+                
                 console.log('Set story content to:', contentValue.substring(0, 100) + '...');
             }
             
             if (pageData.aboutStory.image) {
                 const previewEl = document.getElementById('about_story_image_preview');
+                const urlInput = document.getElementById('about_story_image_url');
                 if (previewEl) {
                     const normalizedPath = normalizeImagePath(pageData.aboutStory.image);
                     previewEl.innerHTML = `<img src="${normalizedPath}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
+                }
+                if (urlInput) {
+                    urlInput.value = pageData.aboutStory.image;
                 }
             }
         } else {
@@ -492,15 +541,42 @@
             };
             
             // Collect about story
+            const storyImageUrlInput = document.getElementById('about_story_image_url');
             const storyImage = document.getElementById('about_story_image').files[0];
-            let storyImageUrl = pageData.aboutStory?.image || '';
-            if (storyImage) {
+            let storyImageUrl = '';
+            
+            // Prioritize URL input
+            if (storyImageUrlInput && storyImageUrlInput.value.trim()) {
+                storyImageUrl = storyImageUrlInput.value.trim();
+            } else if (storyImage) {
                 storyImageUrl = await handleImageUpload('about_story_image', 'about_story_image_preview', 'images/about', null);
+            } else {
+                storyImageUrl = pageData.aboutStory?.image || '';
+            }
+            
+            // Get story content from Quill editor if available, otherwise from hidden input
+            let storyContent = '';
+            if (storyQuill && storyQuill.root) {
+                storyContent = storyQuill.root.innerHTML;
+                // Clean up empty paragraphs
+                storyContent = storyContent.replace(/<p><br><\/p>/g, '').replace(/<p><\/p>/g, '');
+                // Fix links
+                storyContent = storyContent.replace(/<a\s+href=["']([^"']+)["']([^>]*)><\/a>/gi, function(match, url, attrs) {
+                    return `<a href="${url}"${attrs}>${url}</a>`;
+                });
+                storyContent = storyContent.replace(/<a\s+href=["']([^"']+)["']/gi, function(match, url) {
+                    if (url && !url.match(/^https?:\/\//i) && !url.startsWith('#') && !url.startsWith('/') && !url.startsWith('mailto:') && !url.startsWith('tel:')) {
+                        return match.replace(url, 'https://' + url);
+                    }
+                    return match;
+                });
+            } else {
+                storyContent = document.getElementById('about_story_content').value || '';
             }
             
             pageData.aboutStory = {
                 title: document.getElementById('about_story_title').value,
-                content: document.getElementById('about_story_content').value,
+                content: storyContent,
                 image: storyImageUrl
             };
             
@@ -681,10 +757,12 @@
         window.initFolderSelectors();
     }
     
-    // Initialize image picker for hero image
+    // Initialize image picker for hero image and story image
     if (window.initImagePicker) {
         const pageHeroImageUrl = document.getElementById('page_hero_image_url');
+        const aboutStoryImageUrl = document.getElementById('about_story_image_url');
         if (pageHeroImageUrl) window.initImagePicker(pageHeroImageUrl);
+        if (aboutStoryImageUrl) window.initImagePicker(aboutStoryImageUrl);
     }
     
     // Add input listener for hero image URL
@@ -700,6 +778,19 @@
         });
     }
     
+    // Add input listener for story image URL
+    if (document.getElementById('about_story_image_url')) {
+        document.getElementById('about_story_image_url').addEventListener('input', function() {
+            const url = this.value.trim();
+            if (url) {
+                const normalizedPath = normalizeImagePath(url);
+                document.getElementById('about_story_image_preview').innerHTML = `<img src="${normalizedPath}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
+            } else {
+                document.getElementById('about_story_image_preview').innerHTML = '<div class="image-preview-placeholder"><i class="bi bi-image"></i><p>No image selected</p></div>';
+            }
+        });
+    }
+    
     // Setup upload buttons
     if (document.getElementById('page_hero_image_upload_btn')) {
         document.getElementById('page_hero_image_upload_btn').addEventListener('click', function() {
@@ -709,6 +800,233 @@
     if (document.getElementById('about_story_image_upload_btn')) {
         document.getElementById('about_story_image_upload_btn').addEventListener('click', function() {
             document.getElementById('about_story_image').click();
+        });
+    }
+    
+    // Initialize Quill editor for story content
+    const storyEditorDiv = document.getElementById('about_story_content_editor');
+    const storyHiddenInput = document.getElementById('about_story_content');
+    
+    if (storyEditorDiv && storyHiddenInput && typeof Quill !== 'undefined') {
+        // Ensure editor div has initial content
+        if (!storyEditorDiv.innerHTML.trim()) {
+            storyEditorDiv.innerHTML = '<p><br></p>';
+        }
+        
+        storyQuill = new Quill(storyEditorDiv, {
+            theme: 'snow',
+            modules: {
+                toolbar: {
+                    container: [
+                        ['bold', 'italic', 'underline'],
+                        [{ 'color': [] }],
+                        ['link'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        ['clean']
+                    ],
+                    handlers: {
+                        'link': function(value) {
+                            if (value) {
+                                const selection = this.quill.getSelection(true);
+                                const text = this.quill.getText(selection.index, selection.length);
+                                let href = prompt('Enter the URL:', '');
+                                if (href) {
+                                    if (!href.match(/^https?:\/\//i)) {
+                                        href = 'https://' + href;
+                                    }
+                                    if (!text || text.trim() === '') {
+                                        this.quill.insertText(selection.index, href, 'link', href, 'user');
+                                    } else {
+                                        this.quill.format('link', href);
+                                    }
+                                }
+                            } else {
+                                this.quill.format('link', false);
+                            }
+                        },
+                        'color': function(value) {
+                            const selection = this.quill.getSelection();
+                            if (selection && selection.length > 0) {
+                                this.quill.formatText(selection.index, selection.length, 'color', value === '' ? false : value);
+                            } else {
+                                this.quill.format('color', value === '' ? false : value);
+                            }
+                            setTimeout(() => {
+                                const colorPicker = this.quill.getModule('toolbar').container.querySelector('.ql-color');
+                                if (colorPicker && colorPicker.classList.contains('ql-expanded')) {
+                                    const pickerLabel = colorPicker.querySelector('.ql-picker-label');
+                                    if (pickerLabel) {
+                                        pickerLabel.click();
+                                    }
+                                }
+                            }, 100);
+                        }
+                    }
+                }
+            },
+            placeholder: 'Story content...'
+        });
+        
+        // Force toolbar icons to be white
+        setTimeout(() => {
+            const toolbar = storyEditorDiv.parentElement.querySelector('.ql-toolbar');
+            if (toolbar) {
+                const allSvgs = toolbar.querySelectorAll('svg');
+                allSvgs.forEach(svg => {
+                    svg.style.color = '#ffffff';
+                    const strokes = svg.querySelectorAll('.ql-stroke, .ql-stroke-miter, .ql-stroke.ql-thin');
+                    strokes.forEach(stroke => {
+                        stroke.style.stroke = '#ffffff';
+                        stroke.setAttribute('stroke', '#ffffff');
+                    });
+                    const fills = svg.querySelectorAll('.ql-fill');
+                    fills.forEach(fill => {
+                        fill.style.fill = '#ffffff';
+                        fill.setAttribute('fill', '#ffffff');
+                    });
+                });
+                const buttons = toolbar.querySelectorAll('button');
+                buttons.forEach(button => {
+                    button.style.color = '#ffffff';
+                });
+            }
+            
+            // Customize color picker
+            const colorPicker = toolbar ? toolbar.querySelector('.ql-color') : null;
+            if (colorPicker) {
+                const brandColors = [
+                    { label: 'Reset', value: '' },
+                    { label: 'Charcoal', value: '#2d2d2d' },
+                    { label: 'Dark Blue', value: '#1e3a5f' },
+                    { label: 'Accent Blue', value: '#2c4a6b' },
+                    { label: 'White', value: '#ffffff' }
+                ];
+                
+                const applyDarkTheme = () => {
+                    const colorPickerOptions = colorPicker.querySelector('.ql-picker-options');
+                    if (colorPickerOptions) {
+                        if (!colorPicker.classList.contains('ql-expanded')) {
+                            colorPickerOptions.style.display = 'none';
+                            colorPickerOptions.style.visibility = 'hidden';
+                            colorPickerOptions.style.opacity = '0';
+                            return;
+                        }
+                        colorPickerOptions.style.display = 'flex';
+                        colorPickerOptions.style.visibility = 'visible';
+                        colorPickerOptions.style.opacity = '1';
+                        colorPickerOptions.style.backgroundColor = '#1a1f26';
+                        colorPickerOptions.style.background = '#1a1f26';
+                        colorPickerOptions.style.border = '1px solid #2d3748';
+                        colorPickerOptions.style.borderRadius = '8px';
+                        colorPickerOptions.style.padding = '0.75rem';
+                        colorPickerOptions.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3)';
+                        
+                        const items = colorPickerOptions.querySelectorAll('.ql-picker-item');
+                        items.forEach(item => {
+                            if (item.getAttribute('data-value') === '') {
+                                item.style.backgroundColor = '#252b33';
+                                item.style.background = '#252b33';
+                                item.style.color = '#f5f5f5';
+                                item.style.border = '2px solid #2d3748';
+                                item.style.width = '100%';
+                                item.style.height = '32px';
+                                item.style.padding = '6px 12px';
+                                item.style.marginBottom = '0.25rem';
+                            } else {
+                                item.style.width = '32px';
+                                item.style.height = '32px';
+                                item.style.borderRadius = '6px';
+                                item.style.border = '2px solid #2d3748';
+                                item.style.margin = '0';
+                            }
+                        });
+                    }
+                };
+                
+                const colorPickerOptions = colorPicker.querySelector('.ql-picker-options');
+                if (colorPickerOptions) {
+                    colorPickerOptions.innerHTML = '';
+                    brandColors.forEach(color => {
+                        const option = document.createElement('span');
+                        option.classList.add('ql-picker-item');
+                        option.setAttribute('data-value', color.value);
+                        if (color.value) {
+                            option.style.backgroundColor = color.value;
+                        } else {
+                            option.textContent = 'Reset';
+                        }
+                        option.setAttribute('title', color.label);
+                        
+                        option.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            let selection = storyQuill.getSelection();
+                            if (!selection) {
+                                selection = storyQuill.getSelection(true);
+                            }
+                            if (color.value === '') {
+                                if (selection && selection.length > 0) {
+                                    storyQuill.formatText(selection.index, selection.length, 'color', false);
+                                } else {
+                                    storyQuill.format('color', false);
+                                }
+                            } else {
+                                if (selection && selection.length > 0) {
+                                    storyQuill.formatText(selection.index, selection.length, 'color', color.value);
+                                } else {
+                                    storyQuill.format('color', color.value);
+                                }
+                            }
+                            setTimeout(() => {
+                                if (colorPicker.classList.contains('ql-expanded')) {
+                                    const pickerLabel = colorPicker.querySelector('.ql-picker-label');
+                                    if (pickerLabel) {
+                                        pickerLabel.click();
+                                    }
+                                }
+                            }, 100);
+                            return false;
+                        });
+                        
+                        colorPickerOptions.appendChild(option);
+                    });
+                    
+                    applyDarkTheme();
+                    const pickerLabel = colorPicker.querySelector('.ql-picker-label');
+                    if (pickerLabel) {
+                        pickerLabel.addEventListener('click', () => {
+                            setTimeout(applyDarkTheme, 50);
+                        });
+                    }
+                    const observer = new MutationObserver(() => {
+                        setTimeout(applyDarkTheme, 10);
+                    });
+                    observer.observe(colorPicker, { attributes: true, attributeFilter: ['class'] });
+                    document.addEventListener('click', (e) => {
+                        if (!colorPicker.contains(e.target)) {
+                            setTimeout(applyDarkTheme, 10);
+                        }
+                    });
+                }
+            }
+        }, 100);
+        
+        // Update hidden input when content changes
+        storyQuill.on('text-change', function() {
+            let html = storyQuill.root.innerHTML;
+            // Clean up empty paragraphs
+            html = html.replace(/<p><br><\/p>/g, '').replace(/<p><\/p>/g, '');
+            // Fix links
+            html = html.replace(/<a\s+href=["']([^"']+)["']([^>]*)><\/a>/gi, function(match, url, attrs) {
+                return `<a href="${url}"${attrs}>${url}</a>`;
+            });
+            html = html.replace(/<a\s+href=["']([^"']+)["']/gi, function(match, url) {
+                if (url && !url.match(/^https?:\/\//i) && !url.startsWith('#') && !url.startsWith('/') && !url.startsWith('mailto:') && !url.startsWith('tel:')) {
+                    return match.replace(url, 'https://' + url);
+                }
+                return match;
+            });
+            storyHiddenInput.value = html;
         });
     }
 })();

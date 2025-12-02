@@ -391,12 +391,21 @@
     transition: all 0.3s ease;
 }
 
+.admin-form-group input:-webkit-autofill,
+.admin-form-group input:-webkit-autofill:hover,
+.admin-form-group input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 30px var(--admin-bg-primary) inset !important;
+    -webkit-text-fill-color: var(--admin-text-primary) !important;
+    border-color: var(--admin-border) !important;
+}
+
 .admin-form-group input:focus,
 .admin-form-group textarea:focus,
 .admin-form-group select:focus {
     outline: none;
     border-color: var(--admin-accent);
-    box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.2);
+    box-shadow: 0 0 0 2px rgba(30, 58, 95, 0.15);
+    background: var(--admin-bg-primary);
 }
 
 /* ============================================
@@ -1138,7 +1147,7 @@
 
 .admin-form-group input:valid:not(:placeholder-shown),
 .admin-form-group textarea:valid:not(:placeholder-shown) {
-    border-color: var(--admin-success);
+    border-color: var(--admin-border);
 }
 
 .admin-form-group .field-error {
@@ -1146,6 +1155,461 @@
     font-size: 0.875rem;
     margin-top: 0.25rem;
     display: none;
+}
+
+/* ============================================
+   QUILL EDITOR STYLING
+   ============================================ */
+
+.project-description-editor .ql-toolbar,
+.section-content-editor .ql-toolbar {
+    background: var(--admin-bg-secondary);
+    border: 1px solid var(--admin-border);
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    padding: 0.5rem;
+}
+
+.project-description-editor .ql-container,
+.section-content-editor .ql-container {
+    background: var(--admin-bg-primary);
+    border: 1px solid var(--admin-border);
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    color: var(--admin-text-primary);
+    min-height: 200px;
+}
+
+.project-description-editor .ql-editor {
+    color: #f5f5f5;
+    min-height: 200px;
+}
+
+/* Default text color for paragraphs */
+.project-description-editor .ql-editor p {
+    color: #f5f5f5;
+}
+
+/* CRITICAL: Inline styles should work, but we need to ensure they're not overridden */
+/* Use a more specific selector that doesn't interfere with inline styles */
+.project-description-editor .ql-editor > p,
+.project-description-editor .ql-editor > ul,
+.project-description-editor .ql-editor > ol {
+    color: #f5f5f5;
+}
+
+/* CRITICAL: Allow inline color styles to work - they have highest specificity */
+/* But we must ensure no !important rules override them */
+/* Inline styles (style="color: ...") have higher specificity than CSS rules */
+/* Only !important can override inline styles, so we don't use !important here */
+.project-description-editor .ql-editor span[style*="color"],
+.project-description-editor .ql-editor [style*="color"] {
+    /* Inline style attribute will take precedence naturally */
+    /* This empty rule ensures no other CSS overrides it */
+}
+
+.project-description-editor .ql-editor a {
+    color: var(--admin-accent) !important;
+    text-decoration: underline;
+}
+
+.project-description-editor .ql-editor strong {
+    font-weight: 600;
+    color: #f5f5f5;
+}
+
+/* Allow colored text in strong tags if they have inline color styles */
+/* Inline styles on strong tags will naturally override the color above */
+/* No need for special handling - inline styles have highest specificity */
+
+.project-description-editor .ql-editor.ql-blank::before {
+    color: var(--admin-text-secondary);
+    font-style: normal;
+}
+
+.project-description-editor .ql-stroke,
+.section-content-editor .ql-stroke {
+    stroke: #ffffff !important;
+}
+
+.project-description-editor .ql-fill,
+.section-content-editor .ql-fill {
+    fill: #ffffff !important;
+}
+
+/* Force all toolbar button icons to be white */
+.project-description-editor .ql-toolbar .ql-stroke,
+.section-content-editor .ql-toolbar .ql-stroke {
+    stroke: #ffffff !important;
+}
+
+.project-description-editor .ql-toolbar .ql-fill,
+.section-content-editor .ql-toolbar .ql-fill {
+    fill: #ffffff !important;
+}
+
+.project-description-editor .ql-toolbar button .ql-stroke,
+.section-content-editor .ql-toolbar button .ql-stroke {
+    stroke: #ffffff !important;
+}
+
+.project-description-editor .ql-toolbar button .ql-fill,
+.section-content-editor .ql-toolbar button .ql-fill {
+    fill: #ffffff !important;
+}
+
+.project-description-editor .ql-toolbar button svg,
+.section-content-editor .ql-toolbar button svg {
+    color: #ffffff !important;
+}
+
+.project-description-editor .ql-toolbar button svg .ql-stroke {
+    stroke: #ffffff !important;
+}
+
+.project-description-editor .ql-toolbar button svg .ql-fill {
+    fill: #ffffff !important;
+}
+
+.project-description-editor .ql-toolbar .ql-formats button .ql-stroke {
+    stroke: #ffffff !important;
+}
+
+.project-description-editor .ql-toolbar .ql-formats button .ql-fill {
+    fill: #ffffff !important;
+}
+
+.project-description-editor .ql-picker-label {
+    color: #ffffff !important;
+}
+
+.project-description-editor .ql-picker-label svg {
+    stroke: #ffffff !important;
+}
+
+.project-description-editor .ql-picker-label svg .ql-stroke {
+    stroke: #ffffff !important;
+}
+
+.project-description-editor .ql-picker-label svg .ql-fill {
+    fill: #ffffff !important;
+}
+
+.project-description-editor .ql-picker {
+    color: #ffffff;
+}
+
+.project-description-editor .ql-picker.ql-expanded .ql-picker-label {
+    color: #ffffff !important;
+}
+
+/* Color picker button icon */
+.project-description-editor .ql-color .ql-picker-label {
+    color: #ffffff !important;
+}
+
+.project-description-editor .ql-color .ql-picker-label svg {
+    stroke: #ffffff !important;
+}
+
+.project-description-editor .ql-color .ql-picker-label svg .ql-stroke {
+    stroke: #ffffff !important;
+}
+
+.project-description-editor .ql-color .ql-picker-label svg .ql-fill {
+    fill: #ffffff !important;
+}
+
+/* Hide the color preview swatch that shows below the A icon when not needed */
+.project-description-editor .ql-color .ql-picker-label::after {
+    display: none !important;
+}
+
+/* Style the color preview indicator properly */
+.project-description-editor .ql-color .ql-picker-label .ql-color-label {
+    display: none !important;
+}
+
+.project-description-editor .ql-toolbar button {
+    color: #ffffff !important;
+}
+
+.project-description-editor .ql-toolbar .ql-formats {
+    color: #ffffff !important;
+}
+
+.project-description-editor .ql-toolbar .ql-formats button {
+    color: #ffffff !important;
+}
+
+/* Text-based icons (B, I, U) */
+.project-description-editor .ql-toolbar button.ql-bold,
+.project-description-editor .ql-toolbar button.ql-italic,
+.project-description-editor .ql-toolbar button.ql-underline,
+.project-description-editor .ql-toolbar button.ql-link,
+.project-description-editor .ql-toolbar button.ql-list,
+.project-description-editor .ql-toolbar button.ql-clean {
+    color: #ffffff !important;
+}
+
+/* All SVG elements in toolbar */
+.project-description-editor .ql-toolbar svg {
+    color: #ffffff !important;
+}
+
+.project-description-editor .ql-toolbar svg * {
+    stroke: #ffffff !important;
+    fill: #ffffff !important;
+}
+
+/* Override any inline styles or default Quill styles */
+.project-description-editor .ql-toolbar .ql-stroke.ql-thin,
+.project-description-editor .ql-toolbar .ql-stroke-miter {
+    stroke: #ffffff !important;
+    stroke-width: 1 !important;
+}
+
+.project-description-editor .ql-toolbar button:hover,
+.project-description-editor .ql-toolbar button.ql-active {
+    color: var(--admin-accent);
+}
+
+.project-description-editor .ql-toolbar button:hover .ql-stroke,
+.project-description-editor .ql-toolbar button.ql-active .ql-stroke {
+    stroke: var(--admin-accent);
+}
+
+.project-description-editor .ql-toolbar button:hover .ql-fill,
+.project-description-editor .ql-toolbar button.ql-active .ql-fill {
+    fill: var(--admin-accent);
+}
+
+/* Hide picker options when not expanded */
+.ql-color:not(.ql-expanded) .ql-picker-options,
+.project-description-editor .ql-color:not(.ql-expanded) .ql-picker-options {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+}
+
+/* Color picker styling - Global overrides for all Quill color pickers */
+.ql-color.ql-expanded .ql-picker-options,
+.project-description-editor .ql-color.ql-expanded .ql-picker-options {
+    background: var(--admin-bg-secondary) !important;
+    background-color: var(--admin-bg-secondary) !important;
+    border: 1px solid var(--admin-border) !important;
+    border-radius: 8px !important;
+    padding: 0.75rem !important;
+    box-shadow: var(--admin-shadow-lg) !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 0.5rem !important;
+    width: auto !important;
+    min-width: 200px !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Force dark background on any Quill picker dropdown when expanded */
+.ql-picker.ql-expanded .ql-picker-options {
+    background: var(--admin-bg-secondary) !important;
+    background-color: var(--admin-bg-secondary) !important;
+}
+
+/* Hide all picker options by default */
+.ql-picker-options {
+    display: none !important;
+}
+
+/* Show picker options only when parent is expanded */
+.ql-picker.ql-expanded .ql-picker-options {
+    display: block !important;
+}
+
+.project-description-editor .ql-color .ql-picker-item {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 6px !important;
+    margin: 0 !important;
+    border: 2px solid var(--admin-border) !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    flex-shrink: 0 !important;
+    box-sizing: border-box !important;
+    pointer-events: auto !important;
+    position: relative !important;
+    z-index: 10 !important;
+}
+
+.project-description-editor .ql-color .ql-picker-item:hover {
+    transform: scale(1.1) !important;
+    border-color: var(--admin-accent) !important;
+    box-shadow: 0 0 0 2px rgba(30, 58, 95, 0.3) !important;
+}
+
+.ql-color .ql-picker-item[data-value=""],
+.project-description-editor .ql-color .ql-picker-item[data-value=""] {
+    background: var(--admin-bg-tertiary) !important;
+    background-color: var(--admin-bg-tertiary) !important;
+    border: 2px solid var(--admin-border) !important;
+    color: var(--admin-text-primary) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    width: 100% !important;
+    height: 32px !important;
+    padding: 6px 12px !important;
+    min-width: auto !important;
+    margin-bottom: 0.25rem !important;
+}
+
+.project-description-editor .ql-color .ql-picker-item[data-value=""]:hover {
+    background: var(--admin-bg-tertiary) !important;
+    border-color: var(--admin-accent) !important;
+    color: var(--admin-accent) !important;
+    transform: none !important;
+}
+
+/* Ensure color swatches are visible */
+.project-description-editor .ql-color .ql-picker-item[data-value]:not([data-value=""]) {
+    display: inline-block !important;
+}
+
+.project-description-editor .ql-editor a {
+    color: var(--admin-accent) !important;
+    text-decoration: underline;
+}
+
+.project-description-editor .ql-editor a:hover {
+    color: var(--admin-accent-hover) !important;
+}
+
+/* Keep brand color for bold links in editor */
+.project-description-editor .ql-editor a strong,
+.project-description-editor .ql-editor strong a {
+    color: var(--admin-accent) !important;
+    font-weight: 600;
+    text-decoration: underline;
+}
+
+.project-description-editor .ql-editor a strong:hover,
+.project-description-editor .ql-editor strong a:hover {
+    color: var(--admin-accent-hover) !important;
+}
+
+.project-description-editor .ql-editor strong {
+    font-weight: 600;
+    color: var(--admin-text-primary);
+}
+
+.project-description-editor .ql-editor p {
+    margin-bottom: 0.75rem;
+    line-height: 1.6;
+}
+
+.project-description-editor .ql-editor ul,
+.project-description-editor .ql-editor ol {
+    margin-bottom: 0.75rem;
+    padding-left: 1.5rem;
+}
+
+.project-description-editor .ql-editor li {
+    margin-bottom: 0.25rem;
+}
+
+/* Section content editor - share styles with project description editor */
+.section-content-editor,
+.project-description-editor {
+    background: var(--admin-bg-secondary);
+    border: 1px solid var(--admin-border);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* Section content editor - make text visible in dark mode (identical to project description editor) */
+.section-content-editor .ql-editor {
+    color: #f5f5f5 !important;
+    min-height: 200px;
+}
+
+/* Default text color for paragraphs */
+.section-content-editor .ql-editor p {
+    color: #f5f5f5 !important;
+}
+
+/* CRITICAL: Inline styles should work, but we need to ensure they're not overridden */
+.section-content-editor .ql-editor > p,
+.section-content-editor .ql-editor > ul,
+.section-content-editor .ql-editor > ol {
+    color: #f5f5f5 !important;
+}
+
+/* CRITICAL: Allow inline color styles to work - they have highest specificity */
+.section-content-editor .ql-editor span[style*="color"],
+.section-content-editor .ql-editor [style*="color"] {
+    /* Inline style attribute will take precedence naturally */
+    /* This empty rule ensures no other CSS overrides it */
+}
+
+.section-content-editor .ql-editor a {
+    color: var(--admin-accent) !important;
+    text-decoration: underline;
+}
+
+.section-content-editor .ql-editor a:hover {
+    color: var(--admin-accent-hover) !important;
+}
+
+/* Keep brand color for bold links in editor */
+.section-content-editor .ql-editor a strong,
+.section-content-editor .ql-editor strong a {
+    color: var(--admin-accent) !important;
+    font-weight: 600;
+    text-decoration: underline;
+}
+
+.section-content-editor .ql-editor a strong:hover,
+.section-content-editor .ql-editor strong a:hover {
+    color: var(--admin-accent-hover) !important;
+}
+
+.section-content-editor .ql-editor strong {
+    font-weight: 600;
+    color: #f5f5f5;
+}
+
+/* Allow colored text in strong tags if they have inline color styles */
+/* Inline styles on strong tags will naturally override the color above */
+/* No need for special handling - inline styles have highest specificity */
+
+.section-content-editor .ql-editor.ql-blank::before {
+    color: var(--admin-text-secondary);
+    font-style: normal;
+}
+
+.section-content-editor .ql-editor p {
+    margin-bottom: 0.75rem;
+    line-height: 1.6;
+}
+
+.section-content-editor .ql-editor ul,
+.section-content-editor .ql-editor ol {
+    margin-bottom: 0.75rem;
+    padding-left: 1.5rem;
+}
+
+.section-content-editor .ql-editor li {
+    margin-bottom: 0.25rem;
+}
+
+/* Allow inline colors in section content editor */
+.section-content-editor .ql-editor a[style*="color"],
+.section-content-editor .ql-editor a span[style*="color"] {
+    color: unset !important;
 }
 
 .admin-form-group input:invalid:not(:focus):not(:placeholder-shown) ~ .field-error,

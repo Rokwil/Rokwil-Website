@@ -621,11 +621,18 @@
                 if (data.aboutStory.content && data.aboutStory.content.trim()) {
                     // Use content field directly (this is what gets saved from the admin form)
                     const content = data.aboutStory.content.trim();
-                    // Split content by double newlines or single newlines to create paragraphs
+                    // Split content by double newlines to create paragraphs
+                    // Single newlines will be converted to <br> tags within paragraphs
                     if (content.includes('\n\n')) {
-                        paragraphs = content.split(/\n\s*\n/).filter(p => p.trim());
+                        // Split by double newlines for paragraphs
+                        const paraSections = content.split(/\n\s*\n/).filter(p => p.trim());
+                        paragraphs = paraSections.map(section => {
+                            // Within each paragraph section, replace single newlines with <br>
+                            return section.replace(/\n/g, '<br>');
+                        });
                     } else if (content.includes('\n')) {
-                        paragraphs = content.split('\n').filter(p => p.trim());
+                        // Only single newlines - treat as one paragraph with <br> tags
+                        paragraphs = [content.replace(/\n/g, '<br>')];
                     } else {
                         paragraphs = [content];
                     }
@@ -1113,14 +1120,109 @@
                     const h2 = card.querySelector('.project-details h2');
                     if (h2 && project.name) h2.textContent = project.name;
                     
-                    // Update description paragraphs
-                    if (project.description && Array.isArray(project.description)) {
-                        const paragraphs = card.querySelectorAll('.project-details > p');
-                        paragraphs.forEach((p, pIdx) => {
-                            if (pIdx < project.description.length) {
-                                p.textContent = project.description[pIdx];
+                    // Update description - support HTML or array of paragraphs
+                    if (project.description) {
+                        const descriptionContainer = card.querySelector('.project-details');
+                        if (descriptionContainer) {
+                            // Get all direct child paragraphs (not nested ones)
+                            const existingParagraphs = Array.from(descriptionContainer.children).filter(el => el.tagName === 'P');
+                            
+                            // Check if description is HTML string or array
+                            if (typeof project.description === 'string' && (project.description.includes('<') || project.description.includes('&lt;'))) {
+                                // HTML content - replace existing paragraphs with HTML
+                                if (existingParagraphs.length > 0) {
+                                    // Replace first paragraph with HTML, remove others
+                                    existingParagraphs[0].innerHTML = project.description;
+                                    for (let i = 1; i < existingParagraphs.length; i++) {
+                                        existingParagraphs[i].remove();
+                                    }
+                                } else {
+                                    // No paragraphs exist, create one
+                                    const p = document.createElement('p');
+                                    p.innerHTML = project.description;
+                                    const insertBefore = descriptionContainer.querySelector('.project-features') || descriptionContainer.querySelector('.project-sections') || descriptionContainer.querySelector('.project-meta');
+                                    if (insertBefore) {
+                                        descriptionContainer.insertBefore(p, insertBefore);
+                                    } else {
+                                        descriptionContainer.appendChild(p);
+                                    }
+                                }
+                            } else if (Array.isArray(project.description)) {
+                                // Array of paragraphs - update existing or create new
+                                existingParagraphs.forEach((p, pIdx) => {
+                                    if (pIdx < project.description.length) {
+                                        // Check if paragraph contains HTML
+                                        const descText = project.description[pIdx];
+                                        if (typeof descText === 'string' && (descText.includes('<') || descText.includes('&lt;'))) {
+                                            p.innerHTML = descText;
+                                        } else {
+                                            p.textContent = descText;
+                                        }
+                                    }
+                                });
+                                // If we have more description items than paragraphs, create new ones
+                                if (project.description.length > existingParagraphs.length) {
+                                    for (let i = existingParagraphs.length; i < project.description.length; i++) {
+                                        const p = document.createElement('p');
+                                        const descText = project.description[i];
+                                        if (typeof descText === 'string' && (descText.includes('<') || descText.includes('&lt;'))) {
+                                            p.innerHTML = descText;
+                                        } else {
+                                            p.textContent = descText;
+                                        }
+                                        const insertBefore = descriptionContainer.querySelector('.project-features') || descriptionContainer.querySelector('.project-sections');
+                                        if (insertBefore) {
+                                            descriptionContainer.insertBefore(p, insertBefore);
+                                        } else {
+                                            descriptionContainer.appendChild(p);
+                                        }
+                                    }
+                                }
+                            } else if (typeof project.description === 'string') {
+                                // Plain string - treat as HTML if it contains tags, otherwise as plain text
+                                if (existingParagraphs.length > 0) {
+                                    if (project.description.includes('<') || project.description.includes('&lt;')) {
+                                        existingParagraphs[0].innerHTML = project.description;
+                                    } else {
+                                        existingParagraphs[0].textContent = project.description;
+                                    }
+                                    for (let i = 1; i < existingParagraphs.length; i++) {
+                                        existingParagraphs[i].remove();
+                                    }
+                                } else {
+                                    // Create new paragraph
+                                    const p = document.createElement('p');
+                                    if (project.description.includes('<') || project.description.includes('&lt;')) {
+                                        p.innerHTML = project.description;
+                                    } else {
+                                        p.textContent = project.description;
+                                    }
+                                    const insertBefore = descriptionContainer.querySelector('.project-features') || descriptionContainer.querySelector('.project-sections') || descriptionContainer.querySelector('.project-meta');
+                                    if (insertBefore) {
+                                        descriptionContainer.insertBefore(p, insertBefore);
+                                    } else {
+                                        descriptionContainer.appendChild(p);
+                                    }
+                                }
                             }
-                        });
+                            
+                            // Fix any links in the description to ensure they're absolute URLs
+                            const links = descriptionContainer.querySelectorAll('p a[href]');
+                            links.forEach(link => {
+                                const href = link.getAttribute('href');
+                                // If it's a relative URL that looks like a domain (not starting with /, #, mailto:, tel:)
+                                if (href && !href.match(/^https?:\/\//i) && !href.startsWith('#') && !href.startsWith('/') && !href.startsWith('mailto:') && !href.startsWith('tel:') && href.includes('.')) {
+                                    link.setAttribute('href', 'https://' + href);
+                                }
+                                // Ensure external links open in new tab
+                                if (href && (href.startsWith('http://') || href.startsWith('https://'))) {
+                                    if (!link.hasAttribute('target')) {
+                                        link.setAttribute('target', '_blank');
+                                        link.setAttribute('rel', 'noopener noreferrer');
+                                    }
+                                }
+                            });
+                        }
                     }
                     
                     // Update images
@@ -1183,21 +1285,118 @@
                                     const sectionIcon = section.icon || 'bi-diagram-3-fill';
                                     heading.innerHTML = `<i class="bi ${sectionIcon}"></i>${section.title || ''}`;
                                     
-                                    // Update next element (could be ul or p)
+                                    console.log(`Updating section ${sIdx}: "${section.title}"`, {
+                                        hasContent: !!section.content,
+                                        contentType: typeof section.content,
+                                        isArray: Array.isArray(section.content),
+                                        contentPreview: typeof section.content === 'string' ? section.content.substring(0, 100) : section.content
+                                    });
+                                    
+                                    // Update next element (could be ul, p, or div with class project-section-content)
                                     const nextEl = heading.nextElementSibling;
-                                    if (nextEl) {
-                                        if (nextEl.tagName === 'UL' && Array.isArray(section.content)) {
+                                    console.log(`  Next element:`, nextEl ? { tagName: nextEl.tagName, className: nextEl.className } : 'NONE');
+                                    
+                                    // Check if content is HTML (contains tags)
+                                    const isHTML = typeof section.content === 'string' && section.content && (section.content.includes('<') || section.content.includes('&lt;'));
+                                    
+                                    if (nextEl && (nextEl.tagName === 'P' || nextEl.tagName === 'UL' || nextEl.classList.contains('project-section-content'))) {
+                                        // Existing content element found
+                                        if (isHTML) {
+                                            // HTML content - always use innerHTML
+                                            if (nextEl.tagName === 'UL') {
+                                                // Replace UL with P for HTML content
+                                                const p = document.createElement('p');
+                                                p.innerHTML = section.content;
+                                                nextEl.replaceWith(p);
+                                                // Ensure links open in new tab
+                                                const links = p.querySelectorAll('a[href]');
+                                                links.forEach(link => {
+                                                    const href = link.getAttribute('href');
+                                                    if (href && (href.startsWith('http://') || href.startsWith('https://')) && !link.getAttribute('target')) {
+                                                        link.setAttribute('target', '_blank');
+                                                        link.setAttribute('rel', 'noopener noreferrer');
+                                                    }
+                                                });
+                                            } else {
+                                                // P or div - update innerHTML
+                                                nextEl.innerHTML = section.content;
+                                                // Ensure links open in new tab
+                                                const links = nextEl.querySelectorAll('a[href]');
+                                                links.forEach(link => {
+                                                    const href = link.getAttribute('href');
+                                                    if (href && (href.startsWith('http://') || href.startsWith('https://')) && !link.getAttribute('target')) {
+                                                        link.setAttribute('target', '_blank');
+                                                        link.setAttribute('rel', 'noopener noreferrer');
+                                                    }
+                                                });
+                                            }
+                                        } else if (nextEl.tagName === 'UL' && Array.isArray(section.content)) {
+                                            // Array content for UL - update list items
                                             nextEl.innerHTML = '';
                                             section.content.forEach(content => {
                                                 const li = document.createElement('li');
                                                 li.innerHTML = content;
                                                 nextEl.appendChild(li);
                                             });
-                                        } else if (nextEl.tagName === 'P') {
-                                            nextEl.textContent = Array.isArray(section.content) 
-                                                ? section.content.join('\n') 
-                                                : section.content;
+                                        } else if (nextEl.tagName === 'P' || nextEl.classList.contains('project-section-content')) {
+                                            // Plain text or array for P element
+                                            if (Array.isArray(section.content)) {
+                                                // Check if array items contain HTML
+                                                const hasHTML = section.content.some(item => item && (item.includes('<') || item.includes('&lt;')));
+                                                if (hasHTML) {
+                                                    nextEl.innerHTML = section.content.join('<br>');
+                                                } else {
+                                                    nextEl.textContent = section.content.join('\n');
+                                                }
+                                            } else {
+                                                // Plain string - check if it contains HTML
+                                                if (section.content && (section.content.includes('<') || section.content.includes('&lt;'))) {
+                                                    nextEl.innerHTML = section.content;
+                                                } else {
+                                                    nextEl.textContent = section.content || '';
+                                                }
+                                            }
                                         }
+                                    } else {
+                                        // No next element exists or wrong type - create one
+                                        let contentEl;
+                                        if (isHTML) {
+                                            // HTML content - use paragraph
+                                            contentEl = document.createElement('p');
+                                            contentEl.innerHTML = section.content;
+                                        } else if (Array.isArray(section.content)) {
+                                            // Array content - use list
+                                            contentEl = document.createElement('ul');
+                                            contentEl.className = 'tenant-list';
+                                            section.content.forEach(contentItem => {
+                                                const li = document.createElement('li');
+                                                li.innerHTML = contentItem || '';
+                                                contentEl.appendChild(li);
+                                            });
+                                        } else {
+                                            // Plain text - use paragraph
+                                            contentEl = document.createElement('p');
+                                            contentEl.textContent = section.content || '';
+                                        }
+                                        
+                                        // Insert after heading
+                                        if (nextEl) {
+                                            // Replace wrong type element
+                                            nextEl.replaceWith(contentEl);
+                                        } else {
+                                            // Insert new element
+                                            heading.insertAdjacentElement('afterend', contentEl);
+                                        }
+                                        
+                                        // Ensure links open in new tab
+                                        const links = contentEl.querySelectorAll('a[href]');
+                                        links.forEach(link => {
+                                            const href = link.getAttribute('href');
+                                            if (href && (href.startsWith('http://') || href.startsWith('https://')) && !link.getAttribute('target')) {
+                                                link.setAttribute('target', '_blank');
+                                                link.setAttribute('rel', 'noopener noreferrer');
+                                            }
+                                        });
                                     }
                                 }
                             });
@@ -1231,21 +1430,40 @@
                                     heading.innerHTML = `<i class="bi ${sectionIcon}"></i>${section.title || ''}`;
                                     
                                     // Create content element
-                                    const content = Array.isArray(section.content) ? section.content : [section.content];
+                                    // Check if content is HTML (contains tags)
+                                    const isHTML = typeof section.content === 'string' && (section.content.includes('<') || section.content.includes('&lt;'));
                                     let contentEl;
                                     
-                                    // Determine if content should be a list (if it has multiple items) or paragraph
-                                    if (content.length > 1 || (content.length === 1 && content[0].includes('<li>') || content[0].includes('•'))) {
-                                        contentEl = document.createElement('ul');
-                                        contentEl.className = 'tenant-list';
-                                        content.forEach(contentItem => {
-                                            const li = document.createElement('li');
-                                            li.innerHTML = contentItem;
-                                            contentEl.appendChild(li);
+                                    if (isHTML) {
+                                        // HTML content - always use paragraph and render HTML
+                                        contentEl = document.createElement('p');
+                                        contentEl.innerHTML = section.content;
+                                        // Ensure links open in new tab
+                                        const links = contentEl.querySelectorAll('a[href]');
+                                        links.forEach(link => {
+                                            const href = link.getAttribute('href');
+                                            if (href && (href.startsWith('http://') || href.startsWith('https://')) && !link.getAttribute('target')) {
+                                                link.setAttribute('target', '_blank');
+                                                link.setAttribute('rel', 'noopener noreferrer');
+                                            }
                                         });
                                     } else {
-                                        contentEl = document.createElement('p');
-                                        contentEl.textContent = content[0] || '';
+                                        // Legacy format - array or plain text
+                                        const content = Array.isArray(section.content) ? section.content : [section.content];
+                                        
+                                        // Determine if content should be a list (if it has multiple items) or paragraph
+                                        if (content.length > 1 || (content.length === 1 && content[0].includes('<li>') || content[0].includes('•'))) {
+                                            contentEl = document.createElement('ul');
+                                            contentEl.className = 'tenant-list';
+                                            content.forEach(contentItem => {
+                                                const li = document.createElement('li');
+                                                li.innerHTML = contentItem;
+                                                contentEl.appendChild(li);
+                                            });
+                                        } else {
+                                            contentEl = document.createElement('p');
+                                            contentEl.textContent = content[0] || '';
+                                        }
                                     }
                                     
                                     // Insert into DOM
@@ -1414,7 +1632,18 @@
             phone.textContent = footerData.phone;
             phone.href = `tel:${footerData.phone.replace(/\s/g, '')}`;
         }
-        if (copyright && footerData.copyright) copyright.textContent = footerData.copyright;
+        if (copyright && footerData.copyright) {
+            // Preserve the Admin link if it exists, otherwise add it
+            const adminLink = copyright.querySelector('a[href*="admin/login"]');
+            if (adminLink) {
+                // Admin link exists, update copyright text but keep the link
+                const copyrightText = footerData.copyright.replace(/\s*\|\s*Admin.*$/, '').trim();
+                copyright.innerHTML = copyrightText + ' | ' + adminLink.outerHTML;
+            } else {
+                // No admin link, add it
+                copyright.innerHTML = footerData.copyright + ' | <a href="admin/login.html" style="color: rgba(255, 255, 255, 0.3); font-size: 0.7rem; text-decoration: none;">Admin</a>';
+            }
+        }
     }
     
     // Determine current page and load appropriate content

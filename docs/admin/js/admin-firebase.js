@@ -737,10 +737,16 @@
         let imagePreview = null;
         const heroItem = imageUrlInput.closest('.hero-image-item');
         const projectItem = imageUrlInput.closest('.project-image-item');
+        const showcaseItem = imageUrlInput.closest('.showcase-image-item');
+        const newsItem = imageUrlInput.closest('.news-image-item');
         if (heroItem) {
             imagePreview = heroItem.querySelector('.image-preview');
         } else if (projectItem) {
             imagePreview = projectItem.querySelector('.project-image-preview');
+        } else if (showcaseItem) {
+            imagePreview = showcaseItem.querySelector('.showcase-image-preview');
+        } else if (newsItem) {
+            imagePreview = newsItem.querySelector('.news-image-preview');
         } else {
             // Try to find by ID pattern
             const inputId = imageUrlInput.id || '';
@@ -756,6 +762,8 @@
                 imagePreview = document.getElementById('contact_hero_image_preview');
             } else if (inputId.includes('about_story_image')) {
                 imagePreview = document.getElementById('about_story_image_preview');
+            } else if (inputId.includes('video_poster')) {
+                imagePreview = document.getElementById('video_poster_preview');
             }
         }
         

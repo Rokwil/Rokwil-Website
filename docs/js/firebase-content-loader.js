@@ -1646,6 +1646,355 @@
         }
     }
     
+    // Load gallery page content
+    async function loadGalleryPage() {
+        try {
+            console.log('Loading gallery page content from Firebase...');
+            const data = await loadPageContent('gallery');
+            console.log('Gallery data loaded:', data);
+            
+            if (data && data.projects) {
+                console.log('📦 Projects found:', Object.keys(data.projects));
+                console.log('📋 Project order from Firebase:', data.projectOrder);
+                
+                // Use projectOrder if available and valid, otherwise use Object.keys
+                let projectOrder = data.projectOrder;
+                if (!projectOrder || !Array.isArray(projectOrder) || projectOrder.length === 0) {
+                    console.warn('⚠️ Invalid or missing projectOrder, using Object.keys');
+                    projectOrder = Object.keys(data.projects);
+                }
+                
+                // Ensure all projects are in the order (add any missing ones at the end)
+                const allProjectKeys = Object.keys(data.projects);
+                const finalOrder = projectOrder.filter(key => allProjectKeys.includes(key))
+                    .concat(allProjectKeys.filter(key => !projectOrder.includes(key)));
+                
+                console.log('✅ Using project order for rendering:', finalOrder);
+                console.log('📊 Projects to render:', finalOrder.map(key => ({
+                    key: key,
+                    title: data.projects[key]?.title || key,
+                    itemCount: data.projects[key]?.items?.length || 0,
+                    itemOrder: data.projects[key]?.items ? data.projects[key].items.map((i, idx) => `${idx + 1}. ${i.url || i.type}`).slice(0, 3) : [] // Show first 3 items
+                })));
+                
+                // Count total items
+                let totalItems = 0;
+                Object.values(data.projects).forEach(project => {
+                    if (project.items) totalItems += project.items.length;
+                });
+                console.log('Total items across all projects:', totalItems);
+                
+                renderGallery(data.projects, finalOrder);
+            } else {
+                console.warn('No projects found in gallery data. Data structure:', data);
+                console.log('Keeping static gallery content as fallback');
+            }
+        } catch (error) {
+            console.error('Error loading gallery:', error);
+            console.log('Keeping static gallery content as fallback');
+        }
+    }
+    
+    // Render filter buttons in the correct order
+    function renderFilterButtons(projects, projectOrder) {
+        const filterContainer = document.querySelector('.gallery-filters');
+        if (!filterContainer) {
+            console.warn('Filter buttons container not found, skipping filter button rendering');
+            return;
+        }
+        
+        console.log('🔄 Rendering filter buttons in order:', projectOrder);
+        
+        // Start with "All Projects" button
+        let filterHTML = `
+            <button class="gallery-filter-btn active" data-filter="all">
+                <i class="bi bi-grid-3x3-gap"></i> All Projects
+            </button>
+        `;
+        
+        // Add project buttons in the order from Firebase
+        projectOrder.forEach(projectKey => {
+            const project = projects[projectKey];
+            if (!project) {
+                console.warn('Project not found for filter button:', projectKey);
+                return;
+            }
+            
+            // Skip if project has no items (don't show empty projects in filters)
+            if (!project.items || project.items.length === 0) {
+                console.log('Skipping filter button for project with no items:', projectKey);
+                return;
+            }
+            
+            // Use project's title and icon from Firebase, with fallbacks
+            const title = project.title || projectKey;
+            const icon = project.icon || 'bi-folder';
+            const filter = projectKey;
+            
+            filterHTML += `
+                <button class="gallery-filter-btn" data-filter="${filter}">
+                    <i class="bi ${icon}"></i> ${title}
+                </button>
+            `;
+        });
+        
+        filterContainer.innerHTML = filterHTML;
+        console.log('✅ Filter buttons rendered in order');
+    }
+    
+    // Render gallery from Firebase data
+    function renderGallery(projects, projectOrder) {
+        const galleryProjects = document.querySelector('.gallery-projects');
+        if (!galleryProjects) {
+            console.error('Gallery projects container not found!');
+            return;
+        }
+        
+        console.log('Rendering gallery, clearing existing content...');
+        
+        // Render filter buttons in the correct order
+        renderFilterButtons(projects, projectOrder);
+        
+        // Clear existing content
+        galleryProjects.innerHTML = '';
+        
+        let renderedCount = 0;
+        
+        // Render each project in the specified order
+        projectOrder.forEach(projectKey => {
+            const project = projects[projectKey];
+            if (!project) {
+                console.warn('Project not found:', projectKey);
+                return;
+            }
+            
+            if (!project.items || project.items.length === 0) {
+                console.log('Skipping project with no items:', projectKey);
+                return;
+            }
+            
+            console.log(`Rendering project: ${projectKey} with ${project.items.length} items`);
+            renderedCount++;
+            
+            const projectDiv = document.createElement('div');
+            projectDiv.className = 'gallery-project';
+            projectDiv.setAttribute('data-project', projectKey);
+            
+            const header = document.createElement('div');
+            header.className = 'gallery-project-header';
+            header.innerHTML = `
+                <h2 class="gallery-project-title">${project.title || projectKey}</h2>
+                <p class="gallery-project-subtitle">${project.subtitle || ''}</p>
+            `;
+            
+            const grid = document.createElement('div');
+            grid.className = 'gallery-grid';
+            
+            // Render items in the exact order they appear in the array
+            // IMPORTANT: Firestore preserves array order, so we use the array directly
+            const itemsToRender = Array.isArray(project.items) ? project.items : [];
+            console.log(`📸 Rendering ${itemsToRender.length} items for project "${projectKey}" in order:`, itemsToRender.map((i, idx) => `${idx + 1}. ${i.url || i.type}`));
+            
+            // Ensure we iterate in array order (forEach preserves order)
+            itemsToRender.forEach((item, itemIndex) => {
+                const galleryItem = document.createElement('div');
+                galleryItem.className = 'gallery-item';
+                galleryItem.setAttribute('data-type', item.type);
+                
+                // Normalize image/video URLs
+                let mediaUrl = item.url;
+                if (!mediaUrl) {
+                    console.warn(`Item in project ${projectKey} has no URL:`, item);
+                    return;
+                }
+                
+                // Use the normalizeImagePath/normalizeVideoPath functions from this file
+                if (item.type === 'video') {
+                    mediaUrl = normalizeVideoPath(mediaUrl);
+                } else {
+                    mediaUrl = normalizeImagePath(mediaUrl);
+                }
+                
+                if (item.type === 'video') {
+                    galleryItem.innerHTML = `
+                        <video preload="metadata" poster="${item.poster || ''}">
+                            <source src="${mediaUrl}" type="video/mp4">
+                        </video>
+                        <div class="gallery-item-overlay">
+                            <i class="bi bi-play-circle-fill"></i>
+                        </div>
+                    `;
+                } else {
+                    galleryItem.innerHTML = `
+                        <img src="${mediaUrl}" alt="${project.title || ''}" loading="lazy" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect fill=%27%23ccc%27 width=%27100%27 height=%27100%27/%3E%3Ctext x=%2750%27 y=%2750%27 text-anchor=%27middle%27 dy=%27.3em%27 fill=%27%23999%27%3EImage%3C/text%3E%3C/svg%3E';">
+                        <div class="gallery-item-overlay">
+                            <i class="bi bi-zoom-in"></i>
+                        </div>
+                    `;
+                }
+                
+                grid.appendChild(galleryItem);
+            });
+            
+            projectDiv.appendChild(header);
+            projectDiv.appendChild(grid);
+            galleryProjects.appendChild(projectDiv);
+        });
+        
+        console.log(`Gallery rendered: ${renderedCount} projects with items`);
+        
+        if (renderedCount === 0) {
+            console.warn('⚠️ No projects were rendered! This might mean:');
+            console.warn('1. Projects have no items');
+            console.warn('2. Data structure is incorrect');
+            console.warn('3. Check browser console for errors above');
+        }
+        
+        // Re-initialize gallery JavaScript after a short delay to ensure DOM is ready
+        setTimeout(() => {
+            console.log('Re-initializing gallery functionality...');
+            // Call galleryInit if it exists to re-setup all functionality
+            if (window.galleryInit) {
+                window.galleryInit();
+                console.log('Gallery functionality re-initialized');
+            } else {
+                console.warn('window.galleryInit not found, using fallback');
+                // Fallback: Re-setup filter buttons to match rendered projects
+                const filterButtons = document.querySelectorAll('.gallery-filter-btn');
+                const galleryProjects = document.querySelectorAll('.gallery-project');
+                
+                filterButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        const filter = this.getAttribute('data-filter');
+                        
+                        filterButtons.forEach(btn => btn.classList.remove('active'));
+                        this.classList.add('active');
+                        
+                        galleryProjects.forEach(project => {
+                            const projectType = project.getAttribute('data-project');
+                            
+                            if (filter === 'all') {
+                                project.classList.remove('hidden');
+                            } else if (filter === 'other' && !['keystone', 'judges-court', 'aquelle', 'videos'].includes(projectType)) {
+                                project.classList.remove('hidden');
+                            } else if (projectType === filter) {
+                                project.classList.remove('hidden');
+                            } else {
+                                project.classList.add('hidden');
+                            }
+                        });
+                    });
+                });
+                
+                // Re-setup lightbox functionality
+                const galleryItems = document.querySelectorAll('.gallery-item');
+                const lightbox = document.getElementById('lightbox');
+                const lightboxImage = document.getElementById('lightboxImage');
+                const lightboxVideo = document.getElementById('lightboxVideo');
+                const lightboxClose = document.getElementById('lightboxClose');
+                const lightboxNext = document.getElementById('lightboxNext');
+                const lightboxPrev = document.getElementById('lightboxPrev');
+                
+                let currentIndex = 0;
+                let currentItems = [];
+                
+                function openLightbox(index, items) {
+                    currentIndex = index;
+                    currentItems = items;
+                    if (lightbox) lightbox.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                    showItem(index);
+                }
+                
+                function closeLightbox() {
+                    if (lightbox) lightbox.classList.remove('active');
+                    document.body.style.overflow = '';
+                    if (lightboxVideo) {
+                        lightboxVideo.pause();
+                        lightboxVideo.currentTime = 0;
+                    }
+                }
+                
+                function showItem(index) {
+                    if (index < 0 || index >= currentItems.length) return;
+                    
+                    const item = currentItems[index];
+                    const type = item.getAttribute('data-type');
+                    
+                    if (type === 'video') {
+                        const video = item.querySelector('video');
+                        const source = video ? video.querySelector('source') : null;
+                        if (lightboxVideo && source) {
+                            lightboxVideo.src = source.src;
+                            lightboxVideo.style.display = 'block';
+                            if (lightboxImage) lightboxImage.style.display = 'none';
+                            lightboxVideo.load();
+                        }
+                    } else {
+                        const img = item.querySelector('img');
+                        if (lightboxImage && img) {
+                            lightboxImage.src = img.src;
+                            lightboxImage.alt = img.alt;
+                            lightboxImage.style.display = 'block';
+                            if (lightboxVideo) lightboxVideo.style.display = 'none';
+                        }
+                    }
+                    
+                    currentIndex = index;
+                }
+                
+                function showNext() {
+                    const nextIndex = (currentIndex + 1) % currentItems.length;
+                    showItem(nextIndex);
+                }
+                
+                function showPrev() {
+                    const prevIndex = (currentIndex - 1 + currentItems.length) % currentItems.length;
+                    showItem(prevIndex);
+                }
+                
+                galleryItems.forEach((item, index) => {
+                    item.addEventListener('click', function() {
+                        const project = this.closest('.gallery-project');
+                        const projectItems = Array.from(project.querySelectorAll('.gallery-item'));
+                        const projectIndex = projectItems.indexOf(this);
+                        openLightbox(projectIndex, projectItems);
+                    });
+                });
+                
+                if (lightboxClose) {
+                    lightboxClose.addEventListener('click', closeLightbox);
+                }
+                if (lightboxNext) {
+                    lightboxNext.addEventListener('click', showNext);
+                }
+                if (lightboxPrev) {
+                    lightboxPrev.addEventListener('click', showPrev);
+                }
+                
+                if (lightbox) {
+                    lightbox.addEventListener('click', function(e) {
+                        if (e.target === lightbox) {
+                            closeLightbox();
+                        }
+                    });
+                }
+                
+                document.addEventListener('keydown', function(e) {
+                    if (!lightbox || !lightbox.classList.contains('active')) return;
+                    
+                    if (e.key === 'Escape') {
+                        closeLightbox();
+                    } else if (e.key === 'ArrowRight') {
+                        showNext();
+                    } else if (e.key === 'ArrowLeft') {
+                        showPrev();
+                    }
+                });
+            }
+        }, 100);
+    }
+    
     // Determine current page and load appropriate content
     document.addEventListener('DOMContentLoaded', function() {
         const currentPage = window.location.pathname.split('/').pop() || 'index.html';
@@ -1663,6 +2012,9 @@
         } else if (currentPage === 'contact.html' || currentPage === 'contact') {
             console.log('Loading contact page...');
             loadContactPage();
+        } else if (currentPage.includes('gallery')) {
+            console.log('Loading gallery page...');
+            loadGalleryPage();
         }
         
         // Load footer on all pages
@@ -1679,6 +2031,11 @@
         if (currentPage === 'about.html' || currentPage === 'about') {
             console.log('Loading about page (DOM already loaded)...');
             loadAboutPage();
+        }
+        
+        if (currentPage.includes('gallery')) {
+            console.log('Loading gallery page (DOM already loaded)...');
+            loadGalleryPage();
         }
     }
 })();

@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="View all images and videos from Rokwil Property Development projects. Explore our portfolio organized by project." />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://rokwil.github.io/Rokwil-Website/gallery.html" />
+    <meta property="og:title" content="Project Gallery - Rokwil Property Development" />
+    <meta property="og:description" content="View all images and videos from Rokwil Property Development projects." />
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://rokwil.github.io/Rokwil-Website/gallery.html" />
+    <meta property="twitter:title" content="Project Gallery - Rokwil Property Development" />
+    <meta property="twitter:description" content="View all images and videos from Rokwil Property Development projects." />
+    
+    <title>Project Gallery - Rokwil Property Development</title>
+    <link rel="stylesheet" href="css/site.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- WIP Disclaimer Modal -->
+    <div class="wip-disclaimer-overlay" id="wipDisclaimer">
+        <div class="wip-disclaimer-modal">
+            <div class="wip-disclaimer-header">
+                <div class="wip-disclaimer-icon"><i class="bi bi-cone-striped"></i></div>
+                <h2>Website Under Construction</h2>
+            </div>
+            <div class="wip-disclaimer-content">
+                <p><strong>This website is currently a work in progress.</strong></p>
+                <p>Please be aware that:</p>
+                <ul>
+                    <li>Some information may be incorrect or incomplete</li>
+                    <li>Certain statements and details may be placeholders or examples</li>
+                    <li>Content is subject to change as development continues</li>
+                    <li>Features and functionality may not be fully operational</li>
+                </ul>
+                <p>We appreciate your understanding as we continue to improve and finalize the website.</p>
+            </div>
+            <div class="wip-disclaimer-actions">
+                <button class="wip-disclaimer-btn wip-disclaimer-btn-accept" id="acceptDisclaimer">
+                    I Understand, Continue
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <a href="index.html">
+                    <img src="images/Logos/Rokwil_Group_Logo.png" alt="ROKWIL GROUP" />
+                </a>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="about.html" class="nav-link">About</a></li>
+                <li><a href="projects.html" class="nav-link">Projects</a></li>
+                <li><a href="gallery.html" class="nav-link active">Gallery</a></li>
+                <li><a href="contact.html" class="nav-link">Contact</a></li>
+            </ul>
+            <button class="dark-mode-toggle" id="darkModeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+                <span class="toggle-icon">
+                    <span class="sun"><i class="bi bi-sun"></i></span>
+                    <span class="moon"><i class="bi bi-moon"></i></span>
+                </span>
+            </button>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <section class="page-hero" style="background-image: url('images/Projects/Keystone/Keystone 2.webp'); background-size: cover; background-position: center; position: relative;">
+            <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, rgba(30, 58, 95, 0.85) 0%, rgba(45, 45, 45, 0.85) 100%);"></div>
+            <div class="page-hero-content" style="position: relative; z-index: 2;">
+                <h1>Project Gallery</h1>
+                <p>Explore our portfolio of images and videos organized by project</p>
+            </div>
+        </section>
+
+        <section class="gallery-section" style="padding: var(--spacing-xl) 0;">
+            <div class="container">
+                <!-- Filter Tabs -->
+                <div class="gallery-filters" style="display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: var(--spacing-lg); justify-content: center; border-bottom: 2px solid var(--border-color); padding-bottom: var(--spacing-md);">
+                    <button class="gallery-filter-btn active" data-filter="all">
+                        <i class="bi bi-grid-3x3-gap"></i> All Projects
+                    </button>
+                    <button class="gallery-filter-btn" data-filter="keystone">
+                        <i class="bi bi-building"></i> Keystone Park
+                    </button>
+                    <button class="gallery-filter-btn" data-filter="judges-court">
+                        <i class="bi bi-building"></i> Judges Court
+                    </button>
+                    <button class="gallery-filter-btn" data-filter="aquelle">
+                        <i class="bi bi-building"></i> aQuellé
+                    </button>
+                    <button class="gallery-filter-btn" data-filter="other">
+                        <i class="bi bi-building"></i> Other Projects
+                    </button>
+                </div>
+
+                <!-- Project Sections -->
+                <div class="gallery-projects">
+                    <!-- Keystone Park -->
+                    <div class="gallery-project" data-project="keystone">
+                        <div class="gallery-project-header">
+                            <h2 class="gallery-project-title">Keystone Park</h2>
+                            <p class="gallery-project-subtitle">±152 Hectares • N3 Corridor • Mega DC Logistics Precinct</p>
+                        </div>
+                        <div class="gallery-grid">
+                            <div class="gallery-item" data-type="image">
+                                <img src="images/Projects/Keystone/Keystone 2.webp" alt="Keystone Park" loading="lazy">
+                                <div class="gallery-item-overlay">
+                                    <i class="bi bi-zoom-in"></i>
+                                </div>
+                            </div>
+                            <div class="gallery-item" data-type="image">
+                                <img src="images/Projects/Keystone/Pep MAIN.jpg" alt="Pepkor Distribution Centre" loading="lazy">
+                                <div class="gallery-item-overlay">
+                                    <i class="bi bi-zoom-in"></i>
+                                </div>
+                            </div>
+                            <div class="gallery-item" data-type="image">
+                                <img src="images/Projects/Keystone/Pep.jpg" alt="Pepkor DC" loading="lazy">
+                                <div class="gallery-item-overlay">
+                                    <i class="bi bi-zoom-in"></i>
+                                </div>
+                            </div>
+                            <div class="gallery-item" data-type="image">
+                                <img src="images/Projects/Keystone/Pep 2.jpg" alt="Pepkor Distribution Centre" loading="lazy">
+                                <div class="gallery-item-overlay">
+                                    <i class="bi bi-zoom-in"></i>
+                                </div>
+                            </div>
+                            <div class="gallery-item" data-type="image">
+                                <img src="images/Projects/Keystone/Pep 3.jpg" alt="Pepkor DC" loading="lazy">
+                                <div class="gallery-item-overlay">
+                                    <i class="bi bi-zoom-in"></i>
+                                </div>
+                            </div>
+                            <div class="gallery-item" data-type="image">
+                                <img src="images/Projects/Keystone/ND.webp" alt="Keystone Park" loading="lazy">
+                                <div class="gallery-item-overlay">
+                                    <i class="bi bi-zoom-in"></i>
+                                </div>
+                            </div>
+                            <div class="gallery-item" data-type="image">
+                                <img src="images/Projects/Keystone/malda-pack_22-small-400x267.jpg" alt="Malda Pack" loading="lazy">
+                                <div class="gallery-item-overlay">
+                                    <i class="bi bi-zoom-in"></i>
+                                </div>
+                            </div>
+                            <div class="gallery-item" data-type="image">
+                                <img src="images/Projects/Keystone/The Boys.jpg" alt="Keystone Park" loading="lazy">
+                                <div class="gallery-item-overlay">
+                                    <i class="bi bi-zoom-in"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Judges Court -->
+                    <div class="gallery-project" data-project="judges-court">
+                        <div class="gallery-project-header">
+                            <h2 class="gallery-project-title">Judges Court</h2>
+                            <p class="gallery-project-subtitle">Premium corporate office space in Upper Highway</p>
+                        </div>
+                        <div class="gallery-grid">
+                            <div class="gallery-item" data-type="image">
+                                <img src="images/Projects/Judges Court/Judges-Court-high (2).jpg" alt="Judges Court" loading="lazy">
+                                <div class="gallery-item-overlay">
+                                    <i class="bi bi-zoom-in"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- aQuellé -->
+                    <div class="gallery-project" data-project="aquelle">
+                        <div class="gallery-project-header">
+                            <h2 class="gallery-project-title">aQuellé National Distribution Centre</h2>
+                            <p class="gallery-project-subtitle">State-of-the-art distribution facility with solar installation</p>
+                        </div>
+                        <div class="gallery-grid">
+                            <div class="gallery-item" data-type="image">
+                                <img src="images/Projects/aQuelle - National Distribution Centre/Aquelle.webp" alt="aQuellé Distribution Centre" loading="lazy">
+                                <div class="gallery-item-overlay">
+                                    <i class="bi bi-zoom-in"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Other Projects -->
+                    <div class="gallery-project" data-project="other">
+                        <div class="gallery-project-header">
+                            <h2 class="gallery-project-title">Other Projects</h2>
+                            <p class="gallery-project-subtitle">Additional developments across KwaZulu-Natal</p>
+                        </div>
+                        <div class="gallery-grid">
+                            <div class="gallery-item" data-type="image">
+                                <img src="images/Projects/Lakeview Mini Factories/dji_0041-crop-u6092 (1).jpg" alt="Lakeview Mini Factories" loading="lazy">
+                                <div class="gallery-item-overlay">
+                                    <i class="bi bi-zoom-in"></i>
+                                </div>
+                            </div>
+                            <div class="gallery-item" data-type="image">
+                                <img src="images/Projects/Pioneer Campus/pioneer-campus-2 (1).jpg" alt="Pioneer Campus" loading="lazy">
+                                <div class="gallery-item-overlay">
+                                    <i class="bi bi-zoom-in"></i>
+                                </div>
+                            </div>
+                            <div class="gallery-item" data-type="image">
+                                <img src="images/Projects/Rockwood Mini Factories/Rockwood-1-1.jpg" alt="Rockwood Mini Factories" loading="lazy">
+                                <div class="gallery-item-overlay">
+                                    <i class="bi bi-zoom-in"></i>
+                                </div>
+                            </div>
+                            <div class="gallery-item" data-type="image">
+                                <img src="images/Projects/Umlazi Mega City/umlazi-mega-city-1 (1).jpg" alt="Umlazi Mega City" loading="lazy">
+                                <div class="gallery-item-overlay">
+                                    <i class="bi bi-zoom-in"></i>
+                                </div>
+                            </div>
+                            <div class="gallery-item" data-type="image">
+                                <img src="images/Projects/Victory View Offices/Victory-Road (1).jpg" alt="Victory View Offices" loading="lazy">
+                                <div class="gallery-item-overlay">
+                                    <i class="bi bi-zoom-in"></i>
+                                </div>
+                            </div>
+                            <div class="gallery-item" data-type="image">
+                                <img src="images/Projects/Unkown/Unkown.jpg" alt="Project" loading="lazy">
+                                <div class="gallery-item-overlay">
+                                    <i class="bi bi-zoom-in"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Videos Section -->
+                    <div class="gallery-project" data-project="videos">
+                        <div class="gallery-project-header">
+                            <h2 class="gallery-project-title">Videos</h2>
+                            <p class="gallery-project-subtitle">See our developments in action</p>
+                        </div>
+                        <div class="gallery-grid">
+                            <div class="gallery-item gallery-item-video" data-type="video">
+                                <video preload="metadata" poster="images/Projects/Keystone/Keystone 2.webp">
+                                    <source src="videos/Rokwil.mp4" type="video/mp4">
+                                </video>
+                                <div class="gallery-item-overlay">
+                                    <i class="bi bi-play-circle-fill"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Lightbox Modal -->
+    <div class="lightbox" id="lightbox">
+        <button class="lightbox-close" id="lightboxClose">
+            <i class="bi bi-x-lg"></i>
+        </button>
+        <button class="lightbox-prev" id="lightboxPrev">
+            <i class="bi bi-chevron-left"></i>
+        </button>
+        <button class="lightbox-next" id="lightboxNext">
+            <i class="bi bi-chevron-right"></i>
+        </button>
+        <div class="lightbox-content">
+            <img id="lightboxImage" src="" alt="">
+            <video id="lightboxVideo" controls style="display: none;">
+                <source src="" type="video/mp4">
+            </video>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>ROKWIL</h3>
+                    <p>Building the future of property development in KwaZulu-Natal, South Africa.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="about.html">About</a></li>
+                        <li><a href="projects.html">Projects</a></li>
+                        <li><a href="gallery.html">Gallery</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <p><i class="bi bi-geo-alt-fill me-2"></i>Durban, KwaZulu-Natal</p>
+                    <p>South Africa</p>
+                    <p><i class="bi bi-envelope-fill me-2"></i><a href="mailto:rod@rokwil.com" style="color: var(--text-secondary); text-decoration: none;">rod@rokwil.com</a></p>
+                    <p><i class="bi bi-telephone-fill me-2"></i><a href="tel:+2783693226" style="color: var(--text-secondary); text-decoration: none;">083 693 226</a></p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Rokwil Property Development. All rights reserved. | <a href="admin/login.html" style="color: rgba(255, 255, 255, 0.3); font-size: 0.7rem; text-decoration: none;">Admin</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Cookie Consent Modal -->
+    <div class="cookie-consent-overlay" id="cookieConsentOverlay">
+        <div class="cookie-consent-modal">
+            <div class="cookie-consent-header">
+                <div class="cookie-consent-icon"><i class="bi bi-shield-check"></i></div>
+                <h2>Cookie Consent</h2>
+            </div>
+            <div class="cookie-consent-content">
+                <p><strong>We use cookies and local storage to enhance your experience.</strong></p>
+                <p>This website uses:</p>
+                <ul>
+                    <li>Local storage to remember your theme preference (light/dark mode)</li>
+                    <li>Local storage to remember your WIP disclaimer acceptance</li>
+                    <li>Firebase (Google) for content delivery and hosting</li>
+                    <li>Third-party services (Static Forms) to process contact form submissions</li>
+                </ul>
+                <p>By continuing to use this site, you consent to our use of cookies and local storage. <a href="cookies.html">Learn more</a></p>
+            </div>
+            <div class="cookie-consent-actions">
+                <button class="cookie-consent-btn cookie-consent-btn-decline" id="declineCookies">Leave Website</button>
+                <button class="cookie-consent-btn cookie-consent-btn-accept" id="acceptCookies">Accept</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+    
+    <script src="js/firebase-config.js"></script>
+    <script src="js/firebase-content-loader.js"></script>
+    <script src="js/site.js"></script>
+    <script src="js/gallery.js"></script>
+    <script>
+        // WIP Disclaimer Modal
+        (function() {
+            'use strict';
+            
+            const disclaimerKey = 'rokwil_wip_disclaimer_accepted';
+            const disclaimerOverlay = document.getElementById('wipDisclaimer');
+            const acceptButton = document.getElementById('acceptDisclaimer');
+            
+            function hasAcceptedDisclaimer() {
+                return localStorage.getItem(disclaimerKey) === 'true';
+            }
+            
+            function showDisclaimer() {
+                if (disclaimerOverlay) {
+                    setTimeout(() => {
+                        disclaimerOverlay.classList.add('show');
+                    }, 100);
+                }
+            }
+            
+            function hideDisclaimer() {
+                if (disclaimerOverlay) {
+                    disclaimerOverlay.classList.remove('show');
+                    setTimeout(() => {
+                        if (disclaimerOverlay.parentNode) {
+                            disclaimerOverlay.style.display = 'none';
+                        }
+                    }, 300);
+                }
+            }
+            
+            function acceptDisclaimer() {
+                localStorage.setItem(disclaimerKey, 'true');
+                hideDisclaimer();
+            }
+            
+            function initDisclaimer() {
+                if (!hasAcceptedDisclaimer()) {
+                    showDisclaimer();
+                } else {
+                    if (disclaimerOverlay) {
+                        disclaimerOverlay.style.display = 'none';
+                    }
+                }
+                
+                if (acceptButton) {
+                    acceptButton.addEventListener('click', acceptDisclaimer);
+                }
+            }
+            
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initDisclaimer);
+            } else {
+                initDisclaimer();
+            }
+        })();
+    </script>
+    <script>
+        // Cookie Consent Banner
+        (function() {
+            'use strict';
+            
+            const consentKey = 'rokwil_cookie_consent';
+            const overlay = document.getElementById('cookieConsentOverlay');
+            const acceptBtn = document.getElementById('acceptCookies');
+            const declineBtn = document.getElementById('declineCookies');
+            
+            function hasConsented() {
+                return localStorage.getItem(consentKey) !== null;
+            }
+            
+            function showModal() {
+                if (overlay) {
+                    setTimeout(() => {
+                        overlay.classList.add('show');
+                    }, 100);
+                }
+            }
+            
+            function hideModal() {
+                if (overlay) {
+                    overlay.classList.remove('show');
+                    setTimeout(() => {
+                        if (overlay.parentNode) {
+                            overlay.style.display = 'none';
+                        }
+                    }, 300);
+                }
+            }
+            
+            function acceptCookies() {
+                localStorage.setItem(consentKey, 'accepted');
+                hideModal();
+            }
+            
+            function declineCookies() {
+                window.location.href = 'https://www.google.com';
+            }
+            
+            function initConsent() {
+                if (!hasConsented()) {
+                    showModal();
+                    if (overlay) {
+                        overlay.addEventListener('click', function(e) {
+                            if (e.target === overlay) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                            }
+                        });
+                    }
+                } else {
+                    if (overlay) {
+                        overlay.style.display = 'none';
+                    }
+                }
+                
+                if (acceptBtn) {
+                    acceptBtn.addEventListener('click', acceptCookies);
+                }
+                
+                if (declineBtn) {
+                    declineBtn.addEventListener('click', declineCookies);
+                }
+            }
+            
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initConsent);
+            } else {
+                initConsent();
+            }
+        })();
+    </script>
+</body>
+</html>
+

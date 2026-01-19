@@ -15,8 +15,7 @@
     <header class="admin-header">
         <div class="admin-header-left">
             <div class="admin-logo">
-                <span class="logo-text">ROKWIL</span>
-                <span class="logo-subtitle">Admin Panel</span>
+                <img src="../images/Logos/Rokwil_Group_Logo.png" alt="ROKWIL GROUP" />
             </div>
             <nav class="admin-nav">
                 <a href="index-admin.html" class="admin-nav-link active">
@@ -27,6 +26,9 @@
                 </a>
                 <a href="projects-admin.html" class="admin-nav-link">
                     <i class="bi bi-folder"></i> Projects
+                </a>
+                <a href="gallery-admin.html" class="admin-nav-link">
+                    <i class="bi bi-images"></i> Gallery
                 </a>
                 <a href="contact-admin.html" class="admin-nav-link">
                     <i class="bi bi-envelope"></i> Contact
@@ -191,7 +193,24 @@
                     <label>Video File (URL or upload)</label>
                     <div class="admin-form-group">
                         <label>Video URL (or upload file below)</label>
-                        <input type="text" id="video_file_url" placeholder="videos/Rokwil.mp4 or https://...">
+                        <div class="video-picker-dropdown" style="position: relative;">
+                            <input type="text" id="video_file_url" placeholder="videos/Rokwil.mp4 or https://..." style="width: 100%;" readonly>
+                            <button type="button" class="video-picker-toggle" style="position: absolute; right: 0; top: 0; height: 100%; padding: 0 0.75rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-left: none; border-radius: 0 8px 8px 0; cursor: pointer; display: flex; align-items: center;">
+                                <i class="bi bi-chevron-down"></i>
+                            </button>
+                            <div class="video-picker-dropdown-menu" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--admin-bg-secondary); border: 1px solid var(--admin-border); border-radius: 8px; margin-top: 0.25rem; max-height: 400px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                                <div class="video-picker-search" style="padding: 0.75rem; border-bottom: 1px solid var(--admin-border);">
+                                    <input type="text" class="video-picker-search-input" placeholder="Search videos..." style="width: 100%; padding: 0.5rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-radius: 4px; color: var(--admin-text-primary);">
+                                </div>
+                                <div class="video-picker-list" style="padding: 0.5rem;">
+                                    <!-- Videos will be populated here -->
+                                </div>
+                                <div style="padding: 0.75rem; border-top: 1px solid var(--admin-border);">
+                                    <input type="text" class="video-picker-manual-input" placeholder="Or enter URL manually..." style="width: 100%; padding: 0.5rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-radius: 4px; color: var(--admin-text-primary);">
+                                    <button type="button" class="admin-btn admin-btn-primary" style="width: 100%; margin-top: 0.5rem; padding: 0.5rem;">Use Manual URL</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="video-preview" id="video_preview">
                         <div class="image-preview-placeholder">

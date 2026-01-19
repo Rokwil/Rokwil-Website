@@ -2,6 +2,25 @@
 (function() {
     'use strict';
     
+    // Get auth - wait for Firebase to be ready
+    function getAuth() {
+        if (typeof firebase !== 'undefined' && firebase.auth) {
+            return firebase.auth();
+        }
+        // Fallback: try to get from window if it was set globally
+        if (window.auth) {
+            return window.auth;
+        }
+        console.error('Firebase auth not available');
+        return null;
+    }
+    
+    const auth = getAuth();
+    if (!auth) {
+        console.error('Cannot initialize admin auth - Firebase auth not available');
+        return;
+    }
+    
     // Check if user is already logged in
     auth.onAuthStateChanged((user) => {
         if (user) {
@@ -77,17 +96,42 @@
     
     // Logout function (used in admin pages)
     window.adminLogout = function() {
-        auth.signOut().then(() => {
+        const authInstance = getAuth();
+        if (!authInstance) {
+            console.error('Cannot logout - auth not available');
+            window.location.href = 'login.html';
+            return;
+        }
+        
+        authInstance.signOut().then(() => {
             window.location.href = 'login.html';
         }).catch((error) => {
             console.error('Logout error:', error);
+            // Still redirect even if signout fails
+            window.location.href = 'login.html';
         });
     };
     
     // Check authentication on admin pages
     window.checkAdminAuth = function() {
         return new Promise((resolve, reject) => {
-            auth.onAuthStateChanged((user) => {
+            const authInstance = getAuth();
+            if (!authInstance) {
+                console.error('Auth not available');
+                reject(new Error('Auth not initialized'));
+                return;
+            }
+            
+            // Get current user immediately
+            const currentUser = authInstance.currentUser;
+            if (currentUser) {
+                resolve(currentUser);
+                return;
+            }
+            
+            // If no current user, wait for auth state change
+            const unsubscribe = authInstance.onAuthStateChanged((user) => {
+                unsubscribe(); // Unsubscribe after first check
                 if (user) {
                     resolve(user);
                 } else {
@@ -95,6 +139,15 @@
                     reject(new Error('Not authenticated'));
                 }
             });
+            
+            // Timeout after 5 seconds
+            setTimeout(() => {
+                unsubscribe();
+                if (!authInstance.currentUser) {
+                    window.location.href = 'login.html';
+                    reject(new Error('Authentication timeout'));
+                }
+            }, 5000);
         });
     };
 })();

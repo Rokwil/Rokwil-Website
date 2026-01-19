@@ -183,11 +183,12 @@
             
             // Escape to cancel/closes modals
             if (e.key === 'Escape') {
-                const modals = document.querySelectorAll('.icon-picker-overlay, .confirm-dialog-overlay, .image-picker-dropdown-menu');
+                const modals = document.querySelectorAll('.icon-picker-overlay, .confirm-dialog-overlay, .image-picker-dropdown-menu, .video-picker-dropdown-menu');
                 modals.forEach(modal => {
                     if (modal.style.display !== 'none') {
                         modal.style.display = 'none';
                         modal.closest('.image-picker-dropdown')?.classList.remove('active');
+                        modal.closest('.video-picker-dropdown')?.classList.remove('active');
                     }
                 });
             }
@@ -295,6 +296,14 @@
         // Other
         '/images/Other/Keystone - logo.webp'
     ];
+    
+    // List of available videos from the videos directory
+    const AVAILABLE_VIDEOS = [
+        '/videos/Rokwil.mp4'
+    ];
+    
+    // Make available globally
+    window.AVAILABLE_VIDEOS = AVAILABLE_VIDEOS;
     
     // Helper function to fix truncated image paths (complete paths that are missing extensions or closing parentheses)
     window.fixTruncatedImagePath = function(path) {
@@ -851,6 +860,113 @@
                 dropdownMenu.style.display = 'block';
                 toggleBtn.querySelector('i').className = 'bi bi-chevron-up';
                 populateImageList();
+            }
+        });
+    };
+    
+    // Initialize video picker dropdown (similar to image picker)
+    window.initVideoPicker = function(videoUrlInput) {
+        const dropdown = videoUrlInput.closest('.video-picker-dropdown');
+        if (!dropdown) return;
+        
+        const toggleBtn = dropdown.querySelector('.video-picker-toggle');
+        const dropdownMenu = dropdown.querySelector('.video-picker-dropdown-menu');
+        const videoList = dropdown.querySelector('.video-picker-list');
+        const searchInput = dropdown.querySelector('.video-picker-search-input');
+        const manualInput = dropdown.querySelector('.video-picker-manual-input');
+        const manualBtn = dropdown.querySelector('.admin-btn-primary');
+        
+        // Find preview element
+        let videoPreview = null;
+        const videoUploadContainer = videoUrlInput.closest('.video-upload-container');
+        if (videoUploadContainer) {
+            videoPreview = videoUploadContainer.querySelector('#video_preview');
+        }
+        
+        // Populate video list
+        function populateVideoList(filter = '') {
+            const filtered = window.AVAILABLE_VIDEOS.filter(video => 
+                video.toLowerCase().includes(filter.toLowerCase())
+            );
+            
+            videoList.innerHTML = filtered.map(video => `
+                <div class="video-picker-item" data-video="${video}" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem; cursor: pointer; border-radius: 4px; margin-bottom: 0.25rem; transition: background 0.2s;" onmouseover="this.style.background='var(--admin-bg-tertiary)'" onmouseout="this.style.background='transparent'">
+                    <i class="bi bi-play-circle" style="font-size: 2rem; color: var(--admin-text-secondary);"></i>
+                    <span style="flex: 1; color: var(--admin-text-primary); font-size: 0.875rem;">${video}</span>
+                </div>
+            `).join('');
+            
+            // Add click handlers
+            videoList.querySelectorAll('.video-picker-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const selectedVideo = this.getAttribute('data-video');
+                    videoUrlInput.value = selectedVideo;
+                    if (videoPreview) {
+                        const normalizedPath = normalizeVideoPath(selectedVideo);
+                        videoPreview.innerHTML = `<video controls style="max-width: 100%;"><source src="${normalizedPath}"></video>`;
+                    }
+                    dropdownMenu.style.display = 'none';
+                    toggleBtn.querySelector('i').className = 'bi bi-chevron-down';
+                    
+                    // Trigger input event
+                    videoUrlInput.dispatchEvent(new Event('input', { bubbles: true }));
+                });
+            });
+            
+            if (filtered.length === 0) {
+                videoList.innerHTML = '<div style="padding: 1rem; text-align: center; color: var(--admin-text-secondary);">No videos found</div>';
+            }
+        }
+        
+        // Toggle dropdown
+        toggleBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const isOpen = dropdownMenu.style.display === 'block';
+            dropdownMenu.style.display = isOpen ? 'none' : 'block';
+            toggleBtn.querySelector('i').className = isOpen ? 'bi bi-chevron-down' : 'bi bi-chevron-up';
+            if (!isOpen) {
+                populateVideoList();
+                searchInput.value = '';
+            }
+        });
+        
+        // Search functionality
+        searchInput.addEventListener('input', function() {
+            populateVideoList(this.value);
+        });
+        
+        // Manual URL entry
+        manualBtn.addEventListener('click', function() {
+            const manualUrl = manualInput.value.trim();
+            if (manualUrl) {
+                videoUrlInput.value = manualUrl;
+                if (videoPreview) {
+                    const normalizedPath = normalizeVideoPath(manualUrl);
+                    videoPreview.innerHTML = `<video controls style="max-width: 100%;"><source src="${normalizedPath}"></video>`;
+                }
+                dropdownMenu.style.display = 'none';
+                toggleBtn.querySelector('i').className = 'bi bi-chevron-down';
+                manualInput.value = '';
+                
+                // Trigger input event
+                videoUrlInput.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!dropdown.contains(e.target)) {
+                dropdownMenu.style.display = 'none';
+                toggleBtn.querySelector('i').className = 'bi bi-chevron-down';
+            }
+        });
+        
+        // Make input clickable to open dropdown
+        videoUrlInput.addEventListener('click', function() {
+            if (dropdownMenu.style.display !== 'block') {
+                dropdownMenu.style.display = 'block';
+                toggleBtn.querySelector('i').className = 'bi bi-chevron-up';
+                populateVideoList();
             }
         });
     };

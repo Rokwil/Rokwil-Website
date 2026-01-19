@@ -1103,6 +1103,12 @@
         if (videoPosterUrl) window.initImagePicker(videoPosterUrl);
     }
     
+    // Initialize video picker
+    if (window.initVideoPicker) {
+        const videoFileUrl = document.getElementById('video_file_url');
+        if (videoFileUrl) window.initVideoPicker(videoFileUrl);
+    }
+    
     // Setup upload buttons
     if (document.getElementById('hero_image1_upload_btn')) {
         document.getElementById('hero_image1_upload_btn').addEventListener('click', function() {

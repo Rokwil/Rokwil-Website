@@ -158,10 +158,23 @@ body.dark-mode .navbar {
 
 .nav-logo a {
     display: flex;
-    flex-direction: column;
+    align-items: center;
     text-decoration: none;
 }
 
+.nav-logo img {
+    height: 50px;
+    width: auto;
+    max-width: 200px;
+    object-fit: contain;
+    transition: opacity var(--transition-base);
+}
+
+.nav-logo img:hover {
+    opacity: 0.8;
+}
+
+/* Keep text logo styles for fallback/backward compatibility */
 .logo-text {
     font-family: var(--font-heading);
     font-size: 1.5rem;
@@ -1834,6 +1847,11 @@ body.dark-mode .tenant-list li strong {
    ============================================ */
 
 @media (max-width: 968px) {
+    .nav-logo img {
+        height: 40px;
+        max-width: 150px;
+    }
+
     .nav-menu {
         position: fixed;
         left: -100%;
@@ -1886,6 +1904,11 @@ body.dark-mode .tenant-list li strong {
 }
 
 @media (max-width: 600px) {
+    .nav-logo img {
+        height: 35px;
+        max-width: 120px;
+    }
+
     .container {
         padding: 0 var(--spacing-sm);
     }

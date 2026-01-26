@@ -3,6 +3,13 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="../images/Logos/Rokwil_R_Logo.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../images/Logos/Rokwil_R_Logo.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../images/Logos/Rokwil_R_Logo.png" />
+    <link rel="shortcut icon" href="../images/Logos/Rokwil_R_Logo.png" />
+    
     <title>Admin - Gallery - Rokwil Property Development</title>
     <link rel="stylesheet" href="../css/site.css" />
     <link rel="stylesheet" href="css/admin.css" />
@@ -30,6 +37,9 @@
                 <a href="gallery-admin.html" class="admin-nav-link active">
                     <i class="bi bi-images"></i> Gallery
                 </a>
+                <a href="team-admin.html" class="admin-nav-link">
+                    <i class="bi bi-people"></i> Team
+                </a>
                 <a href="contact-admin.html" class="admin-nav-link">
                     <i class="bi bi-envelope"></i> Contact
                 </a>
@@ -54,6 +64,69 @@
             <h1><i class="bi bi-images"></i> Gallery Manager</h1>
             <p>Drag pictures and videos into projects. Click to remove.</p>
         </div>
+
+        <form id="galleryPageForm" style="margin-bottom: 2rem;">
+            <!-- Page Hero -->
+            <div class="admin-section">
+                <div class="admin-section-header">
+                    <h2 class="admin-section-title">
+                        <i class="bi bi-image"></i> Page Hero
+                    </h2>
+                </div>
+                
+                <div class="admin-form-group">
+                    <label for="gallery_hero_title">Hero Title</label>
+                    <input type="text" id="gallery_hero_title" name="gallery_hero_title" required>
+                </div>
+                
+                <div class="admin-form-group">
+                    <label for="gallery_hero_subtitle">Hero Subtitle</label>
+                    <input type="text" id="gallery_hero_subtitle" name="gallery_hero_subtitle">
+                </div>
+                
+                <div class="image-upload-container">
+                    <label>Hero Background Image</label>
+                    <div class="admin-form-group">
+                        <label>Hero Image URL (or upload file below)</label>
+                        <div class="image-picker-dropdown" style="position: relative;">
+                            <input type="text" id="gallery_hero_image_url" placeholder="images/..." style="width: 100%; padding: 0.5rem 0.75rem; font-size: 0.9rem; line-height: 1.4;" readonly>
+                            <button type="button" class="image-picker-toggle" style="position: absolute; right: 0; top: 0; height: 100%; padding: 0 0.75rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-left: none; border-radius: 0 8px 8px 0; cursor: pointer; display: flex; align-items: center;">
+                                <i class="bi bi-chevron-down"></i>
+                            </button>
+                            <div class="image-picker-dropdown-menu" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--admin-bg-secondary); border: 1px solid var(--admin-border); border-radius: 8px; margin-top: 0.25rem; max-height: 400px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                                <div class="image-picker-search" style="padding: 0.75rem; border-bottom: 1px solid var(--admin-border);">
+                                    <input type="text" class="image-picker-search-input" placeholder="Search images..." style="width: 100%; padding: 0.5rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-radius: 4px; color: var(--admin-text-primary);">
+                                </div>
+                                <div class="image-picker-list" style="padding: 0.5rem;">
+                                    <!-- Images will be populated here -->
+                                </div>
+                                <div style="padding: 0.75rem; border-top: 1px solid var(--admin-border);">
+                                    <input type="text" class="image-picker-manual-input" placeholder="Or enter URL manually..." style="width: 100%; padding: 0.5rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-radius: 4px; color: var(--admin-text-primary);">
+                                    <button type="button" class="admin-btn admin-btn-primary" style="width: 100%; margin-top: 0.5rem; padding: 0.5rem;">Use Manual URL</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="image-preview" id="gallery_hero_image_preview">
+                        <div class="image-preview-placeholder">
+                            <i class="bi bi-image"></i>
+                            <p>No image selected</p>
+                        </div>
+                    </div>
+                    <input type="file" id="gallery_hero_image" accept="image/*" style="display: none;">
+                    <button type="button" class="admin-btn admin-btn-secondary" id="gallery_hero_image_upload_btn" style="margin-top: 0.5rem;">
+                        <i class="bi bi-upload"></i> Upload Hero Image
+                    </button>
+                </div>
+            </div>
+
+            <!-- Save Button -->
+            <div class="admin-section">
+                <button type="submit" class="admin-btn admin-btn-primary">
+                    <i class="bi bi-save"></i> Save Hero Settings
+                </button>
+            </div>
+        </form>
 
         <!-- Project Selector (outside form to avoid interference) -->
         <div class="gallery-project-selector" style="margin-bottom: 2rem; background: var(--admin-bg-secondary); border: 2px solid var(--admin-border); border-radius: 12px; padding: 2rem;">
@@ -94,7 +167,7 @@
                         </label>
                         <div class="gallery-add-controls">
                             <div class="image-picker-dropdown" style="position: relative; flex: 1;">
-                                <input type="text" id="gallery_image_picker" placeholder="Click to choose an image..." class="media-picker-input" readonly>
+                                <input type="text" id="gallery_image_picker" placeholder="Click to choose an image..." class="media-picker-input" readonly style="padding: 0.5rem 0.75rem; font-size: 0.9rem; line-height: 1.4;">
                                 <button type="button" class="image-picker-toggle" style="position: absolute; right: 0; top: 0; height: 100%; padding: 0 0.75rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-left: none; border-radius: 0 8px 8px 0; cursor: pointer; display: flex; align-items: center; transition: all 0.2s;">
                                     <i class="bi bi-chevron-down"></i>
                                 </button>
@@ -124,7 +197,7 @@
                         </label>
                         <div class="gallery-add-controls">
                             <div class="video-picker-dropdown" style="position: relative; flex: 1;">
-                                <input type="text" id="gallery_video_picker" placeholder="Click to choose a video..." class="media-picker-input" readonly>
+                                <input type="text" id="gallery_video_picker" placeholder="Click to choose a video..." class="media-picker-input" readonly style="padding: 0.5rem 0.75rem; font-size: 0.9rem; line-height: 1.4;">
                                 <button type="button" class="video-picker-toggle" style="position: absolute; right: 0; top: 0; height: 100%; padding: 0 0.75rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-left: none; border-radius: 0 8px 8px 0; cursor: pointer; display: flex; align-items: center; transition: all 0.2s;">
                                     <i class="bi bi-chevron-down"></i>
                                 </button>

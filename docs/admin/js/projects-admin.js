@@ -155,6 +155,7 @@
         
         // Populate image list
         function populateImageList(filter = '') {
+            // Use global AVAILABLE_IMAGES (already filtered based on page type)
             const imagesToUse = window.AVAILABLE_IMAGES || AVAILABLE_IMAGES;
             const filtered = imagesToUse.filter(img => 
                 img.toLowerCase().includes(filter.toLowerCase())
@@ -294,7 +295,7 @@
                     <label>Image ${idx + 1} URL</label>
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
                         <div class="image-picker-dropdown" style="flex: 1; position: relative;">
-                            <input type="text" class="project-image-url" value="${img || ''}" placeholder="images/Projects/..." style="width: 100%;" readonly>
+                            <input type="text" class="project-image-url" value="${img || ''}" placeholder="images/Projects/..." style="width: 100%; padding: 0.5rem 0.75rem; font-size: 0.9rem; line-height: 1.4;" readonly>
                             <button type="button" class="image-picker-toggle" style="position: absolute; right: 0; top: 0; height: 100%; padding: 0 0.75rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-left: none; border-radius: 0 8px 8px 0; cursor: pointer; display: flex; align-items: center;">
                                 <i class="bi bi-chevron-down"></i>
                             </button>
@@ -311,13 +312,13 @@
                                 </div>
                             </div>
                         </div>
-                        <button type="button" class="admin-btn admin-btn-secondary" onclick="this.closest('.project-image-item').remove()" style="flex-shrink: 0;">
+                        <button type="button" class="admin-btn admin-btn-secondary" onclick="removeProjectImage(this)" style="flex-shrink: 0;">
                             <i class="bi bi-trash"></i> Remove
                         </button>
                     </div>
                 </div>
-                <div class="image-preview project-image-preview" style="max-width: 200px; margin-bottom: 1rem;">
-                    ${img ? `<img src="${normalizeImagePath(img)}" alt="Preview" style="max-width: 100%;" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">` : '<div class="image-preview-placeholder"><i class="bi bi-image"></i><p>No image</p></div>'}
+                <div class="image-preview project-image-preview" style="max-width: 150px; height: 100px; margin-bottom: 0.5rem;">
+                    ${img ? `<img src="${normalizeImagePath(img)}" alt="Preview" style="max-width: 100%; max-height: 100%; object-fit: contain;" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">` : '<div class="image-preview-placeholder"><i class="bi bi-image"></i><p>No image</p></div>'}
                 </div>
                 <input type="file" class="project-image-input" accept="image/*" style="display: none;">
                 <button type="button" class="admin-btn admin-btn-secondary project-image-upload-btn" style="margin-bottom: 1rem;">
@@ -372,7 +373,7 @@
                     <i class="bi ${metaObj.icon || 'bi-geo-alt-fill'}" style="font-size: 1.5rem; color: var(--admin-text-primary);"></i>
                 </button>
                 <input type="text" class="project-meta-text" value="${metaObj.text || ''}" placeholder="Location, Size, etc." style="flex: 1;">
-                <button type="button" class="admin-btn admin-btn-secondary" onclick="this.closest('.project-meta-item').remove()" style="flex-shrink: 0;">
+                <button type="button" class="admin-btn admin-btn-secondary" onclick="removeProjectMeta(this)" style="flex-shrink: 0;">
                     <i class="bi bi-trash"></i>
                 </button>
             </div>
@@ -400,7 +401,7 @@
                     <input type="hidden" class="section-content" value="${(Array.isArray(section.content) ? section.content.join('<br>') : (section.content || '')).replace(/"/g, '&quot;')}">
                     <small>Use the toolbar to format text, make it bold, and insert links</small>
                 </div>
-                <button type="button" class="admin-btn admin-btn-secondary" onclick="this.closest('.project-section-item').remove()">
+                <button type="button" class="admin-btn admin-btn-secondary" onclick="removeProjectSection(this)">
                     <i class="bi bi-trash"></i> Remove Section
                 </button>
             </div>
@@ -428,7 +429,7 @@
                     <i class="bi ${featureObj.icon || 'bi-tag'}" style="font-size: 1.5rem; color: var(--admin-text-primary);"></i>
                 </button>
                 <input type="text" class="project-feature-text" value="${featureObj.text || ''}" placeholder="Feature tag" style="flex: 1;">
-                <button type="button" class="admin-btn admin-btn-secondary" onclick="this.closest('.project-feature-item').remove()" style="flex-shrink: 0;">
+                <button type="button" class="admin-btn admin-btn-secondary" onclick="removeProjectFeature(this)" style="flex-shrink: 0;">
                     <i class="bi bi-trash"></i>
                 </button>
             </div>
@@ -441,7 +442,7 @@
         item.innerHTML = `
             <div class="repeatable-item-header">
                 <span class="repeatable-item-title">Project ${id + 1}</span>
-                <button type="button" class="btn-remove-item" onclick="this.closest('.repeatable-item').remove()">
+                <button type="button" class="btn-remove-item" onclick="removeProject(this)">
                     <i class="bi bi-trash"></i>
                 </button>
             </div>
@@ -456,7 +457,7 @@
                 <div class="admin-form-group">
                 <label>Meta Items (Location, Size, etc.)</label>
                 <div class="project-meta-container">
-                    ${metaHtml || '<div class="project-meta-item" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;"><input type="text" class="project-meta-icon" placeholder="bi-geo-alt" style="display: none;"><button type="button" class="icon-display-btn" style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-radius: 8px; cursor: pointer; padding: 0; flex-shrink: 0;"><i class="bi bi-geo-alt-fill" style="font-size: 1.5rem; color: var(--admin-text-primary);"></i></button><input type="text" class="project-meta-text" placeholder="Meta item" style="flex: 1;"><button type="button" class="admin-btn admin-btn-secondary" onclick="this.closest(\'.project-meta-item\').remove()" style="flex-shrink: 0;"><i class="bi bi-trash"></i></button></div>'}
+                    ${metaHtml || '<div class="project-meta-item" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;"><input type="text" class="project-meta-icon" placeholder="bi-geo-alt" style="display: none;"><button type="button" class="icon-display-btn" style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-radius: 8px; cursor: pointer; padding: 0; flex-shrink: 0;"><i class="bi bi-geo-alt-fill" style="font-size: 1.5rem; color: var(--admin-text-primary);"></i></button><input type="text" class="project-meta-text" placeholder="Meta item" style="flex: 1;"><button type="button" class="admin-btn admin-btn-secondary" onclick="removeProjectMeta(this)" style="flex-shrink: 0;"><i class="bi bi-trash"></i></button></div>'}
                 </div>
                 <button type="button" class="admin-btn admin-btn-secondary btn-add-item" onclick="addProjectMeta(this)">
                     <i class="bi bi-plus-circle"></i> Add Meta Item
@@ -480,7 +481,7 @@
             <div class="admin-form-group">
                 <label>Feature Tags</label>
                 <div class="project-features-container">
-                    ${featuresHtml || '<div class="project-feature-item" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;"><input type="text" class="project-feature-icon" placeholder="bi-geo-alt" style="display: none;"><button type="button" class="icon-display-btn" style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-radius: 8px; cursor: pointer; padding: 0; flex-shrink: 0;"><i class="bi bi-tag" style="font-size: 1.5rem; color: var(--admin-text-primary);"></i></button><input type="text" class="project-feature-text" placeholder="Feature tag" style="flex: 1;"><button type="button" class="admin-btn admin-btn-secondary" onclick="this.closest(\'.project-feature-item\').remove()" style="flex-shrink: 0;"><i class="bi bi-trash"></i></button></div>'}
+                    ${featuresHtml || '<div class="project-feature-item" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;"><input type="text" class="project-feature-icon" placeholder="bi-geo-alt" style="display: none;"><button type="button" class="icon-display-btn" style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-radius: 8px; cursor: pointer; padding: 0; flex-shrink: 0;"><i class="bi bi-tag" style="font-size: 1.5rem; color: var(--admin-text-primary);"></i></button><input type="text" class="project-feature-text" placeholder="Feature tag" style="flex: 1;"><button type="button" class="admin-btn admin-btn-secondary" onclick="removeProjectFeature(this)" style="flex-shrink: 0;"><i class="bi bi-trash"></i></button></div>'}
                 </div>
                 <button type="button" class="admin-btn admin-btn-secondary btn-add-item" onclick="addProjectFeature(this)">
                     <i class="bi bi-plus-circle"></i> Add Feature Tag
@@ -1349,7 +1350,7 @@
                 <i class="bi bi-geo-alt-fill" style="font-size: 1.5rem; color: var(--admin-text-primary);"></i>
             </button>
             <input type="text" class="project-meta-text" placeholder="Meta item" style="flex: 1;">
-            <button type="button" class="admin-btn admin-btn-secondary" onclick="this.closest('.project-meta-item').remove()" style="flex-shrink: 0;">
+            <button type="button" class="admin-btn admin-btn-secondary" onclick="removeProjectMeta(this)" style="flex-shrink: 0;">
                 <i class="bi bi-trash"></i>
             </button>
         `;
@@ -1411,7 +1412,7 @@
                 <input type="hidden" class="section-content" value="">
                 <small>Use the toolbar to format text, make it bold, and insert links</small>
             </div>
-            <button type="button" class="admin-btn admin-btn-secondary" onclick="this.closest('.project-section-item').remove()">
+            <button type="button" class="admin-btn admin-btn-secondary" onclick="removeProjectSection(this)">
                 <i class="bi bi-trash"></i> Remove Section
             </button>
         `;
@@ -1684,7 +1685,7 @@
                 <i class="bi bi-tag" style="font-size: 1.5rem; color: var(--admin-text-primary);"></i>
             </button>
             <input type="text" class="project-feature-text" placeholder="Feature tag" style="flex: 1;">
-            <button type="button" class="admin-btn admin-btn-secondary" onclick="this.closest('.project-feature-item').remove()" style="flex-shrink: 0;">
+            <button type="button" class="admin-btn admin-btn-secondary" onclick="removeProjectFeature(this)" style="flex-shrink: 0;">
                 <i class="bi bi-trash"></i>
             </button>
         `;
@@ -1735,12 +1736,12 @@
                 <label>Image ${newIndex + 1} URL</label>
                 <div style="display: flex; align-items: center; gap: 0.5rem;">
                     <input type="text" class="project-image-url" placeholder="images/Projects/..." style="flex: 1;">
-                    <button type="button" class="admin-btn admin-btn-secondary" onclick="this.closest('.project-image-item').remove()" style="flex-shrink: 0;">
+                    <button type="button" class="admin-btn admin-btn-secondary" onclick="removeProjectImage(this)" style="flex-shrink: 0;">
                         <i class="bi bi-trash"></i> Remove
                     </button>
                 </div>
             </div>
-            <div class="image-preview project-image-preview" style="max-width: 200px; margin-bottom: 1rem;">
+            <div class="image-preview project-image-preview" style="max-width: 150px; height: 100px; margin-bottom: 0.5rem;">
                 <div class="image-preview-placeholder"><i class="bi bi-image"></i><p>No image</p></div>
             </div>
             <input type="file" class="project-image-input" accept="image/*" style="display: none;">
@@ -1939,6 +1940,36 @@
         }
     });
     
+    // Remove project image with toast
+    window.removeProjectImage = function(btn) {
+        btn.closest('.project-image-item').remove();
+        showToast('Image removed successfully', 'success');
+    };
+    
+    // Remove project meta item with toast
+    window.removeProjectMeta = function(btn) {
+        btn.closest('.project-meta-item').remove();
+        showToast('Meta item removed successfully', 'success');
+    };
+    
+    // Remove project section with toast
+    window.removeProjectSection = function(btn) {
+        btn.closest('.project-section-item').remove();
+        showToast('Section removed successfully', 'success');
+    };
+    
+    // Remove project feature with toast
+    window.removeProjectFeature = function(btn) {
+        btn.closest('.project-feature-item').remove();
+        showToast('Feature removed successfully', 'success');
+    };
+    
+    // Remove project with toast
+    window.removeProject = function(btn) {
+        btn.closest('.repeatable-item').remove();
+        showToast('Project removed successfully', 'success');
+    };
+    
     // Initialize image preview
     initImagePreview('projects_hero_image', 'projects_hero_image_preview');
     
@@ -1959,7 +1990,7 @@
             const url = this.value.trim();
             if (url) {
                 const normalizedPath = normalizeImagePath(url);
-                document.getElementById('projects_hero_image_preview').innerHTML = `<img src="${normalizedPath}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
+                document.getElementById('projects_hero_image_preview').innerHTML = `<img src="${normalizedPath}" alt="Preview" style="max-width: 100%; max-height: 100%; object-fit: contain;" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
             } else {
                 document.getElementById('projects_hero_image_preview').innerHTML = '<div class="image-preview-placeholder"><i class="bi bi-image"></i><p>No image selected</p></div>';
             }

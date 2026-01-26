@@ -71,7 +71,7 @@
         item.innerHTML = `
             <div class="repeatable-item-header">
                 <span class="repeatable-item-title">Contact Info Item ${id + 1}</span>
-                <button type="button" class="btn-remove-item" onclick="this.closest('.repeatable-item').remove()">
+                <button type="button" class="btn-remove-item" onclick="removeContactInfoItem(this)">
                     <i class="bi bi-trash"></i>
                 </button>
             </div>
@@ -181,7 +181,7 @@
             const url = this.value.trim();
             if (url) {
                 const normalizedPath = normalizeImagePath(url);
-                document.getElementById('contact_hero_image_preview').innerHTML = `<img src="${normalizedPath}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
+                document.getElementById('contact_hero_image_preview').innerHTML = `<img src="${normalizedPath}" alt="Preview" style="max-width: 100%; max-height: 100%; object-fit: contain;" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
             } else {
                 document.getElementById('contact_hero_image_preview').innerHTML = '<div class="image-preview-placeholder"><i class="bi bi-image"></i><p>No image selected</p></div>';
             }

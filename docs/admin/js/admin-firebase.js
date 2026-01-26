@@ -19,8 +19,69 @@
         }
     };
     
-    // Show alert message
-    window.showAlert = function(message, type = 'info') {
+    // Show toast notification (non-blocking, appears in corner)
+    window.showToast = function(message, type = 'info', duration = 5000) {
+        // Get or create toast container
+        let container = document.getElementById('toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'toast-container';
+            container.className = 'toast-container';
+            document.body.appendChild(container);
+        }
+        
+        // Create toast element
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        
+        const iconMap = {
+            success: 'check-circle-fill',
+            error: 'exclamation-circle-fill',
+            warning: 'exclamation-triangle-fill',
+            info: 'info-circle-fill'
+        };
+        
+        toast.innerHTML = `
+            <i class="bi bi-${iconMap[type] || iconMap.info}"></i>
+            <div class="toast-content">${message}</div>
+            <button type="button" class="toast-close" onclick="this.closest('.toast').remove()">
+                <i class="bi bi-x"></i>
+            </button>
+            <div class="toast-progress" style="animation-duration: ${duration}ms;"></div>
+        `;
+        
+        // Add to container
+        container.appendChild(toast);
+        
+        // Auto remove after duration
+        const removeToast = () => {
+            toast.classList.add('removing');
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.remove();
+                }
+                // Remove container if empty
+                if (container && container.children.length === 0) {
+                    container.remove();
+                }
+            }, 300);
+        };
+        
+        setTimeout(removeToast, duration);
+        
+        // Allow manual close
+        toast.querySelector('.toast-close').addEventListener('click', removeToast);
+    };
+    
+    // Show alert message (now uses toast notifications by default)
+    window.showAlert = function(message, type = 'info', useInline = false) {
+        // Use toast for non-blocking notifications (default)
+        if (!useInline) {
+            showToast(message, type, 5000);
+            return;
+        }
+        
+        // Fallback to inline alert if explicitly requested
         const alert = document.createElement('div');
         alert.className = `admin-alert admin-alert-${type}`;
         alert.innerHTML = `
@@ -32,9 +93,6 @@
         const container = document.querySelector('.admin-container');
         if (container) {
             container.insertBefore(alert, container.firstChild);
-            
-            // Scroll to top to show alert
-            window.scrollTo({ top: 0, behavior: 'smooth' });
             
             // Auto remove after 5 seconds
             setTimeout(() => {
@@ -136,7 +194,7 @@
                 <div class="confirm-dialog">
                     <div class="confirm-dialog-header">
                         <h3>${title}</h3>
-                        <button type="button" class="confirm-dialog-close" onclick="this.closest('.confirm-dialog-overlay').remove(); resolve(false);">
+                        <button type="button" class="confirm-dialog-close">
                             <i class="bi bi-x"></i>
                         </button>
                     </div>
@@ -144,10 +202,10 @@
                         <p>${message}</p>
                     </div>
                     <div class="confirm-dialog-footer">
-                        <button type="button" class="admin-btn admin-btn-secondary" onclick="this.closest('.confirm-dialog-overlay').remove(); resolve(false);">
+                        <button type="button" class="admin-btn admin-btn-secondary confirm-cancel-btn">
                             Cancel
                         </button>
-                        <button type="button" class="admin-btn admin-btn-primary" onclick="this.closest('.confirm-dialog-overlay').remove(); resolve(true);">
+                        <button type="button" class="admin-btn admin-btn-primary confirm-ok-btn">
                             Confirm
                         </button>
                     </div>
@@ -156,16 +214,29 @@
             
             document.body.appendChild(overlay);
             
+            // Set up event listeners
+            const closeBtn = overlay.querySelector('.confirm-dialog-close');
+            const cancelBtn = overlay.querySelector('.confirm-cancel-btn');
+            const okBtn = overlay.querySelector('.confirm-ok-btn');
+            
+            const closeDialog = (result) => {
+                overlay.remove();
+                resolve(result);
+            };
+            
+            closeBtn.addEventListener('click', () => closeDialog(false));
+            cancelBtn.addEventListener('click', () => closeDialog(false));
+            okBtn.addEventListener('click', () => closeDialog(true));
+            
             // Close on overlay click
             overlay.addEventListener('click', (e) => {
                 if (e.target === overlay) {
-                    overlay.remove();
-                    resolve(false);
+                    closeDialog(false);
                 }
             });
             
             // Focus confirm button
-            overlay.querySelector('.admin-btn-primary').focus();
+            okBtn.focus();
         });
     };
     
@@ -292,18 +363,33 @@
         '/images/Archived/Rockwood.jpg',
         // Home
         '/images/Home/Home Screen.jpg',
-        '/images/Home/Video photo.webp',
-        // Other
-        '/images/Other/Keystone - logo.webp'
+        '/images/Home/Video photo.webp'
     ];
     
-    // List of available videos from the videos directory
-    const AVAILABLE_VIDEOS = [
-        '/videos/Rokwil.mp4'
-    ];
+    // List of available videos (fallback - will be replaced by dynamic loading)
+    const AVAILABLE_VIDEOS = [];
     
-    // Make available globally
+    // Make available globally (will be populated dynamically)
     window.AVAILABLE_VIDEOS = AVAILABLE_VIDEOS;
+    
+    // Dynamically load videos from server API
+    window.loadAvailableVideos = async function() {
+        try {
+            const response = await fetch('/api/videos?filter=gallery');
+            
+            if (response.ok) {
+                const videos = await response.json();
+                window.AVAILABLE_VIDEOS = videos;
+                console.log(`Loaded ${videos.length} videos from server`);
+            } else {
+                console.warn('Failed to load videos from API, using empty list');
+                window.AVAILABLE_VIDEOS = [];
+            }
+        } catch (error) {
+            console.error('Error loading videos from API:', error);
+            window.AVAILABLE_VIDEOS = [];
+        }
+    };
     
     // Helper function to fix truncated image paths (complete paths that are missing extensions or closing parentheses)
     window.fixTruncatedImagePath = function(path) {
@@ -427,10 +513,17 @@
         
         // If path starts with '/images/', prepend base path
         if (path.startsWith('/images/')) {
+            // For localhost, basePath is '/', so just return the path as-is
+            if (basePath === '/') {
+                return path;
+            }
             return basePath + path.substring(1); // Remove leading / and prepend base
         }
         
         // For other absolute paths, prepend base path
+        if (basePath === '/') {
+            return path;
+        }
         return basePath + path.substring(1);
     };
     
@@ -682,10 +775,11 @@
         return folderSelector;
     };
     
-    // List of available images from the images directory (using absolute paths)
+    // List of available images (using absolute paths)
     // This is shared across all admin pages
-    window.AVAILABLE_IMAGES = [
-        // Projects/Keystone
+    // Gallery images are filtered out for non-gallery pages
+    const ALL_AVAILABLE_IMAGES = [
+        // Non-Gallery images (available to all pages)
         '/images/Projects/Keystone/Keystone 2.webp',
         '/images/Projects/Keystone/malda-pack_22-small-400x267.jpg',
         '/images/Projects/Keystone/ND.webp',
@@ -694,23 +788,14 @@
         '/images/Projects/Keystone/Pep MAIN.jpg',
         '/images/Projects/Keystone/Pep.jpg',
         '/images/Projects/Keystone/The Boys.jpg',
-        // Projects/aQuelle
         '/images/Projects/aQuelle - National Distribution Centre/Aquelle.webp',
-        // Projects/Judges Court
         '/images/Projects/Judges Court/Judges-Court-high (2).jpg',
-        // Projects/Lakeview Mini Factories
         '/images/Projects/Lakeview Mini Factories/dji_0041-crop-u6092 (1).jpg',
-        // Projects/Pioneer Campus
         '/images/Projects/Pioneer Campus/pioneer-campus-2 (1).jpg',
-        // Projects/Rockwood Mini Factories
         '/images/Projects/Rockwood Mini Factories/Rockwood-1-1.jpg',
-        // Projects/Umlazi Mega City
         '/images/Projects/Umlazi Mega City/umlazi-mega-city-1 (1).jpg',
-        // Projects/Unkown
         '/images/Projects/Unkown/Unkown.jpg',
-        // Projects/Victory View Offices
         '/images/Projects/Victory View Offices/Victory-Road (1).jpg',
-        // Archived
         '/images/Archived/Aquelle.webp',
         '/images/Archived/Judges Court.jpg',
         '/images/Archived/Keystone - logo.webp',
@@ -723,12 +808,79 @@
         '/images/Archived/Keystone 8.webp',
         '/images/Archived/Keystone 9.webp',
         '/images/Archived/Rockwood.jpg',
-        // Home
         '/images/Home/Home Screen.jpg',
         '/images/Home/Video photo.webp',
-        // Other
-        '/images/Other/Keystone - logo.webp'
+        // Gallery/Projects - Keystone (with subfolders) - ONLY for gallery admin page
+        '/images/Gallery/Projects/Keystone/Ackermans/Keystone 2.webp',
+        '/images/Gallery/Projects/Keystone/Ackermans/Keystone 5.webp',
+        '/images/Gallery/Projects/Keystone/Ackermans/Keystone 6.webp',
+        '/images/Gallery/Projects/Keystone/Ackermans/Keystone 9.webp',
+        '/images/Gallery/Projects/Keystone/Ackermans/Pep-Ackermans 1.jpeg',
+        '/images/Gallery/Projects/Keystone/KDG/Keystone 10.webp',
+        '/images/Gallery/Projects/Keystone/keystone - meeting.webp',
+        '/images/Gallery/Projects/Keystone/Keystone 1.jpeg',
+        '/images/Gallery/Projects/Keystone/Malda Pack/malda-pack_22-small-400x267.jpg',
+        '/images/Gallery/Projects/Keystone/Mr Price/Keystone 3.webp',
+        '/images/Gallery/Projects/Keystone/ND/ND.webp',
+        '/images/Gallery/Projects/Keystone/Pep/Keystone 1.webp',
+        '/images/Gallery/Projects/Keystone/Pep/Keystone 8.webp',
+        '/images/Gallery/Projects/Keystone/Pep/Pep 2.jpg',
+        '/images/Gallery/Projects/Keystone/Pep/Pep 3.jpg',
+        '/images/Gallery/Projects/Keystone/Pep/Pep 4.jpeg',
+        '/images/Gallery/Projects/Keystone/Pep/Pep 5.jpeg',
+        '/images/Gallery/Projects/Keystone/Pep/Pep 6.jpeg',
+        '/images/Gallery/Projects/Keystone/Pep/Pep MAIN.jpg',
+        '/images/Gallery/Projects/Keystone/Pep/Pep-Ackermans 1.jpeg',
+        '/images/Gallery/Projects/Keystone/Pep/Pep.jpg',
+        '/images/Gallery/Projects/Keystone/The Boys.jpg',
+        // Gallery/Projects - Other Projects
+        '/images/Gallery/Projects/9 Old Main Road/Unkown.jpg',
+        '/images/Gallery/Projects/aQuelle - National Distribution Centre/Aquelle.webp',
+        '/images/Gallery/Projects/Judges Court/Judges-Court-high (2).jpg',
+        '/images/Gallery/Projects/Lakeview Mini Factories/dji_0041-crop-u6092 (1).jpg',
+        '/images/Gallery/Projects/Pioneer Campus/pioneer-campus-2 (1).jpg',
+        '/images/Gallery/Projects/Rockwood Mini Factories/Rockwood-1-1.jpg',
+        '/images/Gallery/Projects/Umlazi Mega City/umlazi-mega-city-1 (1).jpg',
+        '/images/Gallery/Projects/Victory View Offices/Victory-Road (1).jpg'
     ];
+    
+    // Dynamically load images from server API
+    // This automatically discovers all images in the images directory
+    window.loadAvailableImages = async function() {
+        try {
+            const isGalleryAdminPage = window.location.pathname.includes('gallery-admin.html') || 
+                                       window.location.pathname.includes('gallery-admin');
+            
+            const filter = isGalleryAdminPage ? 'gallery' : 'non-gallery';
+            const response = await fetch(`/api/images?filter=${filter}`);
+            
+            if (response.ok) {
+                const images = await response.json();
+                window.AVAILABLE_IMAGES = images;
+                console.log(`Loaded ${images.length} images from server`);
+            } else {
+                console.warn('Failed to load images from API, falling back to hardcoded list');
+                // Fallback to hardcoded list
+                window.AVAILABLE_IMAGES = isGalleryAdminPage 
+                    ? ALL_AVAILABLE_IMAGES.filter(img => img.includes('/images/Gallery/') && !img.includes('/images/Archived/'))
+                    : ALL_AVAILABLE_IMAGES.filter(img => !img.includes('/images/Gallery/') && !img.includes('/images/Archived/'));
+            }
+        } catch (error) {
+            console.error('Error loading images from API:', error);
+            // Fallback to hardcoded list
+            const isGalleryAdminPage = window.location.pathname.includes('gallery-admin.html') || 
+                                       window.location.pathname.includes('gallery-admin');
+            window.AVAILABLE_IMAGES = isGalleryAdminPage 
+                ? ALL_AVAILABLE_IMAGES.filter(img => img.includes('/images/Gallery/') && !img.includes('/images/Archived/'))
+                : ALL_AVAILABLE_IMAGES.filter(img => !img.includes('/images/Gallery/') && !img.includes('/images/Archived/'));
+        }
+    };
+    
+    // Initialize with empty array, will be populated by loadAvailableImages
+    window.AVAILABLE_IMAGES = [];
+    
+    // Load images on page load
+    loadAvailableImages();
     
     // Initialize image picker dropdown (shared function for all admin pages)
     window.initImagePicker = function(imageUrlInput) {
@@ -773,11 +925,32 @@
                 imagePreview = document.getElementById('about_story_image_preview');
             } else if (inputId.includes('video_poster')) {
                 imagePreview = document.getElementById('video_poster_preview');
+            } else if (inputId.includes('gallery_hero_image')) {
+                imagePreview = document.getElementById('gallery_hero_image_preview');
+            }
+        }
+        
+        // Final fallback: try to find preview by ID pattern (replace _url with _preview)
+        if (!imagePreview) {
+            const inputId = imageUrlInput.id || '';
+            if (inputId) {
+                const previewId = inputId.replace('_url', '_preview');
+                imagePreview = document.getElementById(previewId);
             }
         }
         
         // Populate image list
         function populateImageList(filter = '') {
+            // Reload images if not yet loaded
+            if (window.AVAILABLE_IMAGES.length === 0) {
+                loadAvailableImages().then(() => {
+                    populateImageList(filter);
+                });
+                imageList.innerHTML = '<div style="padding: 1rem; text-align: center; color: var(--admin-text-secondary);">Loading images...</div>';
+                return;
+            }
+            
+            // window.AVAILABLE_IMAGES is already filtered based on page type
             const filtered = window.AVAILABLE_IMAGES.filter(img => 
                 img.toLowerCase().includes(filter.toLowerCase())
             );
@@ -796,7 +969,7 @@
                     imageUrlInput.value = selectedImage;
                     if (imagePreview) {
                         const normalizedPath = normalizeImagePath(selectedImage);
-                        imagePreview.innerHTML = `<img src="${normalizedPath}" alt="Preview" style="max-width: 100%;" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
+                        imagePreview.innerHTML = `<img src="${normalizedPath}" alt="Preview" style="max-width: 100%; max-height: 100%; object-fit: contain;" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
                     }
                     dropdownMenu.style.display = 'none';
                     toggleBtn.querySelector('i').className = 'bi bi-chevron-down';
@@ -835,7 +1008,7 @@
                 imageUrlInput.value = manualUrl;
                 if (imagePreview) {
                     const normalizedPath = normalizeImagePath(manualUrl);
-                    imagePreview.innerHTML = `<img src="${normalizedPath}" alt="Preview" style="max-width: 100%;" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
+                    imagePreview.innerHTML = `<img src="${normalizedPath}" alt="Preview" style="max-width: 100%; max-height: 100%; object-fit: contain;" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
                 }
                 dropdownMenu.style.display = 'none';
                 toggleBtn.querySelector('i').className = 'bi bi-chevron-down';
@@ -865,9 +1038,14 @@
     };
     
     // Initialize video picker dropdown (similar to image picker)
-    window.initVideoPicker = function(videoUrlInput) {
+    window.initVideoPicker = async function(videoUrlInput) {
         const dropdown = videoUrlInput.closest('.video-picker-dropdown');
         if (!dropdown) return;
+        
+        // Load videos if not already loaded
+        if (window.loadAvailableVideos && (!window.AVAILABLE_VIDEOS || window.AVAILABLE_VIDEOS.length === 0)) {
+            await window.loadAvailableVideos();
+        }
         
         const toggleBtn = dropdown.querySelector('.video-picker-toggle');
         const dropdownMenu = dropdown.querySelector('.video-picker-dropdown-menu');
@@ -885,7 +1063,8 @@
         
         // Populate video list
         function populateVideoList(filter = '') {
-            const filtered = window.AVAILABLE_VIDEOS.filter(video => 
+            const videos = window.AVAILABLE_VIDEOS || [];
+            const filtered = videos.filter(video => 
                 video.toLowerCase().includes(filter.toLowerCase())
             );
             

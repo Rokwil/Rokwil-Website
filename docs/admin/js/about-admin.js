@@ -12,11 +12,31 @@
     };
     let storyQuill = null;
     
+    // Prevent auto-scroll on page load
+    let scrollPosition = window.scrollY || window.pageYOffset;
+    window.scrollTo(0, 0);
+    
     // Check authentication
     checkAdminAuth().then((user) => {
         document.getElementById('adminUserEmail').textContent = user.email;
         loadPageData();
     });
+    
+    // Prevent any auto-scrolling during initialization
+    let preventAutoScroll = true;
+    const originalScrollIntoView = Element.prototype.scrollIntoView;
+    Element.prototype.scrollIntoView = function(...args) {
+        if (preventAutoScroll) {
+            return; // Prevent scrolling during initialization
+        }
+        return originalScrollIntoView.apply(this, args);
+    };
+    
+    // Re-enable scrolling after a short delay
+    setTimeout(() => {
+        preventAutoScroll = false;
+        Element.prototype.scrollIntoView = originalScrollIntoView;
+    }, 1000);
     
     // Load page data from Firebase
     async function loadPageData() {
@@ -35,6 +55,11 @@
         }
         // Always populate form, even if data is empty
         populateForm();
+        
+        // Ensure page stays at top after form population
+        setTimeout(() => {
+            window.scrollTo(0, 0);
+        }, 100);
     }
     
     // Initialize default structure
@@ -193,6 +218,8 @@
                                 if (hiddenInput) {
                                     hiddenInput.value = storyQuill.root.innerHTML;
                                 }
+                                // Keep page at top after setting content
+                                window.scrollTo(0, 0);
                             }
                         }, 200);
                     } else {
@@ -205,6 +232,8 @@
                                 if (hiddenInput) {
                                     hiddenInput.value = storyQuill.root.innerHTML;
                                 }
+                                // Keep page at top after setting content
+                                window.scrollTo(0, 0);
                             }
                         }, 200);
                     }
@@ -332,6 +361,12 @@
         console.log('Form population complete');
     }
     
+    // Remove stats banner item with toast
+    window.removeStatsBannerItem = function(btn) {
+        btn.closest('.repeatable-item').remove();
+        showToast('Stat item deleted successfully', 'success');
+    };
+    
     // Add stat banner item
     window.addStatBannerItem = function(data = null, index = null) {
         const container = document.getElementById('stats_banner_container');
@@ -342,7 +377,7 @@
         item.innerHTML = `
             <div class="repeatable-item-header">
                 <span class="repeatable-item-title">Stat ${id + 1}</span>
-                <button type="button" class="btn-remove-item" onclick="this.closest('.repeatable-item').remove()">
+                <button type="button" class="btn-remove-item" onclick="removeStatsBannerItem(this)">
                     <i class="bi bi-trash"></i>
                 </button>
             </div>
@@ -356,6 +391,15 @@
             </div>
         `;
         container.appendChild(item);
+    };
+    
+    // Remove item with toast notification (generic helper)
+    window.removeItemWithToast = function(btn, itemType = 'Item') {
+        const item = btn.closest('.repeatable-item');
+        if (item) {
+            item.remove();
+            showToast(`${itemType} deleted successfully`, 'success');
+        }
     };
     
     // Add timeline item
@@ -373,7 +417,7 @@
                         <input type="checkbox" class="timeline-item-hidden" ${data?.hidden ? 'checked' : ''}>
                         <span>Hide</span>
                     </label>
-                    <button type="button" class="btn-remove-item" onclick="this.closest('.repeatable-item').remove()">
+                    <button type="button" class="btn-remove-item" onclick="removeItemWithToast(this, 'Timeline item')">
                         <i class="bi bi-trash"></i>
                     </button>
                 </div>
@@ -405,7 +449,7 @@
                         <input type="checkbox" class="value-item-hidden" ${data?.hidden ? 'checked' : ''}>
                         <span>Hide</span>
                     </label>
-                    <button type="button" class="btn-remove-item" onclick="this.closest('.repeatable-item').remove()">
+                    <button type="button" class="btn-remove-item" onclick="removeItemWithToast(this, 'Value item')">
                         <i class="bi bi-trash"></i>
                     </button>
                 </div>
@@ -447,7 +491,7 @@
                         <input type="checkbox" class="csr-item-hidden" ${data?.hidden ? 'checked' : ''}>
                         <span>Hide</span>
                     </label>
-                    <button type="button" class="btn-remove-item" onclick="this.closest('.repeatable-item').remove()">
+                    <button type="button" class="btn-remove-item" onclick="removeItemWithToast(this, 'CSR item')">
                         <i class="bi bi-trash"></i>
                     </button>
                 </div>
@@ -490,7 +534,7 @@
                         <input type="checkbox" class="recognition-item-hidden" ${data?.hidden ? 'checked' : ''}>
                         <span>Hide</span>
                     </label>
-                    <button type="button" class="btn-remove-item" onclick="this.closest('.repeatable-item').remove()">
+                    <button type="button" class="btn-remove-item" onclick="removeItemWithToast(this, 'Recognition item')">
                         <i class="bi bi-trash"></i>
                     </button>
                 </div>
@@ -771,7 +815,7 @@
             const url = this.value.trim();
             if (url) {
                 const normalizedPath = normalizeImagePath(url);
-                document.getElementById('page_hero_image_preview').innerHTML = `<img src="${normalizedPath}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
+                document.getElementById('page_hero_image_preview').innerHTML = `<img src="${normalizedPath}" alt="Preview" style="max-width: 100%; max-height: 100%; object-fit: contain;" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
             } else {
                 document.getElementById('page_hero_image_preview').innerHTML = '<div class="image-preview-placeholder"><i class="bi bi-image"></i><p>No image selected</p></div>';
             }
@@ -784,7 +828,7 @@
             const url = this.value.trim();
             if (url) {
                 const normalizedPath = normalizeImagePath(url);
-                document.getElementById('about_story_image_preview').innerHTML = `<img src="${normalizedPath}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
+                document.getElementById('about_story_image_preview').innerHTML = `<img src="${normalizedPath}" alt="Preview" style="max-width: 100%; max-height: 100%; object-fit: contain;" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
             } else {
                 document.getElementById('about_story_image_preview').innerHTML = '<div class="image-preview-placeholder"><i class="bi bi-image"></i><p>No image selected</p></div>';
             }
@@ -808,6 +852,9 @@
     const storyHiddenInput = document.getElementById('about_story_content');
     
     if (storyEditorDiv && storyHiddenInput && typeof Quill !== 'undefined') {
+        // Save scroll position before initializing Quill
+        const savedScrollY = window.scrollY || window.pageYOffset;
+        
         // Ensure editor div has initial content
         if (!storyEditorDiv.innerHTML.trim()) {
             storyEditorDiv.innerHTML = '<p><br></p>';
@@ -1010,6 +1057,11 @@
                 }
             }
         }, 100);
+        
+        // Restore scroll position after Quill initialization
+        setTimeout(() => {
+            window.scrollTo(0, 0);
+        }, 50);
         
         // Update hidden input when content changes
         storyQuill.on('text-change', function() {

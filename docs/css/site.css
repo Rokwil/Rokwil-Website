@@ -841,8 +841,13 @@ section {
 
 .value-card:hover {
     border-color: var(--secondary-color);
-    box-shadow: var(--shadow-md);
-    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(30, 58, 95, 0.15);
+    transform: translateY(-4px);
+}
+
+.value-card:hover .value-icon {
+    transform: scale(1.1);
+    color: var(--secondary-color);
 }
 
 .value-icon {
@@ -1392,9 +1397,9 @@ body.dark-mode .tenant-list li a span[style*="color: white"] {
 
 .form-group input,
 .form-group textarea {
-    padding: 0.875rem;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
+    padding: 0.875rem 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
     font-family: var(--font-primary);
     font-size: 1rem;
     background: var(--bg-primary);
@@ -1402,11 +1407,17 @@ body.dark-mode .tenant-list li a span[style*="color: white"] {
     transition: all var(--transition-base);
 }
 
+.form-group input:hover,
+.form-group textarea:hover {
+    border-color: var(--secondary-color);
+}
+
 .form-group input:focus,
 .form-group textarea:focus {
     outline: none;
     border-color: var(--secondary-color);
-    box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
+    box-shadow: 0 0 0 4px rgba(30, 58, 95, 0.15);
+    transform: translateY(-1px);
 }
 
 .form-group textarea {
@@ -1461,12 +1472,25 @@ body.dark-mode .tenant-list li a span[style*="color: white"] {
     display: flex;
     gap: var(--spacing-md);
     margin-bottom: var(--spacing-lg);
+    padding: var(--spacing-sm);
+    border-radius: 8px;
+    transition: all var(--transition-base);
+}
+
+.info-item:hover {
+    background: var(--bg-primary);
+    transform: translateX(4px);
+}
+
+.info-item:hover .info-icon {
+    transform: scale(1.1);
 }
 
 .info-icon {
     font-size: 1.5rem;
     color: var(--secondary-color);
     flex-shrink: 0;
+    transition: transform var(--transition-base);
 }
 
 .info-content h3 {
@@ -2200,9 +2224,16 @@ body.dark-mode .tenant-list li strong {
 .csr-card {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
+    border-radius: 12px;
     padding: var(--spacing-lg);
     transition: all var(--transition-base);
+}
+
+.csr-card:hover {
+    transform: translateY(-4px);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
 }
 
 body.dark-mode .csr-card {
@@ -3034,6 +3065,8 @@ body.dark-mode .wip-disclaimer-content li {
     background: var(--secondary-color);
     color: var(--text-light);
     border-color: var(--secondary-color);
+    box-shadow: 0 4px 12px rgba(30, 58, 95, 0.3);
+    font-weight: 600;
 }
 
 .gallery-projects {
@@ -3078,16 +3111,18 @@ body.dark-mode .wip-disclaimer-content li {
     position: relative;
     aspect-ratio: 16 / 9;
     overflow: hidden;
-    border-radius: 8px;
+    border-radius: 12px;
     cursor: pointer;
     background: var(--bg-secondary);
     box-shadow: var(--shadow-md);
     transition: all var(--transition-base);
+    border: 1px solid var(--border-color);
 }
 
 .gallery-item:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-xl);
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: 0 12px 32px rgba(30, 58, 95, 0.25);
+    border-color: var(--secondary-color);
 }
 
 .gallery-item img,
@@ -3275,3 +3310,54 @@ body.dark-mode .gallery-item {
         right: 1rem;
     }
 }
+
+/* ============================================
+   TEAM PAGE STYLES
+   ============================================ */
+
+.team-card {
+    cursor: pointer;
+}
+
+.team-card:hover .team-card-social a {
+    background: var(--secondary-color);
+    color: var(--text-light);
+    transform: scale(1.1);
+}
+
+.team-card-social a:hover {
+    background: var(--secondary-color) !important;
+    color: var(--text-light) !important;
+}
+
+.contractor-card {
+    transition: all var(--transition-base);
+}
+
+.contractor-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(30, 58, 95, 0.15);
+    border-color: var(--secondary-color);
+}
+
+.contractor-card:hover .contractor-icon {
+    transform: scale(1.1) rotate(5deg);
+    background: var(--secondary-color);
+    color: var(--text-light);
+}
+
+.contractor-card .contractor-icon {
+    transition: all 0.3s ease;
+}
+
+@media (max-width: 768px) {
+    .team-grid,
+    .contractors-grid {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .section-title {
+        font-size: 2rem !important;
+    }
+}
+

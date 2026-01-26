@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="../images/Logos/Rokwil_R_Logo.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../images/Logos/Rokwil_R_Logo.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../images/Logos/Rokwil_R_Logo.png" />
+    <link rel="shortcut icon" href="../images/Logos/Rokwil_R_Logo.png" />
+    
+    <title>Admin - Team - Rokwil Property Development</title>
+    <link rel="stylesheet" href="../css/site.css" />
+    <link rel="stylesheet" href="css/admin.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="admin-body">
+    <header class="admin-header">
+        <div class="admin-header-left">
+            <div class="admin-logo">
+                <img src="../images/Logos/Rokwil_Group_Logo.png" alt="ROKWIL GROUP" />
+            </div>
+            <nav class="admin-nav">
+                <a href="index-admin.html" class="admin-nav-link">
+                    <i class="bi bi-house"></i> Home
+                </a>
+                <a href="about-admin.html" class="admin-nav-link">
+                    <i class="bi bi-info-circle"></i> About
+                </a>
+                <a href="projects-admin.html" class="admin-nav-link">
+                    <i class="bi bi-folder"></i> Projects
+                </a>
+                <a href="gallery-admin.html" class="admin-nav-link">
+                    <i class="bi bi-images"></i> Gallery
+                </a>
+                <a href="team-admin.html" class="admin-nav-link active">
+                    <i class="bi bi-people"></i> Team
+                </a>
+                <a href="contact-admin.html" class="admin-nav-link">
+                    <i class="bi bi-envelope"></i> Contact
+                </a>
+                <a href="footer-admin.html" class="admin-nav-link">
+                    <i class="bi bi-layout-text-window"></i> Footer
+                </a>
+            </nav>
+        </div>
+        <div class="admin-header-right">
+            <div class="admin-user-info">
+                <i class="bi bi-person-circle"></i>
+                <span id="adminUserEmail">Loading...</span>
+            </div>
+            <button class="btn-logout" onclick="adminLogout()">
+                <i class="bi bi-box-arrow-right"></i> Logout
+            </button>
+        </div>
+    </header>
+
+    <div class="admin-container">
+        <div class="admin-page-header">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <div>
+                    <h1><i class="bi bi-people"></i> Team Manager</h1>
+                    <p>Manage your team members and contractors. Drag to reorder.</p>
+                </div>
+                <button type="button" class="admin-btn admin-btn-secondary" onclick="populateDummyData()" style="margin-left: 1rem;">
+                    <i class="bi bi-magic"></i> Load Example Data
+                </button>
+            </div>
+        </div>
+
+        <form id="teamForm" class="admin-form">
+            <!-- Hero Section -->
+            <div class="admin-section">
+                <div class="admin-section-header">
+                    <h2 class="admin-section-title">
+                        <i class="bi bi-image"></i> Hero Section
+                    </h2>
+                </div>
+                <div class="admin-form-group">
+                    <label for="hero_title">Hero Title</label>
+                    <input type="text" id="hero_title" placeholder="Our Team" />
+                </div>
+                <div class="admin-form-group">
+                    <label for="hero_subtitle">Hero Subtitle</label>
+                    <input type="text" id="hero_subtitle" placeholder="Dedicated professionals building the future of KwaZulu-Natal" />
+                </div>
+                <div class="admin-form-group">
+                    <label for="hero_image">Hero Background Image</label>
+                    <div class="image-picker-container">
+                        <input type="text" id="hero_image" class="image-picker-input" placeholder="Click to choose an image..." readonly style="width: 100%; padding: 0.5rem 3rem 0.5rem 0.75rem; font-size: 0.9rem; line-height: 1.4; background: var(--admin-bg-primary); border: 1px solid var(--admin-border); border-radius: 8px; color: var(--admin-text-primary);" />
+                        <button type="button" class="image-picker-toggle" onclick="openImagePicker('hero_image')">
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                    </div>
+                    <div class="image-preview-container">
+                        <img id="hero_image_preview" src="" alt="Preview" class="image-preview" style="display: none;" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Team Members Section -->
+            <div class="admin-section">
+                <div class="admin-section-header">
+                    <h2 class="admin-section-title">
+                        <i class="bi bi-person-badge"></i> Team Members
+                    </h2>
+                    <button type="button" class="admin-btn admin-btn-primary" onclick="addTeamMember()">
+                        <i class="bi bi-plus-circle"></i> Add Team Member
+                    </button>
+                </div>
+                <div id="teamMembersContainer" class="sortable-container">
+                    <!-- Team members will be rendered here -->
+                </div>
+            </div>
+
+            <!-- Contractors Section -->
+            <div class="admin-section">
+                <div class="admin-section-header">
+                    <h2 class="admin-section-title">
+                        <i class="bi bi-briefcase"></i> Contractors & Partners
+                    </h2>
+                    <button type="button" class="admin-btn admin-btn-primary" onclick="addContractor()">
+                        <i class="bi bi-plus-circle"></i> Add Contractor
+                    </button>
+                </div>
+                <div id="contractorsContainer" class="sortable-container">
+                    <!-- Contractors will be rendered here -->
+                </div>
+            </div>
+
+            <!-- CTA Section -->
+            <div class="admin-section">
+                <div class="admin-section-header">
+                    <h2 class="admin-section-title">
+                        <i class="bi bi-megaphone"></i> Call-to-Action Section
+                    </h2>
+                </div>
+                <div class="admin-form-group">
+                    <label>
+                        <input type="checkbox" id="cta_hidden" /> Hide CTA Section
+                    </label>
+                </div>
+                <div class="admin-form-group">
+                    <label for="cta_title">CTA Title</label>
+                    <input type="text" id="cta_title" placeholder="Join Our Team" />
+                </div>
+                <div class="admin-form-group">
+                    <label for="cta_text">CTA Text</label>
+                    <textarea id="cta_text" rows="3" placeholder="We're always looking for talented professionals..."></textarea>
+                </div>
+                <div class="admin-form-group">
+                    <label for="cta_button_text">Button Text</label>
+                    <input type="text" id="cta_button_text" placeholder="Get In Touch" />
+                </div>
+            </div>
+
+            <!-- Save Button -->
+            <div class="admin-form-actions">
+                <button type="submit" class="admin-btn admin-btn-primary admin-btn-large">
+                    <i class="bi bi-check-circle"></i> Save All Changes
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Image Picker Modal -->
+    <div id="imagePickerModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Select Image</h3>
+                <button type="button" class="modal-close" onclick="closeImagePicker()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="imagePickerList" class="image-picker-grid">
+                    <!-- Images will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+    
+    <script src="../js/firebase-config.js"></script>
+    <script src="js/admin-auth.js"></script>
+    <script src="js/admin-firebase.js"></script>
+    <script src="js/icon-picker.js"></script>
+    <script src="js/team-admin.js"></script>
+</body>
+</html>
+

@@ -37,7 +37,7 @@
     function loadFromHTML() {
         // Load defaults from current HTML
         loadHeroDefaults();
-        showAlert('No saved data found in Firebase. Form populated with current page content. Save to store in Firebase.', 'info');
+        showAlert('No saved data found in Firebase. Form populated with current page content. Save to store in Firebase.', 'info', true);
     }
     
     // Load hero defaults from current page
@@ -136,7 +136,7 @@
                 let originalPath = pageData.hero.images[0];
                 const normalizedPath = window.normalizeImagePath ? window.normalizeImagePath(originalPath) : originalPath;
                 console.log('Hero Image 1 - Original:', originalPath, 'Normalized:', normalizedPath);
-                document.getElementById('hero_image1_preview').innerHTML = `<img src="${normalizedPath}" alt="Hero Image 1" onerror="console.error('Failed to load:', '${normalizedPath}'); this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found: ${normalizedPath}</p></div>'">`;
+                document.getElementById('hero_image1_preview').innerHTML = `<img src="${normalizedPath}" alt="Hero Image 1" style="max-width: 100%; max-height: 100%; object-fit: contain;" onerror="console.error('Failed to load:', '${normalizedPath}'); this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found: ${normalizedPath}</p></div>'">`;
                 if (document.getElementById('hero_image1_url')) {
                     document.getElementById('hero_image1_url').value = originalPath;
                 }
@@ -145,7 +145,7 @@
                 let originalPath = pageData.hero.images[1];
                 const normalizedPath = window.normalizeImagePath ? window.normalizeImagePath(originalPath) : originalPath;
                 console.log('Hero Image 2 - Original:', originalPath, 'Normalized:', normalizedPath);
-                document.getElementById('hero_image2_preview').innerHTML = `<img src="${normalizedPath}" alt="Hero Image 2" onerror="console.error('Failed to load:', '${normalizedPath}'); this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found: ${normalizedPath}</p></div>'">`;
+                document.getElementById('hero_image2_preview').innerHTML = `<img src="${normalizedPath}" alt="Hero Image 2" style="max-width: 100%; max-height: 100%; object-fit: contain;" onerror="console.error('Failed to load:', '${normalizedPath}'); this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found: ${normalizedPath}</p></div>'">`;
                 if (document.getElementById('hero_image2_url')) {
                     document.getElementById('hero_image2_url').value = originalPath;
                 }
@@ -165,7 +165,7 @@
             }
             if (pageData.video.poster) {
                 const normalizedPath = window.normalizeImagePath ? window.normalizeImagePath(pageData.video.poster) : pageData.video.poster;
-                document.getElementById('video_poster_preview').innerHTML = `<img src="${normalizedPath}" alt="Video Poster" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
+                document.getElementById('video_poster_preview').innerHTML = `<img src="${normalizedPath}" alt="Video Poster" style="max-width: 100%; max-height: 100%; object-fit: contain;" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
                 if (document.getElementById('video_poster_url')) {
                     document.getElementById('video_poster_url').value = pageData.video.poster;
                 }
@@ -330,8 +330,8 @@
                         </button>
                     </div>
                 </div>
-                <div class="image-preview showcase-image-preview" style="max-width: 300px; margin-bottom: 1rem;">
-                    ${img ? `<img src="${window.normalizeImagePath ? window.normalizeImagePath(img) : img}" alt="Preview" style="max-width: 100%;" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">` : '<div class="image-preview-placeholder"><i class="bi bi-image"></i><p>No image</p></div>'}
+                <div class="image-preview showcase-image-preview" style="max-width: 150px; height: 100px; margin-bottom: 0.5rem;">
+                    ${img ? `<img src="${window.normalizeImagePath ? window.normalizeImagePath(img) : img}" alt="Preview" style="max-width: 100%; max-height: 100%; object-fit: contain;" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">` : '<div class="image-preview-placeholder"><i class="bi bi-image"></i><p>No image</p></div>'}
                 </div>
                 <input type="file" class="showcase-image-input" accept="image/*" style="display: none;">
                 <button type="button" class="admin-btn admin-btn-secondary showcase-image-upload-btn" style="margin-bottom: 1rem;">
@@ -455,7 +455,7 @@
                     </button>
                 </div>
             </div>
-            <div class="image-preview showcase-image-preview" style="max-width: 300px; margin-bottom: 1rem;">
+            <div class="image-preview showcase-image-preview" style="max-width: 150px; height: 100px; margin-bottom: 0.5rem;">
                 <div class="image-preview-placeholder"><i class="bi bi-image"></i><p>No image</p></div>
             </div>
             <input type="file" class="showcase-image-input" accept="image/*" style="display: none;">
@@ -576,7 +576,7 @@
                     <label>Image ${idx + 1} URL</label>
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
                         <div class="image-picker-dropdown" style="flex: 1; position: relative;">
-                            <input type="text" class="news-image-url" value="${img || ''}" placeholder="images/Projects/..." style="width: 100%;" readonly>
+                            <input type="text" class="news-image-url" value="${img || ''}" placeholder="images/Projects/..." style="width: 100%; padding: 0.5rem 0.75rem; font-size: 0.9rem; line-height: 1.4;" readonly>
                             <button type="button" class="image-picker-toggle" style="position: absolute; right: 0; top: 0; height: 100%; padding: 0 0.75rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-left: none; border-radius: 0 8px 8px 0; cursor: pointer; display: flex; align-items: center;">
                                 <i class="bi bi-chevron-down"></i>
                             </button>
@@ -598,8 +598,8 @@
                         </button>
                     </div>
                 </div>
-                <div class="image-preview news-image-preview" style="max-width: 300px; margin-bottom: 1rem;">
-                    ${img ? `<img src="${window.normalizeImagePath ? window.normalizeImagePath(img) : img}" alt="Preview" style="max-width: 100%;" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">` : '<div class="image-preview-placeholder"><i class="bi bi-image"></i><p>No image</p></div>'}
+                <div class="image-preview news-image-preview" style="max-width: 150px; height: 100px; margin-bottom: 0.5rem;">
+                    ${img ? `<img src="${window.normalizeImagePath ? window.normalizeImagePath(img) : img}" alt="Preview" style="max-width: 100%; max-height: 100%; object-fit: contain;" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">` : '<div class="image-preview-placeholder"><i class="bi bi-image"></i><p>No image</p></div>'}
                 </div>
                 <input type="file" class="news-image-input" accept="image/*" style="display: none;">
                 <button type="button" class="admin-btn admin-btn-secondary news-image-upload-btn" style="margin-bottom: 1rem;">
@@ -648,7 +648,7 @@
             <div class="image-upload-container">
                 <label>Images (Multiple images supported)</label>
                 <div class="news-images-container">
-                    ${imagesHtml || '<div class="news-image-item" data-index="0"><div class="admin-form-group"><label>Image 1 URL</label><div style="display: flex; align-items: center; gap: 0.5rem;"><div class="image-picker-dropdown" style="flex: 1; position: relative;"><input type="text" class="news-image-url" placeholder="images/Projects/..." style="width: 100%;" readonly><button type="button" class="image-picker-toggle" style="position: absolute; right: 0; top: 0; height: 100%; padding: 0 0.75rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-left: none; border-radius: 0 8px 8px 0; cursor: pointer; display: flex; align-items: center;"><i class="bi bi-chevron-down"></i></button><div class="image-picker-dropdown-menu" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--admin-bg-secondary); border: 1px solid var(--admin-border); border-radius: 8px; margin-top: 0.25rem; max-height: 400px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.3);"><div class="image-picker-search" style="padding: 0.75rem; border-bottom: 1px solid var(--admin-border);"><input type="text" class="image-picker-search-input" placeholder="Search images..." style="width: 100%; padding: 0.5rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-radius: 4px; color: var(--admin-text-primary);"></div><div class="image-picker-list" style="padding: 0.5rem;"></div><div style="padding: 0.75rem; border-top: 1px solid var(--admin-border);"><input type="text" class="image-picker-manual-input" placeholder="Or enter URL manually..." style="width: 100%; padding: 0.5rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-radius: 4px; color: var(--admin-text-primary);"><button type="button" class="admin-btn admin-btn-primary" style="width: 100%; margin-top: 0.5rem; padding: 0.5rem;">Use Manual URL</button></div></div></div><button type="button" class="admin-btn admin-btn-secondary" onclick="this.closest(\'.news-image-item\').remove()" style="flex-shrink: 0;"><i class="bi bi-trash"></i> Remove</button></div></div><div class="image-preview news-image-preview" style="max-width: 300px; margin-bottom: 1rem;"><div class="image-preview-placeholder"><i class="bi bi-image"></i><p>No image</p></div></div><input type="file" class="news-image-input" accept="image/*" style="display: none;"><button type="button" class="admin-btn admin-btn-secondary news-image-upload-btn" style="margin-bottom: 1rem;"><i class="bi bi-upload"></i> Upload Image</button></div>'}
+                    ${imagesHtml || '<div class="news-image-item" data-index="0"><div class="admin-form-group"><label>Image 1 URL</label><div style="display: flex; align-items: center; gap: 0.5rem;"><div class="image-picker-dropdown" style="flex: 1; position: relative;"><input type="text" class="news-image-url" placeholder="images/Projects/..." style="width: 100%; padding: 0.5rem 0.75rem; font-size: 0.9rem; line-height: 1.4;" readonly><button type="button" class="image-picker-toggle" style="position: absolute; right: 0; top: 0; height: 100%; padding: 0 0.75rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-left: none; border-radius: 0 8px 8px 0; cursor: pointer; display: flex; align-items: center;"><i class="bi bi-chevron-down"></i></button><div class="image-picker-dropdown-menu" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--admin-bg-secondary); border: 1px solid var(--admin-border); border-radius: 8px; margin-top: 0.25rem; max-height: 400px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.3);"><div class="image-picker-search" style="padding: 0.75rem; border-bottom: 1px solid var(--admin-border);"><input type="text" class="image-picker-search-input" placeholder="Search images..." style="width: 100%; padding: 0.5rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-radius: 4px; color: var(--admin-text-primary);"></div><div class="image-picker-list" style="padding: 0.5rem;"></div><div style="padding: 0.75rem; border-top: 1px solid var(--admin-border);"><input type="text" class="image-picker-manual-input" placeholder="Or enter URL manually..." style="width: 100%; padding: 0.5rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-radius: 4px; color: var(--admin-text-primary);"><button type="button" class="admin-btn admin-btn-primary" style="width: 100%; margin-top: 0.5rem; padding: 0.5rem;">Use Manual URL</button></div></div></div><button type="button" class="admin-btn admin-btn-secondary" onclick="this.closest(\'.news-image-item\').remove()" style="flex-shrink: 0;"><i class="bi bi-trash"></i> Remove</button></div></div><div class="image-preview news-image-preview" style="max-width: 300px; margin-bottom: 1rem;"><div class="image-preview-placeholder"><i class="bi bi-image"></i><p>No image</p></div></div><input type="file" class="news-image-input" accept="image/*" style="display: none;"><button type="button" class="admin-btn admin-btn-secondary news-image-upload-btn" style="margin-bottom: 1rem;"><i class="bi bi-upload"></i> Upload Image</button></div>'}
                 </div>
                 <button type="button" class="admin-btn admin-btn-secondary btn-add-item" onclick="addNewsImage(this)" style="margin-top: 1rem;">
                     <i class="bi bi-plus-circle"></i> Add Another Image
@@ -709,7 +709,7 @@
                 <label>Image ${newIndex + 1} URL</label>
                 <div style="display: flex; align-items: center; gap: 0.5rem;">
                     <div class="image-picker-dropdown" style="flex: 1; position: relative;">
-                        <input type="text" class="news-image-url" placeholder="images/Projects/..." style="width: 100%;" readonly>
+                        <input type="text" class="news-image-url" placeholder="images/Projects/..." style="width: 100%; padding: 0.5rem 0.75rem; font-size: 0.9rem; line-height: 1.4;" readonly>
                         <button type="button" class="image-picker-toggle" style="position: absolute; right: 0; top: 0; height: 100%; padding: 0 0.75rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-left: none; border-radius: 0 8px 8px 0; cursor: pointer; display: flex; align-items: center;">
                             <i class="bi bi-chevron-down"></i>
                         </button>
@@ -731,7 +731,7 @@
                     </button>
                 </div>
             </div>
-            <div class="image-preview news-image-preview" style="max-width: 300px; margin-bottom: 1rem;">
+            <div class="image-preview news-image-preview" style="max-width: 150px; height: 100px; margin-bottom: 0.5rem;">
                 <div class="image-preview-placeholder"><i class="bi bi-image"></i><p>No image</p></div>
             </div>
             <input type="file" class="news-image-input" accept="image/*" style="display: none;">
@@ -1137,7 +1137,7 @@
             const url = e.target.value.trim();
             if (url) {
                 const normalizedPath = window.normalizeImagePath ? window.normalizeImagePath(url) : url;
-                document.getElementById('hero_image1_preview').innerHTML = `<img src="${normalizedPath}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
+                document.getElementById('hero_image1_preview').innerHTML = `<img src="${normalizedPath}" alt="Preview" style="max-width: 100%; max-height: 100%; object-fit: contain;" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
             }
         });
     }
@@ -1146,7 +1146,7 @@
             const url = e.target.value.trim();
             if (url) {
                 const normalizedPath = window.normalizeImagePath ? window.normalizeImagePath(url) : url;
-                document.getElementById('hero_image2_preview').innerHTML = `<img src="${normalizedPath}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
+                document.getElementById('hero_image2_preview').innerHTML = `<img src="${normalizedPath}" alt="Preview" style="max-width: 100%; max-height: 100%; object-fit: contain;" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
             }
         });
     }
@@ -1164,7 +1164,7 @@
             const url = e.target.value.trim();
             if (url) {
                 const normalizedPath = window.normalizeImagePath ? window.normalizeImagePath(url) : url;
-                document.getElementById('video_poster_preview').innerHTML = `<img src="${normalizedPath}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
+                document.getElementById('video_poster_preview').innerHTML = `<img src="${normalizedPath}" alt="Preview" style="max-width: 100%; max-height: 100%; object-fit: contain;" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
             }
         });
     }
@@ -1174,6 +1174,7 @@
         const confirmed = await showConfirmDialog('Are you sure you want to delete this feature?', 'Delete Feature');
         if (confirmed) {
             btn.closest('.repeatable-item').remove();
+            showToast('Feature deleted successfully', 'success');
         }
     };
     
@@ -1192,6 +1193,7 @@
         const confirmed = await showConfirmDialog('Are you sure you want to delete this featured project?', 'Delete Featured Project');
         if (confirmed) {
             btn.closest('.repeatable-item').remove();
+            showToast('Featured project deleted successfully', 'success');
         }
     };
     
@@ -1211,6 +1213,7 @@
         const confirmed = await showConfirmDialog('Are you sure you want to delete this testimonial?', 'Delete Testimonial');
         if (confirmed) {
             btn.closest('.repeatable-item').remove();
+            showToast('Testimonial deleted successfully', 'success');
         }
     };
     
@@ -1229,6 +1232,7 @@
         const confirmed = await showConfirmDialog('Are you sure you want to delete this news item?', 'Delete News Item');
         if (confirmed) {
             btn.closest('.repeatable-item').remove();
+            showToast('News item deleted successfully', 'success');
         }
     };
     
@@ -1250,6 +1254,7 @@
         const confirmed = await showConfirmDialog('Are you sure you want to delete this statistic?', 'Delete Statistic');
         if (confirmed) {
             btn.closest('.repeatable-item').remove();
+            showToast('Statistic deleted successfully', 'success');
         }
     };
     

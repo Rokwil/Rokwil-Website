@@ -35,17 +35,160 @@
     // Also assign to window.selectProject for onclick handlers
     window.selectProject = window.galleryAdminSelectProject;
     
+    let pageHeroData = {};
+    
     // Check authentication first
-    checkAdminAuth().then((user) => {
+    checkAdminAuth().then(async (user) => {
         document.getElementById('adminUserEmail').textContent = user.email;
+        // Load available videos dynamically first
+        if (window.loadAvailableVideos) {
+            await window.loadAvailableVideos();
+        }
         // Setup everything first
         setupProjectSelector();
         setupImagePicker();
-        setupVideoPicker();
+        await setupVideoPicker();
         setupAddButtons();
-        // Then load data
+        // Load hero data
+        loadHeroData();
+        // Then load gallery data
         loadGalleryData();
     });
+    
+    // Load hero data from Firebase
+    async function loadHeroData() {
+        try {
+            const data = await loadFromFirestore('pages', 'gallery');
+            if (data && data.pageHero) {
+                pageHeroData = data.pageHero;
+                populateHeroForm();
+            } else {
+                // Initialize with defaults
+                pageHeroData = {
+                    title: 'Project Gallery',
+                    subtitle: 'Explore our portfolio of images and videos organized by project',
+                    image: ''
+                };
+                populateHeroForm();
+            }
+        } catch (error) {
+            console.error('Error loading hero data:', error);
+            // Initialize with defaults
+            pageHeroData = {
+                title: 'Project Gallery',
+                subtitle: 'Explore our portfolio of images and videos organized by project',
+                image: ''
+            };
+            populateHeroForm();
+        }
+    }
+    
+    // Populate hero form with data
+    function populateHeroForm() {
+        if (pageHeroData.title) {
+            document.getElementById('gallery_hero_title').value = pageHeroData.title;
+        }
+        if (pageHeroData.subtitle) {
+            document.getElementById('gallery_hero_subtitle').value = pageHeroData.subtitle;
+        }
+        if (pageHeroData.image) {
+            const normalizedPath = normalizeImagePath(pageHeroData.image);
+            document.getElementById('gallery_hero_image_url').value = pageHeroData.image;
+            document.getElementById('gallery_hero_image_preview').innerHTML = `<img src="${normalizedPath}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'image-preview-placeholder\\'><i class=\\'bi bi-image\\'></i><p>Image not found</p></div>'">`;
+        }
+        
+        // Initialize image picker
+        const imageUrlInput = document.getElementById('gallery_hero_image_url');
+        if (imageUrlInput) {
+            initImagePicker(imageUrlInput);
+        }
+        
+        // Initialize image upload
+        const uploadBtn = document.getElementById('gallery_hero_image_upload_btn');
+        const fileInput = document.getElementById('gallery_hero_image');
+        if (uploadBtn && fileInput) {
+            uploadBtn.addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', async (e) => {
+                if (e.target.files[0]) {
+                    const imageUrl = await handleImageUpload('gallery_hero_image', 'gallery_hero_image_preview', 'images', null);
+                    if (imageUrl && document.getElementById('gallery_hero_image_url')) {
+                        document.getElementById('gallery_hero_image_url').value = imageUrl;
+                    }
+                }
+            });
+        }
+    }
+    
+    // Handle hero form submission
+    document.getElementById('galleryPageForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        try {
+            showLoading();
+            
+            // Collect page hero
+            const heroImageUrl = document.getElementById('gallery_hero_image_url')?.value.trim();
+            const heroImage = document.getElementById('gallery_hero_image').files[0];
+            let finalHeroImageUrl = pageHeroData.image || '';
+            if (heroImageUrl) {
+                finalHeroImageUrl = heroImageUrl;
+            } else if (heroImage) {
+                finalHeroImageUrl = await handleImageUpload('gallery_hero_image', 'gallery_hero_image_preview', 'images', null);
+            }
+            
+            pageHeroData = {
+                title: document.getElementById('gallery_hero_title').value,
+                subtitle: document.getElementById('gallery_hero_subtitle').value,
+                image: finalHeroImageUrl
+            };
+            
+            // Load existing gallery data to merge
+            const existingData = await loadFromFirestore('pages', 'gallery') || {};
+            
+            // Merge hero data with existing gallery data
+            const updatedData = {
+                ...existingData,
+                pageHero: pageHeroData
+            };
+            
+            // Remove undefined values
+            const cleanedData = removeUndefinedValues(updatedData);
+            
+            // Save to Firebase
+            await saveToFirestore('pages', 'gallery', cleanedData);
+            
+            hideLoading();
+            showToast('Gallery hero settings saved successfully!', 'success');
+            
+        } catch (error) {
+            console.error('Error saving gallery hero:', error);
+            hideLoading();
+            showToast('Error saving hero settings. Please try again.', 'error');
+        }
+    });
+    
+    // Helper function to remove undefined values
+    function removeUndefinedValues(obj) {
+        if (obj === null || obj === undefined) {
+            return obj;
+        }
+        if (Array.isArray(obj)) {
+            return obj.map(item => removeUndefinedValues(item)).filter(item => item !== undefined);
+        }
+        if (typeof obj === 'object') {
+            const cleaned = {};
+            for (const key in obj) {
+                if (obj.hasOwnProperty(key)) {
+                    const value = removeUndefinedValues(obj[key]);
+                    if (value !== undefined) {
+                        cleaned[key] = value;
+                    }
+                }
+            }
+            return cleaned;
+        }
+        return obj;
+    }
     
     // Load gallery data from Firebase
     async function loadGalleryData() {
@@ -84,9 +227,18 @@
                     // Merge with defaults, preserving titles and subtitles
                     Object.keys(data.projects).forEach(key => {
                         if (galleryData[key]) {
+                            // Filter out old paths that don't use Gallery folders
+                            let items = (data.projects[key].items || []).filter(item => {
+                                const url = item.url || '';
+                                // Only keep items from Gallery folders
+                                return url.includes('Gallery/') || url.includes('gallery/');
+                            });
+                            
                             galleryData[key] = {
                                 ...galleryData[key],
                                 ...data.projects[key],
+                                // Replace items with filtered ones (only Gallery paths)
+                                items: items,
                                 // Preserve title and subtitle from defaults if not in Firebase
                                 title: data.projects[key].title || galleryData[key].title,
                                 subtitle: data.projects[key].subtitle || galleryData[key].subtitle,
@@ -94,26 +246,36 @@
                                 icon: data.projects[key].icon || galleryData[key].icon
                             };
                         } else {
-                            galleryData[key] = data.projects[key];
+                            // Filter items for new projects too
+                            let items = (data.projects[key].items || []).filter(item => {
+                                const url = item.url || '';
+                                return url.includes('Gallery/') || url.includes('gallery/');
+                            });
+                            galleryData[key] = {
+                                ...data.projects[key],
+                                items: items
+                            };
                         }
                     });
-                    console.log('Merged gallery data:', galleryData);
+                    console.log('Merged gallery data (filtered old paths):', galleryData);
+                    // ALWAYS load from AVAILABLE_IMAGES to add any new files from Gallery folders
+                    console.log('Loading additional files from Gallery folders...');
+                    loadFromAvailableImages();
                     renderCurrentProject();
                 } else {
                     // No Firebase data, try loading from HTML
                     await loadFromHTML();
+                    // Load from AVAILABLE_IMAGES to populate with Gallery files
+                    loadFromAvailableImages();
                     renderCurrentProject();
                 }
             } else {
                 console.log('No gallery data found in Firebase, loading from HTML...');
-                // No Firebase data, try loading from HTML first, then fallback to AVAILABLE_IMAGES
+                // No Firebase data, try loading from HTML first, then load from AVAILABLE_IMAGES
                 await loadFromHTML();
-                // If still no items, try loading from AVAILABLE_IMAGES
-                const hasItems = Object.values(galleryData).some(project => project.items && project.items.length > 0);
-                if (!hasItems) {
-                    console.log('No items from HTML, loading from AVAILABLE_IMAGES...');
-                    loadFromAvailableImages();
-                }
+                // Always load from AVAILABLE_IMAGES to populate with Gallery files
+                console.log('Loading files from Gallery folders...');
+                loadFromAvailableImages();
                 renderCurrentProject();
             }
             
@@ -124,12 +286,9 @@
             console.error('Error loading gallery data:', error);
             // Try loading from HTML as fallback
             await loadFromHTML();
-            // If still no items, try loading from AVAILABLE_IMAGES
-            const hasItems = Object.values(galleryData).some(project => project.items && project.items.length > 0);
-            if (!hasItems) {
-                console.log('No items from HTML, loading from AVAILABLE_IMAGES...');
-                loadFromAvailableImages();
-            }
+            // Always load from AVAILABLE_IMAGES to populate with Gallery files
+            console.log('Loading files from Gallery folders...');
+            loadFromAvailableImages();
             showAlert('Could not load from Firebase. Loaded from gallery page/images folder instead!', 'info');
             renderCurrentProject();
         }
@@ -233,15 +392,18 @@
             }
             
             // Determine which project this belongs to based on path
+            // ONLY check Gallery/Projects/ folder
             let projectKey = 'other';
             
-            if (url.includes('Projects/Keystone')) {
+            // Check for Keystone in Gallery/Projects/Keystone
+            if (url.includes('Gallery/Projects/Keystone')) {
                 projectKey = 'keystone';
-            } else if (url.includes('Projects/Judges Court')) {
+            } else if (url.includes('Gallery/Projects/Judges Court')) {
                 projectKey = 'judges-court';
-            } else if (url.includes('Projects/aQuelle') || url.includes('Projects/aQuellé')) {
+            } else if (url.includes('Gallery/Projects/aQuelle') || url.includes('Gallery/Projects/aQuellé')) {
                 projectKey = 'aquelle';
-            } else if (url.includes('Projects/')) {
+            } else if (url.includes('Gallery/Projects/')) {
+                // All other projects from Gallery folder go to 'other'
                 projectKey = 'other';
             }
             
@@ -260,17 +422,24 @@
             }
         });
         
-        // Add videos
+        // Add videos - organize by folder structure
         availableVideos.forEach(videoPath => {
             let url = videoPath;
             if (url.startsWith('/')) {
                 url = url.substring(1);
             }
             
+            // Skip if not from Gallery folder
+            if (!url.includes('Gallery/') && !url.includes('gallery/')) {
+                return;
+            }
+            
+            // Ensure videos project exists
             if (!galleryData.videos) {
                 galleryData.videos = { title: 'Videos', subtitle: 'See our developments in action', items: [] };
             }
             
+            // Add video if not already present
             const exists = galleryData.videos.items.some(item => item.url === url);
             if (!exists) {
                 galleryData.videos.items.push({
@@ -530,9 +699,11 @@
         
         // Don't allow deleting if it's the only project
         if (projectOrder.length <= 1) {
-            alert('You must have at least one project!');
+            showToast('You must have at least one project!', 'warning');
             return;
         }
+        
+        const projectTitle = galleryData[projectKey].title;
         
         // Remove from galleryData
         delete galleryData[projectKey];
@@ -553,6 +724,8 @@
             selectProject(projectOrder[0], null);
         }
         
+        showToast(`Project "${projectTitle}" deleted successfully`, 'success');
+        
         showAlert('Project deleted!', 'success');
     };
     
@@ -566,10 +739,10 @@
     }
     
     // Setup video picker
-    function setupVideoPicker() {
+    async function setupVideoPicker() {
         const videoInput = document.getElementById('gallery_video_picker');
         if (videoInput && window.initVideoPicker) {
-            window.initVideoPicker(videoInput);
+            await window.initVideoPicker(videoInput);
         }
     }
     
@@ -624,7 +797,7 @@
         if (confirm('Remove this item?')) {
             galleryData[currentProject].items.splice(index, 1);
             renderCurrentProject();
-            showAlert('Item removed!', 'info');
+            showToast('Item removed successfully', 'success');
         }
     };
     
@@ -661,17 +834,21 @@
             if (item.type === 'video') {
                 // Normalize video URL
                 let videoUrl = item.url;
-                // Remove any leading slash first, then normalize
-                if (videoUrl.startsWith('/')) {
-                    videoUrl = videoUrl.substring(1);
+                
+                // Ensure path starts with / for normalization
+                if (!videoUrl.startsWith('/') && !videoUrl.startsWith('http')) {
+                    videoUrl = '/' + videoUrl;
                 }
+                
                 // Use normalizeImagePath if available (works for videos too)
                 if (window.normalizeImagePath) {
                     videoUrl = window.normalizeImagePath(videoUrl);
                 } else {
                     // Fallback: ensure path starts with / for absolute paths
                     if (!videoUrl.startsWith('http') && !videoUrl.startsWith('../')) {
-                        videoUrl = '/' + videoUrl;
+                        if (!videoUrl.startsWith('/')) {
+                            videoUrl = '/' + videoUrl;
+                        }
                     }
                 }
                 
@@ -692,23 +869,27 @@
             } else {
                 // Normalize image URL
                 let imageUrl = item.url;
-                // Remove any leading slash first, then normalize
-                if (imageUrl.startsWith('/')) {
-                    imageUrl = imageUrl.substring(1);
+                
+                // Ensure path starts with / for normalization
+                if (!imageUrl.startsWith('/') && !imageUrl.startsWith('http')) {
+                    imageUrl = '/' + imageUrl;
                 }
+                
                 // Use normalizeImagePath if available
                 if (window.normalizeImagePath) {
                     imageUrl = window.normalizeImagePath(imageUrl);
                 } else {
                     // Fallback: ensure path starts with / for absolute paths
                     if (!imageUrl.startsWith('http') && !imageUrl.startsWith('../')) {
-                        imageUrl = '/' + imageUrl;
+                        if (!imageUrl.startsWith('/')) {
+                            imageUrl = '/' + imageUrl;
+                        }
                     }
                 }
                 
                 return `
                     <div class="gallery-item-admin" draggable="true" data-index="${index}">
-                        <img src="${imageUrl}" alt="Gallery item" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect fill=%27%23ccc%27 width=%27100%27 height=%27100%27/%3E%3Ctext x=%2750%27 y=%2750%27 text-anchor=%27middle%27 dy=%27.3em%27 fill=%27%23999%27%3EImage%3C/text%3E%3C/svg%3E'; console.error('Failed to load image:', '${imageUrl}');">
+                        <img src="${imageUrl}" alt="Gallery item" loading="lazy" style="width: 100%; height: 100%; object-fit: cover; display: block;" onerror="this.onerror=null; this.parentElement.innerHTML='<div style=\\'width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #2a2a2a; color: #999; font-size: 0.875rem;\\'>Image</div>'; console.error('Failed to load image:', '${imageUrl}');">
                         <button type="button" class="item-remove-btn" onclick="removeGalleryItem(${index})" title="Remove">
                             <i class="bi bi-trash"></i>
                         </button>

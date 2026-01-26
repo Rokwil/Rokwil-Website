@@ -3,6 +3,13 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="../images/Logos/Rokwil_R_Logo.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../images/Logos/Rokwil_R_Logo.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../images/Logos/Rokwil_R_Logo.png" />
+    <link rel="shortcut icon" href="../images/Logos/Rokwil_R_Logo.png" />
+    
     <title>Admin - Projects Page - Rokwil Property Development</title>
     <link rel="stylesheet" href="../css/site.css" />
     <link rel="stylesheet" href="css/admin.css" />
@@ -31,6 +38,9 @@
                 </a>
                 <a href="gallery-admin.html" class="admin-nav-link">
                     <i class="bi bi-images"></i> Gallery
+                </a>
+                <a href="team-admin.html" class="admin-nav-link">
+                    <i class="bi bi-people"></i> Team
                 </a>
                 <a href="contact-admin.html" class="admin-nav-link">
                     <i class="bi bi-envelope"></i> Contact
@@ -81,7 +91,7 @@
                     <div class="admin-form-group">
                         <label>Hero Image URL (or upload file below)</label>
                         <div class="image-picker-dropdown" style="position: relative;">
-                            <input type="text" id="projects_hero_image_url" placeholder="images/projects/..." style="width: 100%;" readonly>
+                            <input type="text" id="projects_hero_image_url" placeholder="images/projects/..." style="width: 100%; padding: 0.5rem 0.75rem; font-size: 0.9rem; line-height: 1.4;" readonly>
                             <button type="button" class="image-picker-toggle" style="position: absolute; right: 0; top: 0; height: 100%; padding: 0 0.75rem; background: var(--admin-bg-tertiary); border: 1px solid var(--admin-border); border-left: none; border-radius: 0 8px 8px 0; cursor: pointer; display: flex; align-items: center;">
                                 <i class="bi bi-chevron-down"></i>
                             </button>

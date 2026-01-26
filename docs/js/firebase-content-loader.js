@@ -108,6 +108,9 @@
             return path;
         }
         
+        // Update old "Gallary" paths to "Gallery" for backward compatibility
+        path = path.replace(/Gallary\//g, 'Gallery/').replace(/gallary\//g, 'Gallery/');
+        
         // Get base path for GitHub Pages
         const basePath = getBasePath();
         
@@ -131,10 +134,17 @@
         
         // If path starts with '/images/', prepend base path
         if (path.startsWith('/images/')) {
+            // For localhost, basePath is '/', so just return the path as-is
+            if (basePath === '/') {
+                return path;
+            }
             return basePath + path.substring(1); // Remove leading / and prepend base
         }
         
         // For other absolute paths, prepend base path
+        if (basePath === '/') {
+            return path;
+        }
         return basePath + path.substring(1);
     }
     
@@ -149,6 +159,9 @@
         if (path.startsWith('http://') || path.startsWith('https://')) {
             return path;
         }
+        
+        // Update old "Gallary" paths to "Gallery" for backward compatibility
+        path = path.replace(/Gallary\//g, 'Gallery/').replace(/gallary\//g, 'Gallery/');
         
         // Get base path for GitHub Pages
         const basePath = getBasePath();
@@ -173,10 +186,17 @@
         
         // If path starts with '/videos/', prepend base path
         if (path.startsWith('/videos/')) {
+            // For localhost, basePath is '/', so just return the path as-is
+            if (basePath === '/') {
+                return path;
+            }
             return basePath + path.substring(1); // Remove leading / and prepend base
         }
         
         // For other absolute paths, prepend base path
+        if (basePath === '/') {
+            return path;
+        }
         return basePath + path.substring(1);
     }
     
@@ -1653,6 +1673,30 @@
             const data = await loadPageContent('gallery');
             console.log('Gallery data loaded:', data);
             
+            // Page Hero
+            if (data && data.pageHero) {
+                const pageHero = document.querySelector('.page-hero');
+                if (pageHero) {
+                    const h1 = pageHero.querySelector('h1');
+                    const p = pageHero.querySelector('p');
+                    if (h1 && data.pageHero.title) h1.textContent = data.pageHero.title;
+                    if (p && data.pageHero.subtitle) p.textContent = data.pageHero.subtitle;
+                    if (data.pageHero.image) {
+                        const normalizedImg = normalizeImagePath(data.pageHero.image);
+                        pageHero.style.backgroundImage = `url('${normalizedImg}')`;
+                        if (!pageHero.style.backgroundSize) {
+                            pageHero.style.backgroundSize = 'cover';
+                        }
+                        if (!pageHero.style.backgroundPosition) {
+                            pageHero.style.backgroundPosition = 'center';
+                        }
+                    } else {
+                        // Default fallback image if no Firebase image is set
+                        pageHero.style.backgroundImage = `url('images/Projects/Keystone/Keystone 2.webp')`;
+                    }
+                }
+            }
+            
             if (data && data.projects) {
                 console.log('📦 Projects found:', Object.keys(data.projects));
                 console.log('📋 Project order from Firebase:', data.projectOrder);
@@ -2015,6 +2059,9 @@
         } else if (currentPage.includes('gallery')) {
             console.log('Loading gallery page...');
             loadGalleryPage();
+        } else if (currentPage.includes('team')) {
+            console.log('Loading team page...');
+            loadTeamPage();
         }
         
         // Load footer on all pages
@@ -2037,6 +2084,195 @@
             console.log('Loading gallery page (DOM already loaded)...');
             loadGalleryPage();
         }
+        
+        if (currentPage.includes('team')) {
+            console.log('Loading team page (DOM already loaded)...');
+            loadTeamPage();
+        }
+    }
+    
+    // Load and render team page content
+    async function loadTeamPage() {
+        console.log('🔵 loadTeamPage() called');
+        console.log('🔵 Current URL:', window.location.href);
+        
+        // Always clear placeholder content first
+        const teamGrid = document.querySelector('.team-grid');
+        const contractorsGrid = document.querySelector('.contractors-grid');
+        
+        console.log('🔵 Team grid found:', !!teamGrid);
+        console.log('🔵 Contractors grid found:', !!contractorsGrid);
+        
+        if (teamGrid) {
+            console.log('🔵 Clearing team grid (had', teamGrid.children.length, 'children)');
+            teamGrid.innerHTML = '';
+        }
+        if (contractorsGrid) {
+            console.log('🔵 Clearing contractors grid (had', contractorsGrid.children.length, 'children)');
+            contractorsGrid.innerHTML = '';
+        }
+        
+        console.log('🔵 Loading team page content from Firebase...');
+        const data = await loadPageContent('team');
+        console.log('🔵 Firebase data received:', data);
+        
+        if (!data) {
+            console.log('⚠️ No data found in Firebase for team page - placeholder content cleared');
+            // Show empty state message
+            if (teamGrid) {
+                teamGrid.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; color: var(--text-secondary); padding: 2rem;">No team members added yet.</p>';
+            }
+            if (contractorsGrid) {
+                contractorsGrid.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; color: var(--text-secondary); padding: 2rem;">No contractors added yet.</p>';
+            }
+            return;
+        }
+        console.log('✅ Team page data loaded:', data);
+        
+        // Hero section
+        if (data.hero) {
+            const heroTitle = document.querySelector('.page-hero-content h1');
+            const heroSubtitle = document.querySelector('.page-hero-content p');
+            const heroSection = document.querySelector('.page-hero');
+            
+            if (heroTitle && data.hero.title) {
+                heroTitle.textContent = data.hero.title;
+            }
+            if (heroSubtitle && data.hero.subtitle) {
+                heroSubtitle.textContent = data.hero.subtitle;
+            }
+            if (heroSection && data.hero.image) {
+                const normalizedImg = normalizeImagePath(data.hero.image);
+                heroSection.style.backgroundImage = `url('${normalizedImg}')`;
+            }
+        }
+        
+        // Team Members Section
+        console.log('🔵 Processing team members:', data.teamMembers);
+        if (data.teamMembers && Array.isArray(data.teamMembers) && data.teamMembers.length > 0) {
+            console.log('✅ Found', data.teamMembers.length, 'team members');
+            if (teamGrid) {
+                data.teamMembers.forEach((member, idx) => {
+                    console.log(`🔵 Creating card ${idx + 1} for:`, member.name);
+                    const memberCard = document.createElement('div');
+                    memberCard.className = 'team-card reveal';
+                    
+                    const imageUrl = member.image ? normalizeImagePath(member.image) : '';
+                    const initials = member.initials || (member.name ? member.name.split(' ').map(n => n[0]).join('').substring(0, 3).toUpperCase() : 'TM');
+                    
+                    memberCard.innerHTML = `
+                        <div class="team-card-image" style="position: relative; width: 100%; height: 300px; overflow: hidden; background: var(--gradient-2); display: flex; align-items: center; justify-content: center;">
+                            ${imageUrl ? `<img src="${imageUrl}" alt="${member.name || ''}" style="width: 100%; height: 100%; object-fit: cover;" />` : `<div style="width: 200px; height: 200px; border-radius: 50%; background: var(--gradient-2); display: flex; align-items: center; justify-content: center; color: var(--text-light); font-size: 4rem; font-weight: 700; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">${initials}</div>`}
+                            <div class="team-card-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%); opacity: 0; transition: opacity 0.3s ease;"></div>
+                        </div>
+                        <div class="team-card-content" style="padding: var(--spacing-md);">
+                            <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--text-primary);">${member.name || 'Team Member'}</h3>
+                            <p style="color: var(--secondary-color); font-weight: 600; margin-bottom: 1rem; font-size: 1rem;">${member.position || ''}</p>
+                            <p style="color: var(--text-secondary); line-height: 1.7; margin-bottom: 1.5rem; font-size: 0.95rem;">${member.bio || ''}</p>
+                            <div class="team-card-social" style="display: flex; gap: 0.75rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                                ${member.email ? `<a href="mailto:${member.email}" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: var(--bg-secondary); border-radius: 50%; color: var(--text-primary); transition: all 0.3s ease;" title="Email"><i class="bi bi-envelope"></i></a>` : ''}
+                                ${member.phone ? `<a href="tel:${member.phone}" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: var(--bg-secondary); border-radius: 50%; color: var(--text-primary); transition: all 0.3s ease;" title="Phone"><i class="bi bi-telephone"></i></a>` : ''}
+                                ${member.linkedin ? `<a href="${member.linkedin}" target="_blank" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: var(--bg-secondary); border-radius: 50%; color: var(--text-primary); transition: all 0.3s ease;" title="LinkedIn"><i class="bi bi-linkedin"></i></a>` : ''}
+                            </div>
+                        </div>
+                    `;
+                    
+                    teamGrid.appendChild(memberCard);
+                    console.log(`✅ Card ${idx + 1} appended to team grid`);
+                });
+                console.log('✅ All team member cards added. Grid now has', teamGrid.children.length, 'children');
+            } else {
+                console.warn('⚠️ Team grid not found in DOM');
+            }
+        } else {
+            console.log('⚠️ No team members in data');
+            if (teamGrid) {
+                teamGrid.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; color: var(--text-secondary); padding: 2rem;">No team members added yet.</p>';
+            }
+        }
+        
+        // Contractors Section
+        console.log('🔵 Processing contractors:', data.contractors);
+        if (data.contractors && Array.isArray(data.contractors) && data.contractors.length > 0) {
+            console.log('✅ Found', data.contractors.length, 'contractors');
+            if (contractorsGrid) {
+                data.contractors.forEach((contractor, idx) => {
+                    console.log(`🔵 Creating contractor card ${idx + 1} for:`, contractor.name);
+                    const contractorCard = document.createElement('div');
+                    contractorCard.className = 'contractor-card reveal';
+                    
+                    const iconClass = contractor.icon || 'bi-building';
+                    const tags = contractor.tags || [];
+                    
+                    contractorCard.innerHTML = `
+                        <div class="contractor-icon" style="width: 80px; height: 80px; margin: 0 auto 1.5rem; background: var(--gradient-2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text-light); font-size: 2.5rem; box-shadow: var(--shadow-md);">
+                            <i class="bi ${iconClass}"></i>
+                        </div>
+                        <h3 style="font-size: 1.3rem; margin-bottom: 0.5rem; color: var(--text-primary);">${contractor.name || 'Contractor'}</h3>
+                        <p style="color: var(--text-secondary); line-height: 1.7; margin-bottom: 1rem; font-size: 0.95rem;">${contractor.description || ''}</p>
+                        ${tags.length > 0 ? `<div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
+                            ${tags.map(tag => `<span style="padding: 0.4rem 1rem; background: var(--bg-secondary); border-radius: 20px; font-size: 0.85rem; color: var(--text-secondary); border: 1px solid var(--border-color);">${tag}</span>`).join('')}
+                        </div>` : ''}
+                    `;
+                    
+                    contractorsGrid.appendChild(contractorCard);
+                    console.log(`✅ Contractor card ${idx + 1} appended`);
+                });
+                console.log('✅ All contractor cards added. Grid now has', contractorsGrid.children.length, 'children');
+            } else {
+                console.warn('⚠️ Contractors grid not found in DOM');
+            }
+        } else {
+            console.log('⚠️ No contractors in data');
+            if (contractorsGrid) {
+                contractorsGrid.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; color: var(--text-secondary); padding: 2rem;">No contractors added yet.</p>';
+            }
+        }
+        
+        console.log('✅ Team page rendering complete');
+        
+        // CTA Section
+        if (data.cta) {
+            const ctaSection = document.querySelector('.team-cta');
+            if (ctaSection) {
+                if (data.cta.hidden) {
+                    ctaSection.style.display = 'none';
+                } else {
+                    ctaSection.style.display = 'block';
+                    const ctaTitle = ctaSection.querySelector('h2');
+                    const ctaText = ctaSection.querySelector('p');
+                    const ctaButton = ctaSection.querySelector('.btn');
+                    
+                    if (ctaTitle && data.cta.title) {
+                        ctaTitle.textContent = data.cta.title;
+                    }
+                    if (ctaText && data.cta.text) {
+                        ctaText.textContent = data.cta.text;
+                    }
+                    if (ctaButton && data.cta.buttonText) {
+                        const span = ctaButton.querySelector('span');
+                        if (span) span.textContent = data.cta.buttonText;
+                    }
+                }
+            }
+        }
+        
+        // Re-initialize reveal animations
+        setTimeout(() => {
+            const revealElements = document.querySelectorAll('.reveal');
+            const revealObserver = new IntersectionObserver((entries) => {
+                entries.forEach((entry, index) => {
+                    if (entry.isIntersecting) {
+                        setTimeout(() => {
+                            entry.target.classList.add('active');
+                        }, index * 100);
+                        revealObserver.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            revealElements.forEach(el => revealObserver.observe(el));
+        }, 100);
     }
 })();
 

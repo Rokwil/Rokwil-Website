@@ -21,5 +21,5 @@ This website, including all code, text, images, graphics, designs, logos, and ot
 
 For licensing inquiries, contact:
 - Email: rod@rokwil.com
-- Phone: 083 693 226
+- Phone: 083 693 2226
 
